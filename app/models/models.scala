@@ -33,11 +33,13 @@ object BookShelf {
   }
 
   // 一件だけ取得
-  def select(name:String): (Long, String) = {
+  def select(name:String): Shelf = {
     DB.withConnection {implicit conn =>
-      SQL("select * from book_shelf where name = {name}").on("name" -> name)().collect {
-        case Row(id:Long, name:String) => (id, name)
-      }.toList.head
+      val shelfs = SQL("select * from book_shelf where shelf_name = {name}").on("name" -> name).as(shelf *)
+      shelfs match {
+        case (s :: _) => s
+        case _ => throw new Exception("not found")
+      }
     }
   }
 }
