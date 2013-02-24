@@ -9,6 +9,12 @@ Ext.define('Mock.view.BookShelfList', {
     config: {
         itemCls: 'x-extended-list-item',
         store: {xtype:'shelf_store'},
-        itemTpl: 'hoge{name}'
+        itemTpl: '{name}',
+        items : { xtype: 'button',
+                  text: '本棚を作る',
+                  action: 'goto_shelf_maker',
+                  ui: 'action',
+                  docked: 'bottom',
+                }
     }
 });

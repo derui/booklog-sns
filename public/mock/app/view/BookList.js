@@ -15,6 +15,13 @@ Ext.define('Mock.view.BookList', {
             '<div style="margin-left:100px;height:100%";float: none">{name}</div>',
             '<span>著者:{author}</span>',
             '<span>ISBN:{isbn}</span></div>'
-        ].join("")
+        ].join(""),
+        items : { xtype: 'button',
+                  text: '本を追加する',
+                  action: 'goto_shelf_maker',
+                  ui: 'action',
+                  docked: 'bottom',
+                }
+
     }
 });
