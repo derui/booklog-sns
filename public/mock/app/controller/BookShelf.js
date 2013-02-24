@@ -83,10 +83,10 @@ Ext.define('Mock.controller.BookShelf',
         var name = parent.down('textfield');
 
         Ext.Ajax.request(
-            { url : 'makeshelf',
+            { url : 'http://localhost:9000/makeshelf',
             method : "POST",
             params :
-                { shelf_name : Ext.JSON.encode(name.getData()) },
+                { shelf_name : Ext.JSON.encode(name.getValue()) },
             success : function() {
                 alert("本棚ができました。");
             },
