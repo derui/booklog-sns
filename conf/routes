@@ -4,6 +4,8 @@
 
 # Home page
 GET     /                           controllers.Application.index
+GET     /shelfs                     controllers.Application.getAllShelf
+GET     /books        controllers.Application.getBooksInShelf
 POST    /makeshelf                  controllers.Application.makeShelf
 
 # Map static resources from the /public folder to the /assets URL path

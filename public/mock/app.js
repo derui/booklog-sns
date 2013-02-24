@@ -8,8 +8,8 @@ Ext.Loader.setPath({
 
 Ext.application({
     controllers: ["BookShelf"],
-    stores: ["MovieStore"],
-    models: ["ListItem"],
+    stores: ["BookShelfStore"],
+    models: ["BookShelfItem", "BookItem"],
 
     name: 'Mock',
 
@@ -17,7 +17,7 @@ Ext.application({
         'Ext.MessageBox'
     ],
 
-    views: ['Main', 'SlideMenu', 'BookShelfList', 'ShelfMaker'],
+    views: ['Main', 'SlideMenu', 'BookShelfList', 'ShelfMaker', 'BookList'],
 
     icon: {
         '57': 'resources/icons/Icon.png',

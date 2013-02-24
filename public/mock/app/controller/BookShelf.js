@@ -57,12 +57,22 @@ Ext.define('Mock.controller.BookShelf',
         // ここで渡されるlistは、navigationviewの直下に常にいるため、
         // 親を取得できる
         var parent = list.up('navigationview');
-        var store = Ext.create('Mock.store.MovieStore',
-            { data : moviesPerGenre['genre' + (index + 1)]
+        var store = Ext.create(
+            'Ext.data.Store',
+            { model: 'Mock.model.BookItem',
+              proxy : {
+                  type:'ajax',
+                  url : 'books?shelf=' + record.data['id'],
+                  reader: {
+                      type : 'json',
+                      rootProperty : 'books'
+                  }
+              },
+              autoLoad : true
             });
-        var list = Ext.create('Mock.view.MovieList',
+        var list = Ext.create('Mock.view.BookList',
             { store : store,
-            title : record.get('text')
+              title : record.get('name') + 'の中身',
             });
 
         parent.push(list);
@@ -86,7 +96,7 @@ Ext.define('Mock.controller.BookShelf',
             { url : 'http://localhost:9000/makeshelf',
             method : "POST",
             params :
-                { shelf_name : Ext.JSON.encode(name.getValue()) },
+                { shelf_name : name.getValue() },
             success : function() {
                 alert("本棚ができました。");
             },
@@ -95,6 +105,7 @@ Ext.define('Mock.controller.BookShelf',
             }
 
             });
+        parent.up('navigationview').down('shelf_list').getStore().load();
         parent.up('navigationview').pop();
     },
 

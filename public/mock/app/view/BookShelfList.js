@@ -8,9 +8,7 @@ Ext.define('Mock.view.BookShelfList', {
     // Ext.createでdataだけを変更すればよい。
     config: {
         itemCls: 'x-extended-list-item',
-        data: [{text: 'genre 1'},
-               {text: 'genre 2'},
-               {text: 'genre 3'}],
-        itemTpl: '{text}'
+        store: {xtype:'shelf_store'},
+        itemTpl: 'hoge{name}'
     }
 });
