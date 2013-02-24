@@ -8,8 +8,8 @@
 db
 eclipse
 lib
-log
-logs
+/log
+/logs
 modules
 precompiled
 project/project
