@@ -41,7 +41,7 @@ object Application extends Controller {
     val form = Form(
       tuple(
         "start" -> optional(number),
-        "load" -> optional(number)
+        "rows" -> optional(number)
       )
     )
 
@@ -67,7 +67,7 @@ object Application extends Controller {
       tuple(
         "shelf" -> number,
         "start" -> optional(number),
-        "load" -> optional(number)
+        "rows" -> optional(number)
       )
     )
 
