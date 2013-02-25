@@ -20,8 +20,8 @@ object Application extends Controller {
   def makeShelf = Action { implicit request =>
     val form = Form(
         tuple(
-      "shelf_name" -> nonEmptyText,
-      "shelf_description" -> nonEmptyText
+          "shelf_name" -> nonEmptyText,
+          "shelf_description" -> nonEmptyText
       )
     )
 
@@ -31,11 +31,27 @@ object Application extends Controller {
     )
   }
 
-  def getAllShelf = Action {
-    val jsoned = BookShelf.all.map(shelf => Json.obj("id" -> shelf.id, "name" -> shelf.name))
-    .foldLeft(Json.arr())((ary, obj) => ary :+ obj)
-    Ok(stringifyWithRoot("shelfs", jsoned)
-       )
+  private def responseJson(ary:List[JsValue]):JsObject = {
+    Json.obj("totalCount" -> ary.length, "result" ->
+             ary.foldLeft(Json.arr())((ary, obj) => ary :+ obj)
+           )
+  }
+
+  def getAllShelf = Action { implicit request =>
+    val form = Form(
+      tuple(
+        "start" -> optional(number),
+        "rows" -> optional(number)
+      )
+    )
+
+    form.bindFromRequest.fold(
+      e => BadRequest(e.errors.head.message),
+      p => {
+        val jsoned = BookShelf.all(p._1, p._2).map(shelf => Json.obj("id" -> shelf.id, "name" -> shelf.name))
+        Ok(responseJson(jsoned))
+      }
+    )
   }
 
   def insertShelf(name : String, desc:String) = {
@@ -48,14 +64,18 @@ object Application extends Controller {
 
   def getBooksInShelf = Action { implicit request =>
     val form = Form(
-      "shelf" -> number
+      tuple(
+        "shelf" -> number,
+        "start" -> optional(number),
+        "rows" -> optional(number)
+      )
     )
 
     form.bindFromRequest.fold(
       e => BadRequest(e.errors.head.message),
       p => {
-        val books = Book.allInShelf(p).map(Book.bookToJson).foldLeft(Json.arr())((ary,obj) => ary :+ obj)
-        Ok(stringifyWithRoot("books", books))
+        val books = Book.allInShelf(p._1, p._2, p._3).map(Book.bookToJson)
+        Ok(responseJson(books))
       }
     )
   }
