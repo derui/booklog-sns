@@ -5,22 +5,36 @@ import play.api.db.DB
 import anorm._
 import anorm.SqlParser._
 import play.api.libs.json.Json
+import java.sql.Timestamp
+import play.libs.Time
+import java.util.Date
+import java.util.Calendar
 
-case class Shelf(id:Long, name:String)
+case class Shelf(id:Long, name:String, description:String, created:Date, updated:Date)
 
+/**
+ * 本棚データベースに対する操作をまとめたオブジェクト
+ */
 object BookShelf {
 
   val shelf = {
     get[Long]("shelf_id") ~
-    get[String]("shelf_name") map {
-      case id~name => Shelf(id, name)
+    get[String]("shelf_name") ~
+    get[String]("shelf_description") ~
+    get[Date]("created_date") ~
+    get[Date]("updated_date") map {
+      case id~name~desc~created~updated => Shelf(id, name, desc, created, updated)
     }
   }
 
   // 一件追加
-  def insert(name:String):Any = {
+  def insert(name:String, desc:String):Any = {
+    val currentDate = Calendar.getInstance().getTime();
     DB.withConnection { implicit connection =>
-      SQL("insert into book_shelf (shelf_name) values ({name})").on("name" -> name).
+      SQL("""
+          insert into book_shelf (shelf_name, shelf_description, created_date, updated_date)
+          values ({name}, {desc}, {created}, {updated})
+          """).on("name" -> name, "desc" -> desc, "created" -> currentDate, "updated" -> currentDate).
       executeUpdate()
     }
   }
@@ -44,7 +58,7 @@ object BookShelf {
   }
 }
 
-case class Book(bookId:Long, shelfId:Long, name:String, author:String, isbn:String)
+case class Book(bookId:Long, shelfId:Long, name:String, author:String, isbn:String,  created:Date, updated:Date)
 
 // それぞれの本
 object Book {
@@ -54,18 +68,22 @@ object Book {
     get[Long]("shelf_id") ~
     get[String]("book_name") ~
     get[String]("book_author") ~
-    get[String]("book_isbn") map {
-      case id~shelf_id~name~author~isbn => Book(id, shelf_id, name, author, isbn)
+    get[String]("book_isbn") ~
+    get[Date]("created_date") ~
+    get[Date]("updated_date") map {
+      case id~shelf_id~name~author~isbn~created~updated => Book(id, shelf_id, name, author, isbn, created, updated)
     }
   }
 
   // 一件追加
   def insert(book:Book) = {
+    val currentDate = Calendar.getInstance().getTime();
     DB.withConnection {implicit conn =>
       SQL("""
-          insert into book (book_name, book_author, book_isbn) values ({name}, {author}, {isbn})
-          """).on("name" -> book.name, "author" -> book.author, "isbn" -> book.isbn).
-      executeUpdate()
+          insert into book (book_name, book_author, book_isbn, created, updated)
+          values ({name}, {author}, {isbn}, {created}, {updated})
+          """).on("name" -> book.name, "author" -> book.author, "isbn" -> book.isbn,
+              "created" -> currentDate, "updated" -> currentDate).executeUpdate()
     }
   }
 

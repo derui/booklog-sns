@@ -2,14 +2,16 @@
 
 CREATE TABLE book
 (
-	book_ID BIGINT AUTO_INCREMENT,
-    shelf_id BIGINT not null,
-    book_name varchar(200) not null,
-    book_author varchar(200) not null,
-    book_isbn varchar(50) not null,
-	PRIMARY KEY(book_ID),
-    INDEX(shelf_id)
-) DEFAULT CHARSET=utf8 Engine=INNODB;
+	BOOK_ID BIGINT AUTO_INCREMENT,
+    SHELF_ID BIGINT NOT NULL,
+    BOOK_NAME VARCHAR(200) NOT NULL,
+    BOOK_AUTHOR VARCHAR(200) NOT NULL,
+    BOOK_ISBN VARCHAR(50) NOT NULL,
+    REGISTERED_DATE DATETIME NOT NULL,
+    UPDATED_DATE DATETIME NOT NULL,
+	PRIMARY KEY(BOOK_ID),
+    INDEX(SHELF_ID)
+) DEFAULT CHARSET=UTF8 ENGINE=INNODB;
 
 # --- !Downs
 DROP TABLE book;

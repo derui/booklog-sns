@@ -19,12 +19,15 @@ object Application extends Controller {
 
   def makeShelf = Action { implicit request =>
     val form = Form(
-      "shelf_name" -> nonEmptyText
+        tuple(
+      "shelf_name" -> nonEmptyText,
+      "shelf_description" -> nonEmptyText
+      )
     )
 
     form.bindFromRequest.fold(
       e => BadRequest(e.errors.head.message),
-      p => { insertShelf(p) }
+      p => { insertShelf(p._1, p._2) }
     )
   }
 
@@ -35,8 +38,8 @@ object Application extends Controller {
        )
   }
 
-  def insertShelf(name : String) = {
-    BookShelf.insert(name)
+  def insertShelf(name : String, desc:String) = {
+    BookShelf.insert(name, desc)
     Ok("")
   }
 
