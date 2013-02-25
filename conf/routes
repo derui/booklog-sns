@@ -3,10 +3,10 @@
 # ~~~~
 
 # Home page
-GET     /                           controllers.Application.index
-GET     /shelfs                     controllers.Application.getAllShelf
-GET     /books                      controllers.Application.getBooksInShelf
-POST    /makeshelf                  controllers.Application.makeShelf
+GET     /                    controllers.Application.index
+GET     /shelf               controllers.Application.getAllShelf
+GET     /books               controllers.Application.getBooksInShelf
+POST    /shelf               controllers.Application.makeShelf
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /*file               controllers.Assets.at(path="/public/mock", file)
+GET     /*file               controllers.Assets.at(path="/public", file)
