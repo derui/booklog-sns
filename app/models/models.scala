@@ -43,15 +43,22 @@ object BookShelf {
     }
   }
 
+  // 指定されたshelfを削除する
+  def delete(shelfId:Long) : Int = {
+    DB.withConnection { implicit conn =>
+      SQL("delete from book_shelf where shelf_id = {id}").on("id" -> shelfId).executeUpdate
+    }
+  }
+
   // 全件取得
   def all(start:Option[Int], load:Option[Int]): List[Shelf] = {
     DB.withConnection {implicit conn =>
       (start, load) match {
         case (Some(start), Some(load)) =>
-          SQL("select * from book_shelf order by book_id limit {start}, {count}").
+          SQL("select * from book_shelf order by updated_date limit {start}, {count}").
         on("start" -> start, "count" -> load).as(shelf *)
         case (None, Some(load)) =>
-          SQL("select * from book_shelf order by book_id limit {count}").on("count" -> load).as(shelf *)
+          SQL("select * from book_shelf order by updated_date limit {count}").on("count" -> load).as(shelf *)
         case _ => SQL("select * from book_shelf").as(shelf *)
       }
     }
@@ -71,13 +78,13 @@ object BookShelf {
   // 対象をjsonに変換する
   def toJson(target:Shelf) : JsValue = {
     implicit val writer = (
-        (__ \\ "shelf_id").write[Long] and
-        (__ \\ "shelf_name").write[String] and
-        (__ \\ "shelf_description").write[String] and
-        (__ \\ "created_date").write[Date] and
-        (__ \\ "created_user").write[String] and
-        (__ \\ "updated_date").write[Date] and
-        (__ \\ "updated_user").write[String]
+        (__ \ "shelf_id").write[Long] and
+        (__ \ "shelf_name").write[String] and
+        (__ \ "shelf_description").write[String] and
+        (__ \ "created_date").write[Date] and
+        (__ \ "created_user").write[String] and
+        (__ \ "updated_date").write[Date] and
+        (__ \ "updated_user").write[String]
         )(unlift(Shelf.unapply))
     Json.toJson(target)
   }
@@ -117,8 +124,23 @@ object Book {
     }
   }
 
+  // IDに一致するbookを一件削除する
+  def delete(bookId: Long) : Int = {
+    DB.withConnection { implicit conn =>
+      SQL("delete from book where book_id = {id}").on("id" -> bookId).executeUpdate
+    }
+  }
+
+  /**
+   * 指定した本棚に関連付けられた本を取得する。
+   *
+   * @param Long shelfId 取得対象の本棚ID
+   * @param Option[Int] 取得を開始する位置
+   * @param Option[Int] 取得件数
+   * @return List[Book] 取得した本
+   */
   def allInShelf(shelfId:Long, start:Option[Int], load:Option[Int]) : List[Book] = {
-    val commonSql = "select * from book where shelf_id = {shelf_id} order by book_id"
+    val commonSql = "select * from book where shelf_id = {shelf_id} order by updated_date"
     DB.withConnection { implicit conn =>
       (start, load) match {
         case (Some(start), Some(load)) =>
@@ -145,15 +167,15 @@ object Book {
 
   def toJson(book:Book) : JsValue = {
     implicit val writer = (
-        (__ \\ "book_id").write[Long] and
-        (__ \\ "shelf_id").write[Long] and
-        (__ \\ "book_name").write[String] and
-        (__ \\ "book_author").write[String] and
-        (__ \\ "book_isbn").write[String] and
-        (__ \\ "created_date").write[Date] and
-        (__ \\ "created_user").write[String] and
-        (__ \\ "updated_date").write[Date] and
-        (__ \\ "updated_user").write[String]
+        (__ \ "book_id").write[Long] and
+        (__ \ "shelf_id").write[Long] and
+        (__ \ "book_name").write[String] and
+        (__ \ "book_author").write[String] and
+        (__ \ "book_isbn").write[String] and
+        (__ \ "created_date").write[Date] and
+        (__ \ "created_user").write[String] and
+        (__ \ "updated_date").write[Date] and
+        (__ \ "updated_user").write[String]
         )(unlift(Book.unapply))
     Json.toJson(book)
   }
