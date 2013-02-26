@@ -67,6 +67,7 @@ object Application extends Controller {
     )
   }
 
+  // 指定されたshelfに紐づくbookを取得する
   def getBooksInShelf = Action { implicit request =>
     val form = Form(
       tuple(
