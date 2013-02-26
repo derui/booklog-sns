@@ -67,14 +67,6 @@ object Application extends Controller {
     )
   }
 
-  // 1件だけ取得する
-  def getShelf(shelf_id:Long) = Action {
-    BookShelf.selectById(shelf_id) match {
-      case None => Ok(responseToJson(List()))
-      case Some(x) => Ok(responseToJson(List(BookShelf.toJson(x))))
-    }
-  }
-
   def getBooksInShelf = Action { implicit request =>
     val form = Form(
       tuple(
@@ -93,7 +85,19 @@ object Application extends Controller {
     )
   }
 
-  def getShelfDetail(id: Long) = TODO
+  // 1件だけ取得する
+  def getShelfDetail(id:Long) = Action {
+    BookShelf.selectById(id) match {
+      case None => Ok(responseToJson(List()))
+      case Some(x) => Ok(responseToJson(List(BookShelf.toJson(x))))
+    }
+  }
 
-  def getBookDetial(id: Long) = TODO
+  // Bookの詳細情報を取得する
+  def getBookDetial(id: Long) = Action {
+    Book.selectById(id) match {
+      case None => Ok(responseToJson(List()))
+      case Some(x) => Ok(responseToJson(List(Book.toJson(x))))
+    }
+  }
 }
