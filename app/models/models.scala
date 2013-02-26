@@ -1,18 +1,17 @@
 package models
 
-import play.api.Play.current
-import play.api.db.DB
+import java.util.Calendar
+import java.util.Date
+
 import anorm._
 import anorm.SqlParser._
-import play.api.libs.json.Json
-import java.sql.Timestamp
-import play.libs.Time
-import java.util.Date
-import java.util.Calendar
+import play.api.Play.current
+import play.api.db.DB
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
 
 case class Shelf(id:Long, name:String, description:String, created:Date, createdUser:String,
                  updated:Date, updatedUser:String)
-
 /**
  * 本棚データベースに対する操作をまとめたオブジェクト
  */
@@ -58,15 +57,29 @@ object BookShelf {
     }
   }
 
-  // 一件だけ取得
-  def select(name:String): Shelf = {
+  // idが一致する一件だけ取得
+  def selectById(id:Long): Option[Shelf] = {
     DB.withConnection {implicit conn =>
-      val shelfs = SQL("select * from book_shelf where shelf_name = {name}").on("name" -> name).as(shelf *)
+      val shelfs = SQL("select * from book_shelf where id= {id}").on("id" -> id).as(shelf *)
       shelfs match {
-        case (s :: _) => s
-        case _ => throw new Exception("not found")
+        case (s :: _) => Some(s)
+        case _ => None
       }
     }
+  }
+
+  // 対象をjsonに変換する
+  def toJson(target:Shelf) : JsValue = {
+    implicit val writer = (
+        (__ \\ "shelf_id").write[Long] and
+        (__ \\ "shelf_name").write[String] and
+        (__ \\ "shelf_description").write[String] and
+        (__ \\ "created_date").write[Date] and
+        (__ \\ "created_user").write[String] and
+        (__ \\ "updated_date").write[Date] and
+        (__ \\ "updated_user").write[String]
+        )(unlift(Shelf.unapply))
+    Json.toJson(target)
   }
 }
 
@@ -109,9 +122,10 @@ object Book {
     DB.withConnection { implicit conn =>
       (start, load) match {
         case (Some(start), Some(load)) =>
-          SQL(commonSql + " limit {offset}, {count}").on("offset" -> start, "count" -> load).as(book *)
+          SQL(commonSql + " limit {offset}, {count}").on(
+              "shelf_id" -> shelfId, "offset" -> start, "count" -> load).as(book *)
         case (None, Some(load)) =>
-          SQL(commonSql + " limit {count}").on("count" -> load).as(book *)
+          SQL(commonSql + " limit {count}").on("shelf_id" -> shelfId, "count" -> load).as(book *)
         case _ =>
           SQL("select * from book where shelf_id = {shelf_id}").on(
             "shelf_id" -> shelfId).as(book *)
@@ -119,10 +133,28 @@ object Book {
     }
   }
 
-  def bookToJson(book:Book) = {
-    Json.obj("id" -> book.bookId, "shelf_id" -> book.shelfId,
-             "name" -> book.name, "author" -> book.author, "isbn" -> book.isbn,
-             "created" -> book.created.toString, "updated" -> book.updated.toString
-           )
+  // book_idが一致する一件だけ取得する
+  def selectById(book_id:Long) : Option[Book] = {
+    DB.withConnection {implicit conn =>
+      SQL("select * from book where book_id = {book_id}").on("book_id" -> book_id).as(book *) match {
+        case (x :: _) => Some(x)
+        case Nil => None
+      }
+    }
+  }
+
+  def toJson(book:Book) : JsValue = {
+    implicit val writer = (
+        (__ \\ "book_id").write[Long] and
+        (__ \\ "shelf_id").write[Long] and
+        (__ \\ "book_name").write[String] and
+        (__ \\ "book_author").write[String] and
+        (__ \\ "book_isbn").write[String] and
+        (__ \\ "created_date").write[Date] and
+        (__ \\ "created_user").write[String] and
+        (__ \\ "updated_date").write[Date] and
+        (__ \\ "updated_user").write[String]
+        )(unlift(Book.unapply))
+    Json.toJson(book)
   }
 }
