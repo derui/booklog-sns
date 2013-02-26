@@ -94,7 +94,7 @@ object Application extends Controller {
   }
 
   // Bookの詳細情報を取得する
-  def getBookDetial(id: Long) = Action {
+  def getBookDetail(id: Long) = Action {
     Book.selectById(id) match {
       case None => Ok(responseToJson(List()))
       case Some(x) => Ok(responseToJson(List(Book.toJson(x))))
