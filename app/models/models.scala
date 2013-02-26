@@ -29,7 +29,7 @@ object BookShelf {
     }
   }
 
-  // 一件追加
+  // 一件追加する。追加後、追加されたshelfのIDを返す
   def insert(name:String, desc:String):Any = {
     val currentDate = Calendar.getInstance().getTime();
     DB.withConnection { implicit connection =>
@@ -39,7 +39,7 @@ object BookShelf {
           values ({name}, {desc}, {created}, {cuser}, {updated}, {uuser})
           """).on("name" -> name, "desc" -> desc, "created" -> currentDate, "updated" -> currentDate,
                   "cuser" -> "TODO", "uuser" -> "TODO"
-                ).executeUpdate()
+                ).executeUpdate
     }
   }
 
