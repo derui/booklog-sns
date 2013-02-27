@@ -90,10 +90,14 @@ object BookShelf {
   }
 }
 
-case class Book(bookId: BigInteger, shelfId: BigInteger, name: String, author: String,
-                isbn: String, created: Date, cuser: String, updated: Date, uuser: String)
+// Bookテーブルの情報を表すcase class
+case class BookDetail(bookId: BigInteger, shelfId: BigInteger, name: String, author: String,
+                      isbn: String, created: Date, cuser: String, updated: Date, uuser: String)
 
-// それぞれの本
+// Bookを作成する際に必要な情報を表すcase class
+case class BookRegister(shelfId : BigInteger, name:String, author:String, isbn:String)
+
+// それぞれの本に対する操作を提供する
 object Book {
 
   val book = {
@@ -107,18 +111,18 @@ object Book {
       get[Date]("updated_date") ~
       get[String]("updated_user") map {
         case id ~ shelf_id ~ name ~ author ~ isbn ~ created ~ cuser ~ updated ~ uuser =>
-          Book(id, shelf_id, name, author, isbn, created, cuser, updated, uuser)
+          BookDetail(id, shelf_id, name, author, isbn, created, cuser, updated, uuser)
       }
   }
 
   // 一件追加
-  def insert(book: Book): BigInteger = {
+  def insert(book: BookRegister): BigInteger = {
     val currentDate = Calendar.getInstance().getTime();
     DB.withConnection { implicit conn =>
       SQL("""
-          insert into book (book_name, book_author, book_isbn, created, updated)
-          values ({name}, {author}, {isbn}, {created}, {cuser}, {updated}, {uuser})
-          """).on("name" -> book.name, "author" -> book.author, "isbn" -> book.isbn,
+          insert into book (shelf_id, book_name, book_author, book_isbn, created_date, created_user, updated_date, updated_user)
+          values ({id}, {name}, {author}, {isbn}, {created}, {cuser}, {updated}, {uuser})
+          """).on("id" -> book.shelfId, "name" -> book.name, "author" -> book.author, "isbn" -> book.isbn,
         "created" -> currentDate, "updated" -> currentDate, "cuser" -> "TODO",
         "uuser" -> "TODO").executeUpdate()
       SQL("select last_insert_id() as lastnum from book").apply.head[BigInteger]("lastnum")
@@ -140,7 +144,7 @@ object Book {
    * @param Option[Int] 取得件数
    * @return List[Book] 取得した本
    */
-  def allInShelf(shelfId: BigInteger, start: Option[Int], load: Option[Int]): List[Book] = {
+  def allInShelf(shelfId: BigInteger, start: Option[Int], load: Option[Int]): List[BookDetail] = {
     val commonSql = "select * from book where shelf_id = {shelf_id} order by updated_date"
     DB.withConnection { implicit conn =>
       (start, load) match {
@@ -157,7 +161,7 @@ object Book {
   }
 
   // book_idが一致する一件だけ取得する
-  def selectById(book_id: BigInteger): Option[Book] = {
+  def selectById(book_id: BigInteger): Option[BookDetail] = {
     DB.withConnection { implicit conn =>
       SQL("select * from book where book_id = {book_id}").on("book_id" -> book_id).as(book *) match {
         case (x :: _) => Some(x)
@@ -166,7 +170,7 @@ object Book {
     }
   }
 
-  def toJson(book: Book): JsValue = {
+  def toJson(book: BookDetail): JsValue = {
     implicit val bigIntWriter = Writes[BigInteger] { bi => Json.toJson(bi.longValue()) }
     implicit val writer = (
       (__ \ "book_id").write[BigInteger] and
@@ -177,7 +181,7 @@ object Book {
       (__ \ "created_date").write[Date] and
       (__ \ "created_user").write[String] and
       (__ \ "updated_date").write[Date] and
-      (__ \ "updated_user").write[String])(unlift(Book.unapply))
+      (__ \ "updated_user").write[String])(unlift(BookDetail.unapply))
     Json.toJson(book)
   }
 }

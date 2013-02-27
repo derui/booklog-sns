@@ -16,7 +16,6 @@ class BookShelfSpec extends Specification {
     val result: BigInteger = BookShelf.insert("book shelf", "shelf description")
 
     def after = {
-      println(result)
       BookShelf.delete(result)
     }
   }
@@ -44,7 +43,6 @@ class BookShelfSpec extends Specification {
     "can be selected a registered book shelfs by the ID" in {
       running(FakeApplication()) {
         new scope {
-          println(result)
           val shelf: Option[Shelf] = BookShelf.selectById(result)
           shelf must beSome
           val s = shelf.get
