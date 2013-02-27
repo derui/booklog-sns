@@ -14,8 +14,10 @@ import play.api.libs.json.Json
 import play.api.libs.json.Json.toJsFieldJsValueWrapper
 import play.api.mvc.Action
 import play.api.mvc.Controller
+import java.math.BigInteger
+import util._
 
-object Application extends Controller {
+object Application extends Controller with Composable {
 
   def index = Action {
     Ok(views.html.app("title"))
@@ -80,7 +82,7 @@ object Application extends Controller {
     form.bindFromRequest.fold(
       e => BadRequest(e.errors.head.message),
       p => {
-        val books = Book.allInShelf(p._1, p._2, p._3).map(Book.toJson)
+        val books = Book.allInShelf(BigInteger.valueOf(p._1), p._2, p._3).map(Book.toJson)
         Ok(responseToJson(books))
       }
     )
@@ -88,7 +90,7 @@ object Application extends Controller {
 
   // 1件だけ取得する
   def getShelfDetail(id:Long) = Action {
-    BookShelf.selectById(id) match {
+    (BookShelf.selectById _ << BigInteger.valueOf)(id) match {
       case None => Ok(responseToJson(List()))
       case Some(x) => Ok(responseToJson(List(BookShelf.toJson(x))))
     }
@@ -96,7 +98,7 @@ object Application extends Controller {
 
   // Bookの詳細情報を取得する
   def getBookDetail(id: Long) = Action {
-    Book.selectById(id) match {
+    (Book.selectById _ << BigInteger.valueOf)(id) match {
       case None => Ok(responseToJson(List()))
       case Some(x) => Ok(responseToJson(List(Book.toJson(x))))
     }

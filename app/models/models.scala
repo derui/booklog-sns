@@ -2,15 +2,15 @@ package models
 
 import java.util.Calendar
 import java.util.Date
-
 import anorm._
 import anorm.SqlParser._
 import play.api.Play.current
 import play.api.db.DB
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
+import java.math.BigInteger
 
-case class Shelf(id:Long, name:String, description:String, created:Date, createdUser:String,
+case class Shelf(id:BigInteger, name:String, description:String, created:Date, createdUser:String,
                  updated:Date, updatedUser:String)
 /**
  * 本棚データベースに対する操作をまとめたオブジェクト
@@ -18,7 +18,7 @@ case class Shelf(id:Long, name:String, description:String, created:Date, created
 object BookShelf {
 
   val shelf = {
-    get[Long]("shelf_id") ~
+    get[BigInteger]("shelf_id") ~
     get[String]("shelf_name") ~
     get[String]("shelf_description") ~
     get[Date]("created_date") ~
@@ -30,7 +30,7 @@ object BookShelf {
   }
 
   // 一件追加する。追加後、追加されたshelfのIDを返す
-  def insert(name:String, desc:String):Any = {
+  def insert(name:String, desc:String):BigInteger = {
     val currentDate = Calendar.getInstance().getTime();
     DB.withConnection { implicit connection =>
       SQL("""
@@ -40,11 +40,12 @@ object BookShelf {
           """).on("name" -> name, "desc" -> desc, "created" -> currentDate, "updated" -> currentDate,
                   "cuser" -> "TODO", "uuser" -> "TODO"
                 ).executeUpdate
+      SQL("select last_insert_id() as lastnum from book_shelf").apply.head[BigInteger]("lastnum")
     }
   }
 
   // 指定されたshelfを削除する
-  def delete(shelfId:Long) : Int = {
+  def delete(shelfId:BigInteger) : Int = {
     DB.withConnection { implicit conn =>
       SQL("delete from book_shelf where shelf_id = {id}").on("id" -> shelfId).executeUpdate
     }
@@ -65,9 +66,9 @@ object BookShelf {
   }
 
   // idが一致する一件だけ取得
-  def selectById(id:Long): Option[Shelf] = {
+  def selectById(id:BigInteger): Option[Shelf] = {
     DB.withConnection {implicit conn =>
-      val shelfs = SQL("select * from book_shelf where id= {id}").on("id" -> id).as(shelf *)
+      val shelfs = SQL("select * from book_shelf where shelf_id = {id}").on("id" -> id).as(shelf *)
       shelfs match {
         case (s :: _) => Some(s)
         case _ => None
@@ -77,8 +78,9 @@ object BookShelf {
 
   // 対象をjsonに変換する
   def toJson(target:Shelf) : JsValue = {
+    implicit val bigIntWriter = Writes[BigInteger] { bi => Json.toJson(bi.longValue())}
     implicit val writer = (
-        (__ \ "shelf_id").write[Long] and
+        (__ \ "shelf_id").write[BigInteger] and
         (__ \ "shelf_name").write[String] and
         (__ \ "shelf_description").write[String] and
         (__ \ "created_date").write[Date] and
@@ -90,15 +92,15 @@ object BookShelf {
   }
 }
 
-case class Book(bookId:Long, shelfId:Long, name:String, author:String,
+case class Book(bookId:BigInteger, shelfId:BigInteger, name:String, author:String,
                 isbn:String,  created:Date, cuser:String, updated:Date, uuser:String)
 
 // それぞれの本
 object Book {
 
   val book = {
-    get[Long]("book_id") ~
-    get[Long]("shelf_id") ~
+    get[BigInteger]("book_id") ~
+    get[BigInteger]("shelf_id") ~
     get[String]("book_name") ~
     get[String]("book_author") ~
     get[String]("book_isbn") ~
@@ -112,7 +114,7 @@ object Book {
   }
 
   // 一件追加
-  def insert(book:Book) = {
+  def insert(book:Book):BigInteger = {
     val currentDate = Calendar.getInstance().getTime();
     DB.withConnection {implicit conn =>
       SQL("""
@@ -121,11 +123,12 @@ object Book {
           """).on("name" -> book.name, "author" -> book.author, "isbn" -> book.isbn,
               "created" -> currentDate, "updated" -> currentDate, "cuser" -> "TODO",
                   "uuser" -> "TODO").executeUpdate()
+      SQL("select last_insert_id() as lastnum from book").apply.head[BigInteger]("lastnum")
     }
   }
 
   // IDに一致するbookを一件削除する
-  def delete(bookId: Long) : Int = {
+  def delete(bookId: BigInteger) : Int = {
     DB.withConnection { implicit conn =>
       SQL("delete from book where book_id = {id}").on("id" -> bookId).executeUpdate
     }
@@ -134,12 +137,12 @@ object Book {
   /**
    * 指定した本棚に関連付けられた本を取得する。
    *
-   * @param Long shelfId 取得対象の本棚ID
+   * @param BigInteger shelfId 取得対象の本棚ID
    * @param Option[Int] 取得を開始する位置
    * @param Option[Int] 取得件数
    * @return List[Book] 取得した本
    */
-  def allInShelf(shelfId:Long, start:Option[Int], load:Option[Int]) : List[Book] = {
+  def allInShelf(shelfId:BigInteger, start:Option[Int], load:Option[Int]) : List[Book] = {
     val commonSql = "select * from book where shelf_id = {shelf_id} order by updated_date"
     DB.withConnection { implicit conn =>
       (start, load) match {
@@ -156,7 +159,7 @@ object Book {
   }
 
   // book_idが一致する一件だけ取得する
-  def selectById(book_id:Long) : Option[Book] = {
+  def selectById(book_id:BigInteger) : Option[Book] = {
     DB.withConnection {implicit conn =>
       SQL("select * from book where book_id = {book_id}").on("book_id" -> book_id).as(book *) match {
         case (x :: _) => Some(x)
@@ -166,9 +169,10 @@ object Book {
   }
 
   def toJson(book:Book) : JsValue = {
+    implicit val bigIntWriter = Writes[BigInteger] { bi => Json.toJson(bi.longValue())}
     implicit val writer = (
-        (__ \ "book_id").write[Long] and
-        (__ \ "shelf_id").write[Long] and
+        (__ \ "book_id").write[BigInteger] and
+        (__ \ "shelf_id").write[BigInteger] and
         (__ \ "book_name").write[String] and
         (__ \ "book_author").write[String] and
         (__ \ "book_isbn").write[String] and
