@@ -45,11 +45,11 @@ class BookShelfSpec extends Specification {
       running(FakeApplication()) {
         new scope {
           println(result)
-          val shelf = BookShelf.selectById(result)
-          shelf must beSome { x: Shelf =>
-            x.name must beEqualTo("book shelf")
-            x.description must beEqualTo("shelf description")
-          }
+          val shelf: Option[Shelf] = BookShelf.selectById(result)
+          shelf must beSome
+          val s = shelf.get
+          s.name must beEqualTo("book shelf")
+          s.description must beEqualTo("shelf description")
         }
       }
     }
@@ -64,20 +64,20 @@ class BookShelfSpec extends Specification {
 
           {
             val shelfs = BookShelf.all(Some(3), None)
-            shelfs.size must beEqualTo(7)
-            shelfs.head.name must beEqualTo("book shelf3")
+            shelfs.size must beEqualTo(10)
+            shelfs.map { s => s.name.startsWith("book shelf") must beTrue }
           }
 
           {
             val shelfs = BookShelf.all(None, Some(2))
             shelfs.size must beEqualTo(2)
-            shelfs.head.name must beEqualTo("book shelf0")
+            shelfs.map { s => s.name.startsWith("book shelf") must beTrue }
           }
 
           {
             val shelfs = BookShelf.all(Some(4), Some(2))
             shelfs.size must beEqualTo(2)
-            shelfs.head.name must beEqualTo("book shelf5")
+            shelfs.map { s => s.name.startsWith("book shelf") must beTrue }
           }
         }
       }
