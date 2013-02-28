@@ -17,7 +17,7 @@ class BookSpec extends Specification {
   // 基本的なデータの追加・削除をするためのtrait
   trait scope extends Scope with After {
     val shelfId : BigInteger = BookShelf.insert("book shelf", "description")
-    val result: BigInteger = Book.insert(BookRegister(shelfId, "book name", "book author", "book isbn"))
+    val result: BigInteger = Book.insert(BookRegister(shelfId, "book name", "book author", "book isbn")).right.get
 
     def after = {
       BookShelf.delete(shelfId)
@@ -28,14 +28,13 @@ class BookSpec extends Specification {
   trait manyData extends Scope with After {
     val shelfId : BigInteger = BookShelf.insert("book shelf", "description")
     val results: List[BigInteger] = (1 to 10).map { e =>
-      Book.insert(BookRegister(shelfId, "book name" + e.toString, "book author" + e.toString, e.toString))
+      Book.insert(BookRegister(shelfId, "book name" + e.toString, "book author" + e.toString, e.toString)).right.get
     }.toList
 
     def after = {
       results.map(Book.delete)
       BookShelf.delete(shelfId)
     }
-
   }
 
   "Book" should {
@@ -43,8 +42,10 @@ class BookSpec extends Specification {
       running(FakeApplication()) {
         val shelfId = BookShelf.insert("book shelf", "description")
         val result = Book.insert(BookRegister(shelfId, "book name", "author", "isbn"))
-        result must beGreaterThan(BigInteger.valueOf(0L))
-        Book.delete(result) must beEqualTo(1)
+        result must beAnInstanceOf[Either[String, BigInteger]]
+        val id = result.right.get
+        id must beGreaterThan(BigInteger.valueOf(0L))
+        Book.delete(id) must beEqualTo(1)
         BookShelf.delete(shelfId) must beEqualTo(1)
       }
     }

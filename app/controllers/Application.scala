@@ -3,10 +3,7 @@ package controllers
 import models.Book
 import models.BookShelf
 import play.api.data.Form
-import play.api.data.Forms.nonEmptyText
-import play.api.data.Forms.number
-import play.api.data.Forms.optional
-import play.api.data.Forms.tuple
+import play.api.data.Forms._
 import play.api.libs.json.JsArray
 import play.api.libs.json.JsObject
 import play.api.libs.json.JsValue
@@ -16,6 +13,7 @@ import play.api.mvc.Action
 import play.api.mvc.Controller
 import java.math.BigInteger
 import util._
+import models.BookRegister
 
 object Application extends Controller with Composable {
 
@@ -36,8 +34,31 @@ object Application extends Controller with Composable {
     form.bindFromRequest.fold(
       e => BadRequest(e.errors.head.message),
       p => {
-        BookShelf.insert(p._1, p._2)
-        Ok("")
+        val result = BookShelf.insert(p._1, p._2)
+        Ok(responseToJson(List(Json.obj("id" -> result.longValue))))
+      }
+    )
+  }
+
+  // 登録済みのshelfに対して、データを登録する
+  // 指定されたshelfが存在しない場合は登録は行われない。
+  def makeBookInShelf = Action { implicit request =>
+    val form = Form(
+        tuple(
+          "shelf_id" -> number,
+          "book_name" -> nonEmptyText,
+          "book_author" -> text,
+          "book_isbn" -> text
+          )
+    )
+
+    form.bindFromRequest.fold(
+      e => BadRequest(e.errors.head.message),
+      p => {
+        Book.insert(BookRegister(BigInteger.valueOf(p._1), p._2, p._3, p._4)) match {
+          case Left(_) => BadRequest(Json.obj("error" -> "指定された本棚が存在しません"))
+          case Right(result) => Ok(responseToJson(List(Json.obj("id" -> result.longValue))))
+        }
       }
     )
   }

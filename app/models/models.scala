@@ -95,7 +95,7 @@ case class BookDetail(bookId: BigInteger, shelfId: BigInteger, name: String, aut
                       isbn: String, created: Date, cuser: String, updated: Date, uuser: String)
 
 // Bookを作成する際に必要な情報を表すcase class
-case class BookRegister(shelfId : BigInteger, name:String, author:String, isbn:String)
+case class BookRegister(shelfId: BigInteger, name: String, author: String, isbn: String)
 
 // それぞれの本に対する操作を提供する
 object Book {
@@ -116,16 +116,20 @@ object Book {
   }
 
   // 一件追加
-  def insert(book: BookRegister): BigInteger = {
+  def insert(book: BookRegister): Either[String, BigInteger] = {
     val currentDate = Calendar.getInstance().getTime();
     DB.withConnection { implicit conn =>
-      SQL("""
+      BookShelf.selectById(book.shelfId) match {
+        case None => Left("Shelf not found")
+        case Some(_) =>
+          SQL("""
           insert into book (shelf_id, book_name, book_author, book_isbn, created_date, created_user, updated_date, updated_user)
           values ({id}, {name}, {author}, {isbn}, {created}, {cuser}, {updated}, {uuser})
           """).on("id" -> book.shelfId, "name" -> book.name, "author" -> book.author, "isbn" -> book.isbn,
-        "created" -> currentDate, "updated" -> currentDate, "cuser" -> "TODO",
-        "uuser" -> "TODO").executeUpdate()
-      SQL("select last_insert_id() as lastnum from book").apply.head[BigInteger]("lastnum")
+            "created" -> currentDate, "updated" -> currentDate, "cuser" -> "TODO",
+            "uuser" -> "TODO").executeUpdate()
+          Right(SQL("select last_insert_id() as lastnum from book").apply.head[BigInteger]("lastnum"))
+      }
     }
   }
 
