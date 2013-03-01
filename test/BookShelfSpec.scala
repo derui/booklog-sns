@@ -8,6 +8,7 @@ import org.specs2.matcher._
 import org.specs2.specification.Scope
 import models.Shelf
 import java.math.BigInteger
+import models.BookShelf
 
 class BookShelfSpec extends Specification {
 

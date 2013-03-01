@@ -14,6 +14,8 @@ import play.api.mvc.Controller
 import java.math.BigInteger
 import util._
 import models.BookRegister
+import models.BookShelf
+import models.Book
 
 object Application extends Controller with Composable {
 

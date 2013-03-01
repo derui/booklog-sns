@@ -16,6 +16,8 @@ import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Json
 import views.html.defaultpages.badRequest
+import models.BookShelf
+import models.Book
 
 class ApplicationSpec extends Specification {
 
@@ -62,7 +64,7 @@ class ApplicationSpec extends Specification {
 
     "return BadRequest when give id is not found in data store" in new WithApplication {
 
-      val result = route(FakeRequest(DELETE, "/shelf/0"))
+      var result = route(FakeRequest(DELETE, "/shelf/0"))
       result must beSome
       status(result.get) must beEqualTo(400)
     }
@@ -84,9 +86,11 @@ class ApplicationSpec extends Specification {
       ((node \ "result")(0) \ "shelf_name").as[String] must be_==("name")
       ((node \ "result")(0) \ "shelf_description").as[String] must be_==("desc")
 
-      route(FakeRequest(DELETE, "/shelf/" + id.toString))
+      val deleted = route(FakeRequest(DELETE, "/shelf/" + id))
+      deleted must beSome
+      status(deleted.get) must beEqualTo(OK)
+      (Json.parse(contentAsString(deleted.get)) \ "totalCount").as[Long] must be_==(0L)
     }
-
   }
 
 }

@@ -11,6 +11,8 @@ import java.math.BigInteger
 import models.BookShelf
 import models.BookRegister
 import models.BookDetail
+import models.BookShelf
+import models.Book
 
 class BookSpec extends Specification {
 
