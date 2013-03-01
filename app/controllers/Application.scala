@@ -21,36 +21,31 @@ object Application extends Controller with Composable {
     Ok(views.html.app("title"))
   }
 
-  case class Shelf(name:String)
+  case class Shelf(name: String)
 
   def makeShelf = Action { implicit request =>
     val form = Form(
-        tuple(
-          "shelf_name" -> nonEmptyText,
-          "shelf_description" -> nonEmptyText
-      )
-    )
+      tuple(
+        "shelf_name" -> nonEmptyText,
+        "shelf_description" -> nonEmptyText))
 
     form.bindFromRequest.fold(
       e => BadRequest(e.errors.head.message),
       p => {
         val result = BookShelf.insert(p._1, p._2)
         Ok(responseToJson(List(Json.obj("id" -> result.longValue))))
-      }
-    )
+      })
   }
 
   // 登録済みのshelfに対して、データを登録する
   // 指定されたshelfが存在しない場合は登録は行われない。
   def makeBookInShelf = Action { implicit request =>
     val form = Form(
-        tuple(
-          "shelf_id" -> number,
-          "book_name" -> nonEmptyText,
-          "book_author" -> text,
-          "book_isbn" -> text
-          )
-    )
+      tuple(
+        "shelf_id" -> number,
+        "book_name" -> nonEmptyText,
+        "book_author" -> text,
+        "book_isbn" -> text))
 
     form.bindFromRequest.fold(
       e => BadRequest(e.errors.head.message),
@@ -59,17 +54,15 @@ object Application extends Controller with Composable {
           case Left(_) => BadRequest(Json.obj("error" -> "指定された本棚が存在しません"))
           case Right(result) => Ok(responseToJson(List(Json.obj("id" -> result.longValue))))
         }
-      }
-    )
+      })
   }
 
   /**
    * 渡されたJsValueのリストを、返却形式のJsonに変換する
    */
-  private def responseToJson(ary:List[JsValue]):JsObject = {
+  private def responseToJson(ary: List[JsValue]): JsObject = {
     Json.obj("totalCount" -> ary.length, "result" ->
-             ary.foldLeft(Json.arr())((ary, obj) => ary :+ obj)
-           )
+      ary.foldLeft(Json.arr())((ary, obj) => ary :+ obj))
   }
 
   // 指定された場合は指定された件数のみ、指定されない場合は全件取得する
@@ -77,17 +70,24 @@ object Application extends Controller with Composable {
     val form = Form(
       tuple(
         "start" -> optional(number),
-        "rows" -> optional(number)
-      )
-    )
+        "rows" -> optional(number)))
 
     form.bindFromRequest.fold(
       e => BadRequest(e.errors.head.message),
       p => {
         val jsoned = BookShelf.all(p._1, p._2).map(BookShelf.toJson)
         Ok(responseToJson(jsoned))
-      }
-    )
+      })
+  }
+
+  // 指定された本棚を削除する
+  def deleteBookShelf(id: Long) = Action {
+    val deleted = BookShelf.delete(BigInteger.valueOf(id))
+    if (deleted == 1) {
+      Ok(responseToJson(List()))
+    } else {
+      BadRequest(Json.obj("error" -> "指定された本棚が存在しません"))
+    }
   }
 
   // 指定されたshelfに紐づくbookを取得する
@@ -96,21 +96,18 @@ object Application extends Controller with Composable {
       tuple(
         "shelf" -> number,
         "start" -> optional(number),
-        "rows" -> optional(number)
-      )
-    )
+        "rows" -> optional(number)))
 
     form.bindFromRequest.fold(
       e => BadRequest(e.errors.head.message),
       p => {
         val books = Book.allInShelf(BigInteger.valueOf(p._1), p._2, p._3).map(Book.toJson)
         Ok(responseToJson(books))
-      }
-    )
+      })
   }
 
   // 1件だけ取得する
-  def getShelfDetail(id:Long) = Action {
+  def getShelfDetail(id: Long) = Action {
     (BookShelf.selectById _ << BigInteger.valueOf)(id) match {
       case None => Ok(responseToJson(List()))
       case Some(x) => Ok(responseToJson(List(BookShelf.toJson(x))))

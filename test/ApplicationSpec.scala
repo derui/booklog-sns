@@ -42,8 +42,8 @@ class ApplicationSpec extends Specification {
   }
 
   "Application" should {
-    "makes an book shelf with name and description" in new WithApplication {
-         val data: Map[String, Seq[String]] = Map("shelf_name" -> Seq("name"),
+    "makes and delete an book shelf with name and description" in new WithApplication {
+        val data: Map[String, Seq[String]] = Map("shelf_name" -> Seq("name"),
              "shelf_description" -> Seq("desc"))
         val result = route(FakeRequest(POST, "/shelf").withHeaders(CONTENT_TYPE -> "application/x-www-form-urlencode"), data)
 
@@ -51,7 +51,12 @@ class ApplicationSpec extends Specification {
         status(result.get) must beEqualTo(OK)
         val node = Json.parse(contentAsString(result.get))
         (node \ "totalCount").as[Long] must be_==(1L)
-        (node \ "result" \ "id").as[Long] must be_>(1L)
+        ((node \ "result")(0) \ "id").as[Long] must be_>(1L)
+        val id = ((node \ "result")(0) \ "id").as[Long]
+
+        val resultByDelete = route(FakeRequest(DELETE, "/shelf/" + id.toString))
+        resultByDelete must beSome
+        status(resultByDelete.get) must beEqualTo(OK)
     }
   }
 

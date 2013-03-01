@@ -5,9 +5,10 @@
 # Home page
 GET     /                    controllers.Application.index
 GET     /shelf               controllers.Application.getAllShelf
-GET     /shelf/{id}          controllers.Application.getShelfDetail(id: Long)
+GET     /shelf/*id           controllers.Application.getShelfDetail(id: Long)
+DELETE  /shelf/*id           controllers.Application.deleteBookShelf(id: Long)
 GET     /books               controllers.Application.getBooksInShelf
-GET     /books/{id}          controllers.Application.getBookDetail(id: Long)
+GET     /books/*id           controllers.Application.getBookDetail(id: Long)
 POST    /shelf               controllers.Application.makeShelf
 POST    /book                controllers.Application.makeBookInShelf
 
