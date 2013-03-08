@@ -55,10 +55,10 @@ requirejs(['lib/backbone', 'lib/pure'], function(Backbone) {
 						'.bookshelfInfo' : {
 							'bookshelfInfo<-shelfs' : {
 								'.name' : function(arg) {
-									return '<a href="#">' + arg.bookshelfInfo.item.attributes.name + '</a>';
+									return '<a href="#">' + arg.bookshelfInfo.item.attributes.shelf_name + '</a>';
 								},
 								'.description' : function(arg) {
-									return arg.bookshelfInfo.item.attributes.description;
+									return arg.bookshelfInfo.item.attributes.shelf_description;
 								},
 								'.update_date':function(arg){
 									return arg.bookshelfInfo.item.attributes.updated_date;
