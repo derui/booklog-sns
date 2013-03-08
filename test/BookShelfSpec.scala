@@ -49,6 +49,9 @@ class BookShelfSpec extends Specification {
           val s = shelf.get
           s.name must beEqualTo("book shelf")
           s.description must beEqualTo("shelf description")
+          val jsoned = BookShelf.toJson(s)
+          (jsoned \ "created_date").as[String] must be_==(s.created.formatted("yyyy-MM-dd HH:mm:ss"))
+          (jsoned \ "updated_date").as[String] must be_==(s.updated.formatted("yyyy-MM-dd HH:mm:ss"))
         }
       }
     }

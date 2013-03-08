@@ -61,6 +61,9 @@ class BookSpec extends Specification {
           s.name must beEqualTo("book name")
           s.author must beEqualTo("book author")
           s.isbn must beEqualTo("book isbn")
+          val jsoned = Book.toJson(s)
+          (jsoned \ "created_date").as[String] must be_==(s.created.formatted("yyyy-MM-dd HH:mm:ss"))
+          (jsoned \ "updated_date").as[String] must be_==(s.updated.formatted("yyyy-MM-dd HH:mm:ss"))
         }
       }
     }

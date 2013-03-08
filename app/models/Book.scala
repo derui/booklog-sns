@@ -96,13 +96,14 @@ object Book {
 
   def toJson(book: BookDetail): JsValue = {
     implicit val bigIntWriter = Writes[BigInteger] { bi => Json.toJson(bi.longValue()) }
+    implicit val dateWriter = Writes[Date] { date => Json.toJson(date.formatted("yyyy-MM-dd HH:mm:ss"))}
     implicit val writer = (
       (__ \ "book_id").write[BigInteger] and
       (__ \ "shelf_id").write[BigInteger] and
       (__ \ "book_name").write[String] and
       (__ \ "book_author").write[String] and
       (__ \ "book_isbn").write[String] and
-      (__ \ "created_date").write[Date] and
+      (__ \ "created_date").format[Date] and
       (__ \ "created_user").write[String] and
       (__ \ "updated_date").write[Date] and
       (__ \ "updated_user").write[String])(unlift(BookDetail.unapply))
