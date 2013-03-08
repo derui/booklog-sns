@@ -78,7 +78,7 @@ object BookShelf {
   // 対象をjsonに変換する
   def toJson(target: Shelf): JsValue = {
     implicit val bigIntWriter = Writes[BigInteger] { bi => Json.toJson(bi.longValue()) }
-    implicit val dateWriter = Writes[Date] { date => Json.toJson(date.formatted("yyyy-MM-dd HH:mm:ss"))}
+    implicit val dateWriter = Writes[Date] { date => Json.toJson("%tF %<tT" format date)}
     implicit val writer = (
       (__ \ "shelf_id").write[BigInteger] and
       (__ \ "shelf_name").write[String] and
