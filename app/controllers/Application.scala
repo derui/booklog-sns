@@ -8,19 +8,95 @@ import play.api.libs.json.JsArray
 import play.api.libs.json.JsObject
 import play.api.libs.json.JsValue
 import play.api.libs.json.Json
+import play.api.libs.json.Json
 import play.api.libs.json.Json.toJsFieldJsValueWrapper
-import play.api.mvc.Action
-import play.api.mvc.Controller
+import play.api.libs.json.Reads
+import play.api.libs.json.Writes
+import play.api.mvc._
 import java.math.BigInteger
+import play.api.mvc.Results
+import play.api.mvc.SimpleResult
 import util._
 import models.BookRegister
 import models.BookShelf
 import models.Book
+import models.UserInfo
+import controllers.Connection._
 
 object Application extends Controller with Composable {
 
   def index = Action {
     Ok(views.html.app("title"))
+  }
+
+  // JavaScript側から、oauth2で認証されたトークンを受け取って、二段階目の認証を行う。
+  // 認証結果として正常であれば、以下のフォーマットと一致するjsonをレスポンスとして返す。
+  // すでに認証されている場合には、認証されているユーザーを取得して返す。
+  /**
+   * {
+   *   "id":0,
+   *   "googleUserId":"",
+   *   "googleDisplayName":"",
+   *   "googlePublicProfileUrl":"",
+   *   "googlePublicProfilePhotoUrl":"",
+   *   "googleExpiresAt":0
+   * }
+   */
+  def connect = Action { implicit request =>
+    request.body.asJson match {
+      case None => BadRequest("Auth request must be json format!")
+      case Some(json) =>
+        Token.fromJson(json) match {
+          case Left(e) => BadRequest(e)
+          case Right(token) => {
+            Connection.connect(token) match {
+              case Left(result) => resultToResponse(result)
+              case Right(userInfo) =>
+                // すでに登録されているユーザーか、今回登録されたユーザー情報を返す。
+                // 認証が完了したユーザーについては、セッションに認証データを登録しておく
+
+                Ok((userInfoToToken _ >> responseToJson _)(userInfo)).withSession {
+                  Connection.addAuthToSession(session, userInfo)
+                }
+            }
+          }
+        }
+    }
+  }
+
+  // ユーザーをアプリケーションから切り離す。
+  def disconnect = Action { implicit request =>
+    Connection.disconnect(session) match {
+      case Left(e) => resultToResponse(e)
+      case Right(session) =>
+        Ok("disconnect complete").withSession{ session}
+    }
+
+  }
+
+  // ConnectResultをレスポンス用の文字列に変換する
+  private def resultToResponse[String](result : ConnectResult) : PlainResult = {
+    result match {
+      case ConnectResult.TokenError(e) => BadRequest(e.getMessage)
+      case ConnectResult.MissingAccessToken(m) => BadRequest(m)
+      case ConnectResult.VerificationError(m) => BadRequest(m)
+      case ConnectResult.GoogleApiError(m) => BadRequest(m)
+      case ConnectResult.UserUpdateError(id) => BadRequest("To update faied at %d" format id)
+      case ConnectResult.UserInsertError(m) => BadRequest(m)
+      case ConnectResult.UserNotFoundError(id) => BadRequest("User not found : id = %d" format id)
+      case ConnectResult.UserNotAuthorizedError(e) => Unauthorized(e)
+    }
+  }
+
+  // 渡されたUserInfoを返却用のjsonに変換する。
+  private def userInfoToToken(userinfo:UserInfo) : List[JsValue] = {
+    val json = UserInfo.toJson(userinfo)
+    List(Json.obj("id" -> (json \ "user_id").as[Long],
+             "googleUserId" -> (json \ "google_user_id").as[String],
+             "googleDisplayName" -> (json \ "google_display_name").as[String],
+             "googlePublicProfileUrl" -> (json \ "google_public_profile_url").as[String],
+             "googlePublicProfilePhotoUrl" -> (json \ "google_public_profile_photo_url").as[String],
+             "googleExpiresAt" -> (json \ "google_expires_at").as[Long]))
   }
 
   case class Shelf(name: String)

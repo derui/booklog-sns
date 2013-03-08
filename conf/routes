@@ -11,6 +11,8 @@ GET     /books               controllers.Application.getBooksInShelf
 GET     /books/*id           controllers.Application.getBookDetail(id: Long)
 POST    /shelf               controllers.Application.makeShelf
 POST    /book                controllers.Application.makeBookInShelf
+POST    /connect             controllers.Application.connect
+GET     /disconnect          controllers.Application.disconnect
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /*file               controllers.Assets.at(path="/public", file)
