@@ -1,23 +1,23 @@
 requirejs.config({
 			shim : {
-				"lib/jquery-1.9.0.min" : {
-					exports : "jQuery"
+				"lib/zepto" : {
+					exports : "Zepto"
 				},
 				"lib/underscore" : {
 					exports : "_"
 				},
 				"lib/pure" : {
-					deps : ["../lib/jquery-1.9.0.min"],
+					deps : ["../lib/zepto"],
 					exports : "pure"
 				},
 				"lib/backbone" : {
-					deps : ["../lib/jquery-1.9.0.min", "../lib/underscore"],
+					deps : ["../lib/zepto", "../lib/underscore"],
 					exports : "Backbone"
 				}
 			}
 		});
 
-requirejs(['lib/backbone', 'lib/pure'], function(Backbone) {
+requirejs(['lib/backbone', 'lib/pure', 'common'], function(Backbone) {
 	// TODO モジュール化
 	var BaseModel = Backbone.Model.extend({});
 	var BaseCollection = Backbone.Collection.extend({});
