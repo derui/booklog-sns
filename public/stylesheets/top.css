@@ -11,8 +11,13 @@ body {
     max-width: 700px;
 }
 
+.container-narrow .masthead ul.nav {
+    margin-bottom: 0;
+}
+
 .container-narrow>hr {
-    margin: 30px 0;
+    margin: 5px 0;
+    clear: both;
 }
 
 /* Main marketing message and sign up button */
@@ -41,5 +46,14 @@ body {
 }
 
 #signinArea {
+    margin-top: 5px;
     margin-left: 0.5em;
+}
+
+#profilePhoto {
+    max-height: 25px;
+}
+
+#___signin_0 {
+    vertical-align: middle !important;
 }

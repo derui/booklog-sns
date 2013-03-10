@@ -34,6 +34,7 @@
                 data-height="short"
                 data-theme="dark">
               </span>
+                <button class="btn btn-small disabled" id="dissconectButton" type="button">log out</button>
             </div>
             <form class="navbar-search pull-right">
                 <input type="search" class="search-query" placeholder="本のタイトルを検索する">
@@ -99,35 +100,5 @@
 </div>
 <!-- /container -->
 <script data-main="@routes.Assets.at("javascripts/top")" src="@routes.Assets.at("javascripts/lib/require.js")"></script>
-<script type="text/javascript" >
-window.___gcfg = {
-    lang: 'ja',
-    parsetags: 'onload'
-};
-(function () {
-    var po = document.createElement('script');
-    po.type = 'text/javascript';
-    po.async = true;
-    po.src = 'https://apis.google.com/js/client:plusone.js';
-    var s = document.getElementsByTagName('script')[0];
-    s.parentNode.insertBefore(po, s);
-})();
-function signinCallback(authResult) {
-    if (authResult['access_token']) {
-        $.ajax({
-            type: 'POST',
-            url: '/connect',
-            contentType: "application/json",
-            data: JSON.stringify(authResult),
-            success: function (response) {
-                console.log(response);
-                var loginUserInfo = response.result[0];
-                $('#___signin_0').hide();
-                $('#signinArea').append('<img src="' + loginUserInfo.googlePublicProfilePhotoUrl + '"><span>' + loginUserInfo.googleDisplayName + '</span>');
-            }
-        });
-    }
-}
-</script>
 </body>
 </html>
