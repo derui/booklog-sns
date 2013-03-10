@@ -26,7 +26,7 @@ import controllers.Connection._
 object Application extends Controller with Composable {
 
   def index = Action {
-    Ok(views.html.app("title"))
+    Ok(views.html.app())
   }
 
   // JavaScript側から、oauth2で認証されたトークンを受け取って、二段階目の認証を行う。
