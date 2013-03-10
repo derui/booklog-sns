@@ -61,14 +61,13 @@ trait Rental extends Controller with JsonResponse with Composable {
   def doRental = Authenticated {
     Action { implicit request =>
       val form = Form(
-        tuple(
-          "rental_user" -> number,
-          "rental_book" -> number))
+          "rental_book" -> number)
 
       form.bindFromRequest.fold(
         e => BadRequest(Json.obj("error" -> e.errors.head.message)),
         p => {
-          RentalInfo.insert(BigInteger.valueOf(p._1), BigInteger.valueOf(p._2)) match {
+          RentalInfo.insert(Util.userIdInSession(request),
+                            BigInteger.valueOf(p)) match {
             case Left(e) => BadRequest(Json.obj("error" -> e))
             case Right(id) =>
               OkJsonOneOf(Json.obj("rental_id" -> id.longValue))
@@ -78,10 +77,10 @@ trait Rental extends Controller with JsonResponse with Composable {
     }
   }
 
-  // 返却状態に変更する。APIの仕様で、返却状態からレンタル状態に変更することはできない。
+  // 返却状態に変更する。返却の際には、レンタル情報は削除される。
   def returnRentalBook(id:Long) = Authenticated {
     Action { implicit request =>
-      RentalInfo.update(BigInteger.valueOf(id), false)
+      RentalInfo.delete(BigInteger.valueOf(id))
       OkJson(List())
     }
   }

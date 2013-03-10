@@ -17,10 +17,4 @@ trait Secured extends Security {
       case Right(_) => action(request)
     }
   }
-
-  // セッション内に存在するユーザーIDを取得する。これを呼び出せるタイミングは、
-  // applyの内部しか無い。
-  def userIdInSession[A](request:Request[A]) : BigInteger =
-    checkAuthorization(request.session).right.get
-
 }

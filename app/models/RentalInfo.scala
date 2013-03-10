@@ -66,7 +66,7 @@ object RentalInfo {
   // 指定されたレンタル情報を削除する
   def delete(rentalId: BigInteger): Int = {
     DB.withConnection { implicit conn =>
-      SQL("delete from %s where shelf_id = {id}" format tableName).on("id" -> rentalId).executeUpdate
+      SQL("delete from %s where rental_id = {id}" format tableName).on("id" -> rentalId).executeUpdate
     }
   }
 
@@ -83,14 +83,6 @@ object RentalInfo {
             ).on("count" -> load).as(rentalInfo *)
         case _ => SQL("select * from %s" format tableName).as(rentalInfo *)
       }
-    }
-  }
-
-  // レンタル状態を更新する
-  def update(id : BigInteger, flag : Boolean) = {
-    DB.withConnection { implicit conn =>
-      SQL("update %s set rental_now = {flag} where rental_id = {id}" format tableName)
-      .on("id" -> id, "flag" -> flag).executeUpdate
     }
   }
 
