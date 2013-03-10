@@ -27,7 +27,15 @@ trait Application extends Controller with JsonResponse with Composable {
   this : Security =>
 
   def index = Action {
-    Ok(views.html.app())
+    Ok(views.html.index())
+  }
+
+  def registerBookShelf = Action {
+    Ok(views.html.registerBookShelf())
+  }
+
+  def showBookShelf = Action {
+    Ok(views.html.showBookShelf())
   }
 
   // JavaScript側から、oauth2で認証されたトークンを受け取って、二段階目の認証を行う。

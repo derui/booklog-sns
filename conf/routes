@@ -13,6 +13,8 @@ POST    /shelf               application.Application.makeShelf
 POST    /book                application.Application.makeBookInShelf
 POST    /connect             application.Application.connect
 GET     /disconnect          application.Application.disconnect
+GET     /book_shelf/register application.Application.registerBookShelf
+GET     /book_shelf/detail   application.Application.showBookShelf
 
 # Get and update rental infomations
 GET     /rental              application.Rental.getRentalInfos

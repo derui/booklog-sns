@@ -1,0 +1,42 @@
+@charset "utf-8";
+
+body {
+    padding-top: 20px;
+    padding-bottom: 40px;
+}
+
+/* Custom container */
+.container-narrow {
+    margin: 0 auto;
+    max-width: 700px;
+}
+
+.container-narrow h1 {
+    font-size: 2em;
+}
+
+.container-narrow .masthead ul.nav {
+    margin-bottom: 0;
+}
+
+.container-narrow>hr {
+    margin: 5px 0;
+    clear: both;
+}
+
+#signinArea {
+    margin-top: 5px;
+    margin-left: 0.5em;
+}
+
+#profilePhoto {
+    max-height: 25px;
+}
+
+#___signin_0 {
+    vertical-align: middle !important;
+}
+
+.required {
+    color: red;
+}

@@ -1,0 +1,34 @@
+@styles = {
+}
+
+@script = {
+  <script src="@routes.Assets.at("javascripts/registerBookShelf.js")"></script>
+}
+
+@layout("本棚をつくる - Social BookShelf")(styles)(script) {
+    <ul class="breadcrumb">
+        <li><a href="/">トップ</a> <span class="divider">/</span></li>
+        <li class="active">本棚をつくる</li>
+    </ul>
+    <h2>本棚をつくる</h2>
+    <form id="registerBookShelfForm" class="form-horizontal">
+        <div class="control-group">
+            <label class="control-label" for="shelfName">本棚の名前<span class="required">*</span></label>
+            <div class="controls">
+                <input type="text" id="shelfName" class="input-xlarge" name="shelf_name" placeholder="例）部の本棚" required autofocus maxlength="50" />
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="shelfDescription">本棚の説明<span class="required">*</span></label>
+            <div class="controls">
+                <textarea id="shelfDescription" class="input-xlarge" name="shelf_description" placeholder="例）部の予算で購入した本の本棚です。部以外の方もご利用いただけます。" required rows="3" maxlength="100" ></textarea>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <div class="controls">
+              <button type="submit" id="makeShelfButton" class="btn">作成</button>
+            </div>
+        </div>
+    </form>
+}

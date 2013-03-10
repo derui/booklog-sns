@@ -7,8 +7,12 @@ define(['lib/backbone'], function () {
     var BookShelf = BaseModel.extend({
         urlRoot: '/shelf',
         validate: function (attrs) {
-            if (!attrs.name) {
-                return '本棚の名称は必須です';
+            if (!attrs.shelf_name) {
+                return '本棚の名前は必須です';
+            }
+
+            if (!attrs.shelf_description) {
+                return '本棚の説明は必須です';
             }
         }
     });
