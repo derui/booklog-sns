@@ -1,6 +1,7 @@
 requirejs(['lib/zepto', 'lib/pure'], function () {
     'use strict';
 
+    // PUREをZepto.jsで使えるようにするおまじない
     (function ($) {
         $.extend($.fn, {
             directives: function (directive) {
@@ -19,8 +20,23 @@ requirejs(['lib/zepto', 'lib/pure'], function () {
         });
     })(Zepto);
 
+    // Ajax共通処理：Ajax通信前処理
     $(document).on('ajaxBeforeSend', function (e, xhr, options) {
         // CSRF対策
         xhr.setRequestHeader('X-From', location.href);
+    });
+
+    _.mixin({
+        replaceAll : function(target, substr, newSubStr){
+            if(!target){
+                return target;
+            }
+
+            if(_.isRegExp(substr)){
+                return target.replace(new RegExp(substr.source,'g'), newSubStr);
+            }
+
+            return target.replace(new RegExp(substr,'g'), newSubStr);
+        }
     });
 });

@@ -37,7 +37,7 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto'], 
                             return '<a href="#">' + arg.bookshelfInfo.item.attributes.shelf_name + '</a>';
                         },
                         '.description': function (arg) {
-                            return arg.bookshelfInfo.item.attributes.shelf_description;
+                            return _(arg.bookshelfInfo.item.attributes.shelf_description).replaceAll('\n', '<br />');
                         },
                         '.update_date': function (arg) {
                             return arg.bookshelfInfo.item.attributes.updated_date;
