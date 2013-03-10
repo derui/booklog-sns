@@ -43,6 +43,18 @@ function signinCallback(authResult) {
 requirejs(['lib/backbone', 'lib/pure', 'common', 'lib/zepto'], function (Backbone) {
     "use strict";
 
+    window.___gcfg = {
+        lang: 'ja',
+        parsetags: 'onload'
+    };
+
+    var po = document.createElement('script');
+    po.type = 'text/javascript';
+    po.async = true;
+    po.src = 'https://apis.google.com/js/client:plusone.js';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(po, s);
+
     // TODO モジュール化
     var BaseModel = Backbone.Model.extend({});
     var BaseCollection = Backbone.Collection.extend({});
@@ -95,21 +107,7 @@ requirejs(['lib/backbone', 'lib/pure', 'common', 'lib/zepto'], function (Backbon
         collection: bookShelfList
     });
 
-    bookShelfList.fetch();
-
-    window.___gcfg = {
-        lang: 'ja',
-        parsetags: 'onload'
-    };
-
-    (function () {
-        var po = document.createElement('script');
-        po.type = 'text/javascript';
-        po.async = true;
-        po.src = 'https://apis.google.com/js/client:plusone.js';
-        var s = document.getElementsByTagName('script')[0];
-        s.parentNode.insertBefore(po, s);
-    })();
+    bookShelfList.fetch({data: $.param({start: 0, rows: 5})});
 
     $(function () {
         $('#dissconectButton').on('click', function () {
