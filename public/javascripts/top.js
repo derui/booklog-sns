@@ -18,7 +18,9 @@ requirejs.config({
 });
 
 function signinCallback(authResult) {
-    if (authResult['access_token']) {
+    'use strict';
+
+    if (authResult.access_token) {
         // ログインボタンから認証すると、g-oauth-windowにWindowオブジェクトがセットされ
         // JSON.stringify()でパースエラーとなるため、nullで初期化する
         authResult['g-oauth-window'] = null;
@@ -112,7 +114,7 @@ requirejs(['lib/backbone', 'lib/pure', 'common', 'lib/zepto'], function (Backbon
     $(function () {
         $('#dissconectButton').on('click', function () {
             var $this = $(this);
-            
+
             if ($this.hasClass('disabled')) {
                 return;
             }

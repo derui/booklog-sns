@@ -1,4 +1,6 @@
-requirejs(['lib/zepto','lib/pure'], function () {
+requirejs(['lib/zepto', 'lib/pure'], function () {
+    'use strict';
+
     (function ($) {
         $.extend($.fn, {
             directives: function (directive) {
@@ -14,6 +16,11 @@ requirejs(['lib/zepto','lib/pure'], function () {
             autoRender: function (ctxt, directive) {
                 return Zepto(Array.prototype.slice.call($p(this).autoRender(ctxt, this._pure_d || directive)));
             }
-        })
+        });
     })(Zepto);
+
+    $(document).on('ajaxBeforeSend', function (e, xhr, options) {
+        // CSRF対策
+        xhr.setRequestHeader('X-From', location.href);
+    });
 });
