@@ -24,6 +24,10 @@ import models.UserInfo
 import models.RentalInfo
 import controllers.Connection._
 
+/**
+ * レンタル状況の登録、変更、取得APIへのアクセスを受ける。
+ * ここで受けたものは、基本的にModelかLogicに丸投げする。
+ */
 trait Rental extends Controller with JsonResponse with Composable {
   this: Security =>
 

@@ -15,6 +15,9 @@ trait Composable {
   implicit def toComposableFunction1[T1, R](func: T1 => R) = new ComposableFunction1[T1, R] { val f = func }
 }
 
+/**
+ * TODO 後で整理する
+ */
 object Util {
   // セッション内に存在するユーザーIDを取得する。これを呼び出せるタイミングは、
   // applyの内部しか無い。
