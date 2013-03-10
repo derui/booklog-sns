@@ -37,7 +37,8 @@ object RentalInfo {
   }
 
   // 新規にレンタル情報を追加する。bookがuserに紐づいていない場合、
-  // Leftを返す
+  // Leftを返す。
+  // ここでのuserは、レンタルする側のuserで、bookは別のユーザーが保持するbookとなる。
   def insert(user: BigInteger, book: BigInteger): Either[String, BigInteger] = {
     val currentDate = Calendar.getInstance().getTime();
 
@@ -63,30 +64,41 @@ object RentalInfo {
   }
 
   // 指定されたレンタル情報を削除する
-  def delete(rental: BigInteger): Int = {
+  def delete(rentalId: BigInteger): Int = {
     DB.withConnection { implicit conn =>
-      SQL("delete from book_shelf where shelf_id = {id}").on("id" -> shelfId).executeUpdate
+      SQL("delete from %s where shelf_id = {id}" format tableName).on("id" -> rentalId).executeUpdate
     }
   }
 
   // 全件取得
-  def all(start: Option[Int], load: Option[Int]): List[Shelf] = {
+  def findAll(start: Option[Int], load: Option[Int]): List[RentalInfo] = {
     DB.withConnection { implicit conn =>
       (start, load) match {
         case (Some(start), Some(load)) =>
-          SQL("select * from book_shelf order by updated_date desc limit {start}, {count}").
-        on("start" -> start, "count" -> load).as(shelf *)
+          SQL("select * from %s order by updated_date desc limit {start}, {count}"
+              format tableName
+            ).on("start" -> start, "count" -> load).as(rentalInfo *)
         case (None, Some(load)) =>
-          SQL("select * from book_shelf order by updated_date limit {count}").on("count" -> load).as(shelf *)
-        case _ => SQL("select * from book_shelf").as(shelf *)
+          SQL("select * from %s order by updated_date limit {count}" format tableName
+            ).on("count" -> load).as(rentalInfo *)
+        case _ => SQL("select * from %s" format tableName).as(rentalInfo *)
       }
     }
   }
 
-  // idが一致する一件だけ取得
-  def selectById(id: BigInteger): Option[Shelf] = {
+  // レンタル状態を更新する
+  def update(id : BigInteger, flag : Boolean) = {
     DB.withConnection { implicit conn =>
-      val shelfs = SQL("select * from book_shelf where shelf_id = {id}").on("id" -> id).as(shelf *)
+      SQL("update %s set rental_now = {flag} where rental_id = {id}" format tableName)
+      .on("id" -> id, "flag" -> flag).executeUpdate
+    }
+  }
+
+  // idが一致する一件だけ取得
+  def selectById(id: BigInteger): Option[RentalInfo] = {
+    DB.withConnection { implicit conn =>
+      val shelfs = SQL("select * from %s where rental_id = {id}" format tableName)
+      .on("id" -> id).as(rentalInfo *)
       shelfs match {
         case (s :: _) => Some(s)
         case _ => None
@@ -95,17 +107,18 @@ object RentalInfo {
   }
 
   // 対象をjsonに変換する
-  def toJson(target: Shelf): JsValue = {
+  def toJson(target: RentalInfo): JsValue = {
     implicit val bigIntWriter = Writes[BigInteger] { bi => Json.toJson(bi.longValue()) }
     implicit val dateWriter = Writes[Date] { date => Json.toJson("%tF %<tT" format date)}
     implicit val writer = (
-      (__ \ "shelf_id").write[BigInteger] and
-      (__ \ "shelf_name").write[String] and
-      (__ \ "shelf_description").write[String] and
+      (__ \ "rental_id").write[BigInteger] and
+      (__ \ "rental_user_id").write[BigInteger] and
+      (__ \ "rental_book_id").write[BigInteger] and
+      (__ \ "rental_now").write[Boolean] and
       (__ \ "created_date").write[Date] and
       (__ \ "created_user").write[String] and
       (__ \ "updated_date").write[Date] and
-      (__ \ "updated_user").write[String])(unlift(Shelf.unapply))
+      (__ \ "updated_user").write[String])(unlift(RentalInfo.unapply))
     Json.toJson(target)
   }
 }

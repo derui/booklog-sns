@@ -23,7 +23,8 @@ import models.Book
 import models.UserInfo
 import controllers.Connection._
 
-object Application extends Controller with Composable {
+trait Application extends Controller with JsonResponse with Composable {
+  this : Security =>
 
   def index = Action {
     Ok(views.html.app())
@@ -71,7 +72,6 @@ object Application extends Controller with Composable {
       case Right(session) =>
         Ok("disconnect complete").withSession{ session}
     }
-
   }
 
   // ConnectResultをレスポンス用の文字列に変換する
@@ -101,102 +101,109 @@ object Application extends Controller with Composable {
 
   case class Shelf(name: String)
 
-  def makeShelf = Action { implicit request =>
-    val form = Form(
-      tuple(
-        "shelf_name" -> nonEmptyText,
-        "shelf_description" -> nonEmptyText))
+  def makeShelf = Authenticated {
+    Action { implicit request =>
+      val form = Form(
+        tuple(
+          "shelf_name" -> nonEmptyText,
+          "shelf_description" -> nonEmptyText))
 
-    form.bindFromRequest.fold(
-      e => BadRequest(e.errors.head.message),
-      p => {
-        val result = BookShelf.insert(p._1, p._2)
-        Ok(responseToJson(List(Json.obj("id" -> result.longValue))))
-      })
+      form.bindFromRequest.fold(
+        e => BadRequest(e.errors.head.message),
+        p => {
+          val result = BookShelf.insert(p._1, p._2)
+          OkJsonOneOf(Json.obj("id" -> result.longValue))
+        })
+    }
   }
 
   // 登録済みのshelfに対して、データを登録する
   // 指定されたshelfが存在しない場合は登録は行われない。
-  def makeBookInShelf = Action { implicit request =>
-    val form = Form(
-      tuple(
-        "shelf_id" -> number,
-        "book_name" -> nonEmptyText,
-        "book_author" -> text,
-        "book_isbn" -> text))
+  def makeBookInShelf = Authenticated {
+    Action { implicit request =>
+      val form = Form(
+        tuple(
+          "shelf_id" -> number,
+          "book_name" -> nonEmptyText,
+          "book_author" -> text,
+          "book_isbn" -> text))
 
-    form.bindFromRequest.fold(
-      e => BadRequest(e.errors.head.message),
-      p => {
-        Book.insert(BookRegister(BigInteger.valueOf(p._1), p._2, p._3, p._4)) match {
-          case Left(_) => BadRequest(Json.obj("error" -> "指定された本棚が存在しません"))
-          case Right(result) => Ok(responseToJson(List(Json.obj("id" -> result.longValue))))
-        }
-      })
+      form.bindFromRequest.fold(
+        e => BadRequest(e.errors.head.message),
+        p => {
+          Book.insert(BookRegister(BigInteger.valueOf(p._1), p._2, p._3, p._4)) match {
+            case Left(_) => BadRequest(Json.obj("error" -> "指定された本棚が存在しません"))
+            case Right(result) => OkJsonOneOf(Json.obj("id" -> result.longValue))
+          }
+        })
+    }
   }
 
-  /**
-   * 渡されたJsValueのリストを、返却形式のJsonに変換する
-   */
-  private def responseToJson(ary: List[JsValue]): JsObject = {
-    Json.obj("totalCount" -> ary.length, "result" ->
-      ary.foldLeft(Json.arr())((ary, obj) => ary :+ obj))
-  }
 
   // 指定された場合は指定された件数のみ、指定されない場合は全件取得する
-  def getAllShelf = Action { implicit request =>
-    val form = Form(
-      tuple(
-        "start" -> optional(number),
-        "rows" -> optional(number)))
+  def getAllShelf = Authenticated {
+    Action { implicit request =>
+      val form = Form(
+        tuple(
+          "start" -> optional(number),
+          "rows" -> optional(number)))
 
-    form.bindFromRequest.fold(
-      e => BadRequest(e.errors.head.message),
-      p => {
-        val jsoned = BookShelf.all(p._1, p._2).map(BookShelf.toJson)
-        Ok(responseToJson(jsoned))
-      })
+      form.bindFromRequest.fold(
+        e => BadRequest(e.errors.head.message),
+        p => {
+          val jsoned = BookShelf.all(p._1, p._2).map(BookShelf.toJson)
+          OkJson(jsoned)
+        })
+    }
   }
 
   // 指定された本棚を削除する
-  def deleteBookShelf(id: Long) = Action {
-    val deleted = BookShelf.delete(BigInteger.valueOf(id))
-    if (deleted == 1) {
-      Ok(responseToJson(List()))
-    } else {
-      BadRequest(Json.obj("error" -> "指定された本棚が存在しません"))
+  def deleteBookShelf(id: Long) = Authenticated {
+    Action {
+      val deleted = BookShelf.delete(BigInteger.valueOf(id))
+      if (deleted == 1) {
+        OkJson(List())
+      } else {
+        BadRequest(Json.obj("error" -> "指定された本棚が存在しません"))
+      }
     }
   }
 
   // 指定されたshelfに紐づくbookを取得する
-  def getBooksInShelf = Action { implicit request =>
-    val form = Form(
-      tuple(
-        "shelf" -> number,
-        "start" -> optional(number),
-        "rows" -> optional(number)))
+  def getBooksInShelf = Authenticated {
+    Action { implicit request =>
+      val form = Form(
+        tuple(
+          "shelf" -> number,
+          "start" -> optional(number),
+          "rows" -> optional(number)))
 
-    form.bindFromRequest.fold(
-      e => BadRequest(e.errors.head.message),
-      p => {
-        val books = Book.allInShelf(BigInteger.valueOf(p._1), p._2, p._3).map(Book.toJson)
-        Ok(responseToJson(books))
-      })
+      form.bindFromRequest.fold(
+        e => BadRequest(e.errors.head.message),
+        p => {
+          val books = Book.allInShelf(BigInteger.valueOf(p._1), p._2, p._3).map(Book.toJson)
+          OkJson(books)
+        })
+    }
   }
 
   // 1件だけ取得する
-  def getShelfDetail(id: Long) = Action {
-    (BookShelf.selectById _ << BigInteger.valueOf)(id) match {
-      case None => Ok(responseToJson(List()))
-      case Some(x) => Ok(responseToJson(List(BookShelf.toJson(x))))
+  def getShelfDetail(id: Long) = Authenticated {
+    Action {
+      (BookShelf.selectById _ << BigInteger.valueOf)(id) match {
+        case None => OkJson(List())
+        case Some(x) => OkJsonOneOf(BookShelf.toJson(x))
+      }
     }
   }
 
   // Bookの詳細情報を取得する
-  def getBookDetail(id: Long) = Action {
-    (Book.selectById _ << BigInteger.valueOf)(id) match {
-      case None => Ok(responseToJson(List()))
-      case Some(x) => Ok(responseToJson(List(Book.toJson(x))))
+  def getBookDetail(id: Long) = Authenticated {
+    Action {
+      (Book.selectById _ << BigInteger.valueOf)(id) match {
+        case None => OkJson(List())
+        case Some(x) => OkJsonOneOf(Book.toJson(x))
+      }
     }
   }
 }

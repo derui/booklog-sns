@@ -3,22 +3,22 @@
 # ~~~~
 
 # Home page
-GET     /                    controllers.Application.index
-GET     /shelf               controllers.Application.getAllShelf
-GET     /shelf/*id           controllers.Application.getShelfDetail(id: Long)
-DELETE  /shelf/*id           controllers.Application.deleteBookShelf(id: Long)
-GET     /books               controllers.Application.getBooksInShelf
-GET     /books/*id           controllers.Application.getBookDetail(id: Long)
-POST    /shelf               controllers.Application.makeShelf
-POST    /book                controllers.Application.makeBookInShelf
-POST    /connect             controllers.Application.connect
-GET     /disconnect          controllers.Application.disconnect
+GET     /                    application.Application.index
+GET     /shelf               application.Application.getAllShelf
+GET     /shelf/*id           application.Application.getShelfDetail(id: Long)
+DELETE  /shelf/*id           application.Application.deleteBookShelf(id: Long)
+GET     /books               application.Application.getBooksInShelf
+GET     /books/*id           application.Application.getBookDetail(id: Long)
+POST    /shelf               application.Application.makeShelf
+POST    /book                application.Application.makeBookInShelf
+POST    /connect             application.Application.connect
+GET     /disconnect          application.Application.disconnect
 
 # Get and update rental infomations
-GET     /rental              controllers.Application.getRentalInfos
-GET     /rental/*id          controllers.Application.getRentalDetails
-POST    /rental              controllers.Application.doRental(id :Long)
-PUT     /rental/*id          controllers.APplication.updateRental(id:Long)
+GET     /rental              application.Rental.getRentalInfos
+GET     /rental/*id          application.Rental.getRentalDetails(id: Long)
+POST    /rental              application.Rental.doRental
+PUT     /rental/*id          application.Rental.returnRentalBook(id:Long)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /*file               controllers.Assets.at(path="/public", file)
