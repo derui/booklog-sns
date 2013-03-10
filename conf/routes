@@ -14,5 +14,11 @@ POST    /book                controllers.Application.makeBookInShelf
 POST    /connect             controllers.Application.connect
 GET     /disconnect          controllers.Application.disconnect
 
+# Get and update rental infomations
+GET     /rental              controllers.Application.getRentalInfos
+GET     /rental/*id          controllers.Application.getRentalDetails
+POST    /rental              controllers.Application.doRental(id :Long)
+PUT     /rental/*id          controllers.APplication.updateRental(id:Long)
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /*file               controllers.Assets.at(path="/public", file)

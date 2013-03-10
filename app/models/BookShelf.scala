@@ -55,7 +55,7 @@ object BookShelf {
     DB.withConnection { implicit conn =>
       (start, load) match {
         case (Some(start), Some(load)) =>
-          SQL("select * from book_shelf order by updated_date limit {start}, {count}").
+          SQL("select * from book_shelf order by updated_date desc limit {start}, {count}").
             on("start" -> start, "count" -> load).as(shelf *)
         case (None, Some(load)) =>
           SQL("select * from book_shelf order by updated_date limit {count}").on("count" -> load).as(shelf *)
