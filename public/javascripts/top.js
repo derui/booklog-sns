@@ -40,8 +40,8 @@ function signinCallback(authResult) {
     }
 }
 
-requirejs(['lib/backbone', 'lib/pure', 'common', 'lib/zepto'], function (Backbone) {
-    "use strict";
+requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto'], function (Backbone, Model, View) {
+    'use strict';
 
     window.___gcfg = {
         lang: 'ja',
@@ -55,27 +55,7 @@ requirejs(['lib/backbone', 'lib/pure', 'common', 'lib/zepto'], function (Backbon
     var s = document.getElementsByTagName('script')[0];
     s.parentNode.insertBefore(po, s);
 
-    // TODO モジュール化
-    var BaseModel = Backbone.Model.extend({});
-    var BaseCollection = Backbone.Collection.extend({});
-    var BaseView = Backbone.View.extend({});
-    var BookShelf = BaseModel.extend({
-        urlRoot: '/shelf',
-        validate: function (attrs) {
-            if (!attrs.name) {
-                return '本棚の名称は必須です';
-            }
-        }
-    });
-    var BookShelfList = BaseCollection.extend({
-        url: '/shelf',
-        model: BookShelf,
-        parse: function (json) {
-            return json.result;
-        }
-    });
-
-    var BookShelfInfoListView = BaseView.extend({
+    var BookShelfInfoListView = View.BaseView.extend({
         el: '.bookshelfInfos',
         initialize: function () {
             _.bindAll(this, 'render');
@@ -102,7 +82,8 @@ requirejs(['lib/backbone', 'lib/pure', 'common', 'lib/zepto'], function (Backbon
             });
         }
     });
-    var bookShelfList = new BookShelfList();
+
+    var bookShelfList = new Model.BookShelfList();
     var bookShelfInfoListView = new BookShelfInfoListView({
         collection: bookShelfList
     });
