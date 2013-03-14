@@ -78,7 +78,7 @@ object UserInfo {
                   "created" -> currentDate, "updated" -> currentDate,
                   "cuser" -> user.userGoogleDisplayName,
                   "uuser" -> user.userGoogleDisplayName).executeUpdate()
-      Right(SQL("select last_insert_id() as lastnum from userinfo").apply.head[BigInteger]("lastnum"))
+      Right(SQL("select last_insert_id() as lastnum from %s" format tableName).apply.head[BigInteger]("lastnum"))
     }
   }
 

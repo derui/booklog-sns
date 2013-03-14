@@ -176,7 +176,6 @@ object Connection {
         val reg = "^([0-9]*)(.*).apps.googleusercontent.com$".r
         val issuedTo = reg.findFirstMatchIn(CLIENT_ID)
         val localId = reg.findFirstMatchIn(tokenInfo.getIssuedTo())
-      println(issuedTo.get.group(1).equals(localId.get.group(1)))
 
         (issuedTo, localId) match {
           case (None, _) | (_, None) => Left(ConnectResult.VerificationError("Token's client ID does not match"))
