@@ -1,26 +1,21 @@
 package controllers
 
+import util._
 import models.Book
 import models.BookShelf
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.data.validation.Constraint._
-import play.api.libs.json.JsArray
-import play.api.libs.json.JsObject
-import play.api.libs.json.JsValue
-import play.api.libs.json.Json
-import play.api.libs.json.Json
-import play.api.libs.json.Json.toJsFieldJsValueWrapper
-import play.api.libs.json.Reads
-import play.api.libs.json.Writes
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
 import play.api.mvc._
 import java.math.BigInteger
 import play.api.mvc.Results
 import play.api.mvc.SimpleResult
-import util._
 import models.BookRegister
 import models.BookShelf
 import models.Book
+import models.BookDetail
 import models.UserInfo
 import controllers.Connection._
 
@@ -206,7 +201,21 @@ trait Application extends Controller with JsonResponse with Composable {
     Action {
       (BookShelf.selectById _ << BigInteger.valueOf)(id) match {
         case None => OkJson(List())
-        case Some(x) => OkJsonOneOf(BookShelf.toJson(x))
+        case Some(x) => {
+          // 本棚に関連づいているbookの一覧を取得する。
+          val bookToJson = (x:List[BookDetail]) => x.map {
+            case BookDetail(bid, _, name, author, isbn, l, m, s, _, _, _, _) =>
+              Json.obj("book_id" -> bid.longValue, "book_name" -> name, "book_author" -> author,
+                       "book_isbn" -> isbn, "large_image_url" -> l, "medium_image_url" -> m,
+                       "small_image_url" -> s)
+          }
+          val bookUrls = (bookToJson << (Book.allInShelf(_:BigInteger, None, None)) << BigInteger.valueOf)(id)
+          val transformer = (__ \ "books").json.put(JsonUtil.listToArray(bookUrls))
+          BookShelf.toJson(x).transform(transformer).fold(
+            invalid => BadRequest(Json.obj("error" -> invalid.toString)),
+            valid => OkJsonOneOf(valid)
+          )
+        }
       }
     }
   }
