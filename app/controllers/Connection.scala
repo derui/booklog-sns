@@ -23,7 +23,6 @@ import play.api.mvc.Session
 import com.google.api.client.http.GenericUrl;
 
 object ConnectResult {
-
   case class TokenError(e: Exception) extends ConnectResult
   case class MissingAccessToken(message: String) extends ConnectResult
   case class VerificationError(message: String) extends ConnectResult

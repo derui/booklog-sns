@@ -19,7 +19,9 @@ class BookSpec extends Specification {
   // 基本的なデータの追加・削除をするためのtrait
   trait scope extends Scope with After {
     val shelfId : BigInteger = BookShelf.insert("book shelf", "description")
-    val result: BigInteger = Book.insert(BookRegister(shelfId, "book name", "book author", "book isbn")).right.get
+    val result: BigInteger = Book.insert(
+      BookRegister(shelfId, "book name", "book author", "book isbn",
+                   "large image url", "medium image url", "small image url")).right.get
 
     def after = {
       BookShelf.delete(shelfId)
@@ -30,7 +32,9 @@ class BookSpec extends Specification {
   trait manyData extends Scope with After {
     val shelfId : BigInteger = BookShelf.insert("book shelf", "description")
     val results: List[BigInteger] = (1 to 10).map { e =>
-      Book.insert(BookRegister(shelfId, "book name" + e.toString, "book author" + e.toString, e.toString)).right.get
+      Book.insert(BookRegister(shelfId, "book name" + e.toString, "book author" + e.toString, e.toString,
+                               "large image url", "medium image url", "small image url"
+                             )).right.get
     }.toList
 
     def after = {
@@ -43,7 +47,7 @@ class BookSpec extends Specification {
     "can insert and delete a book information in the book shelf" in {
       running(FakeApplication()) {
         val shelfId = BookShelf.insert("book shelf", "description")
-        val result = Book.insert(BookRegister(shelfId, "book name", "author", "isbn"))
+        val result = Book.insert(BookRegister(shelfId, "book name", "author", "isbn", "", "", ""))
         result must beAnInstanceOf[Either[String, BigInteger]]
         val id = result.right.get
         id must beGreaterThan(BigInteger.valueOf(0L))
@@ -61,6 +65,9 @@ class BookSpec extends Specification {
           s.name must beEqualTo("book name")
           s.author must beEqualTo("book author")
           s.isbn must beEqualTo("book isbn")
+          s.largeImageUrl must be_==("large image url")
+          s.mediumImageUrl must be_==("medium image url")
+          s.smallImageUrl must be_==("small image url")
           val jsoned = Book.toJson(s)
           (jsoned \ "created_date").as[String] must be_==("%tF %<tT" format s.created)
           (jsoned \ "updated_date").as[String] must be_==("%tF %<tT" format s.updated)
@@ -97,5 +104,4 @@ class BookSpec extends Specification {
       }
     }
   }
-
 }
