@@ -53,7 +53,24 @@ trait Rental extends Controller with JsonResponse with Composable {
       form.bindFromRequest.fold(
         e => BadRequest(e.errors.head.message),
         p => {
-          val jsoned = RentalInfo.findAll(p._1, p._2).map(RentalInfo.toJson)
+          val jsoned = RentalInfo.findAll(p._1, p._2).map { rental =>
+            Book.selectById(rental.rentalBookId) match {
+              case None => Json.obj()
+              case Some(book) =>
+                Json.obj("rental_id" -> rental.rentalId.longValue,
+                         "rental_user_id" -> rental.rentalUserId.longValue,
+                         "rental_book_id" -> rental.rentalBookId.longValue,
+                         "rental_now" -> rental.rentalNow,
+                         "created_date" -> rental.created,
+                         "created_user" -> rental.createdUser,
+                         "updated_date" -> rental.updated,
+                         "updated_user" -> rental.updatedUser,
+                         "large_image_url" -> book.largeImageUrl,
+                         "medium_image_url" -> book.mediumImageUrl,
+                         "small_image_url" -> book.smallImageUrl
+                       )
+            }
+          }
           OkJson(jsoned)
         })
     }
