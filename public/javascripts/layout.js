@@ -13,7 +13,7 @@ requirejs(['lib/zepto'], function () {
 
             $.ajax({
                 type: 'POST',
-                url: '/connect',
+                url: '/api/connect',
                 contentType: "application/json",
                 data: JSON.stringify(authResult),
                 success: function (response) {
