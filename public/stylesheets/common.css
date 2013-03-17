@@ -15,6 +15,10 @@ body {
     font-size: 2em;
 }
 
+.container-narrow h1 img {
+    vertical-align: text-top;
+}
+
 .container-narrow .masthead ul.nav {
     margin-bottom: 0;
 }
@@ -42,7 +46,7 @@ body {
 }
 
 h2 {
-    font-size: 2em;
+    font-size: 1.8em;
 }
 
 h1, h2, h3 {

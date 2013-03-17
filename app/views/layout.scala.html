@@ -14,7 +14,7 @@
     <![endif]-->
 
     <!-- Fav and touch icons -->
-    <link rel="shortcut icon" href="@routes.Assets.at("images/favicon.png")">
+    <link rel="shortcut icon" href="@routes.Assets.at("images/favicon.ico")">
 </head>
 
 <body>
@@ -23,7 +23,6 @@
 
     <div class="masthead">
         <ul class="nav nav-pills pull-right">
-<!--            <li class="active"><a href="#">Top</a></li>-->
             <div id="signinArea" class="pull-right">
               <span
                 class="g-signin"
@@ -41,7 +40,7 @@
                 <input type="search" class="search-query" placeholder="本のタイトルを検索する">
             </form>
         </ul>
-        <h1 class="muted"><a href="/">Social BookShelf</a></h1>
+        <h1 class="muted"><a href="/">Social BookShelf <img src="@routes.Assets.at("images/book-12-32.png")" /></a></h1>
     </div>
     <hr>
     @content

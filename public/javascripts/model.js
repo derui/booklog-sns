@@ -61,10 +61,24 @@ define(['lib/backbone'], function () {
         model: Rental
     });
 
+    var Book = BaseModel.extend({
+        path: '/book',
+        validate: function (attrs) {
+            if (!attrs.shelf_id) {
+                return '本棚IDは必須です';
+            }
+
+            if (!attrs.book_name) {
+                return '書籍名は必須です';
+            }
+        }
+    });
+
     return {
         BookShelf: BookShelf,
         BookShelfList: BookShelfList,
         Rental: Rental,
-        RentalList: RentalList
+        RentalList: RentalList,
+        Book: Book
     };
 });

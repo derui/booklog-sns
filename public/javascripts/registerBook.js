@@ -13,18 +13,32 @@ requirejs.config({
         "lib/backbone": {
             deps: ["../lib/zepto", "../lib/underscore"],
             exports: "Backbone"
-        },
-        "lib/bootstrap": {
-            deps: ["../lib/zepto"],
-            exports: "bootstrap"
         }
     }
 });
 
-requirejs(['lib/underscore', 'common', 'lib/zepto', 'lib/bootstrap'], function (Backbone, Model, View) {
+requirejs(['lib/backbone', 'model', 'view', 'common', 'lib/zepto'], function (Backbone, Model, View) {
     'use strict';
 
-    $(function () {
-        $('#myModal').modal({});
+    var RegisterBookFormView = View.BaseView.extend({
+        events: {'submit': 'save'},
+        initialize: function () {
+            _.bindAll(this, 'save');
+        }, save: function () {
+            var arr = this.$el.serializeArray();
+            var data = _(arr).reduce(function (acc, field) {
+                acc[field.name] = field.value;
+                return acc;
+            }, {});
+
+            data['shelf_id'] = _.queryString2json()['shelf_id'];
+
+            this.model.save(data, {success: function (model, response, options) {
+                location.href = '/book/detail/' + response.result[0].id;
+            }});
+            return false;
+        }
     });
+
+    var registerBookFormView = new RegisterBookFormView({el: $('#registerBookForm'), model: new Model.Book()});
 });

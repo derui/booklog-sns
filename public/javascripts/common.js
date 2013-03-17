@@ -1,4 +1,4 @@
-requirejs(['lib/zepto', 'lib/pure'], function () {
+requirejs(['lib/underscore', 'lib/zepto', 'lib/pure'], function () {
     'use strict';
 
     // PUREをZepto.jsで使えるようにするおまじない
@@ -20,8 +20,6 @@ requirejs(['lib/zepto', 'lib/pure'], function () {
         });
     })(Zepto);
 
-    window.jQuery = Zepto;
-
     // Ajax共通処理：Ajax通信前処理
     $(document).on('ajaxBeforeSend', function (e, xhr, options) {
         // CSRF対策
@@ -29,16 +27,26 @@ requirejs(['lib/zepto', 'lib/pure'], function () {
     });
 
     _.mixin({
-        replaceAll : function(target, substr, newSubStr){
-            if(!target){
+        replaceAll: function (target, substr, newSubStr) {
+            if (!target) {
                 return target;
             }
 
-            if(_.isRegExp(substr)){
-                return target.replace(new RegExp(substr.source,'g'), newSubStr);
+            if (_.isRegExp(substr)) {
+                return target.replace(new RegExp(substr.source, 'g'), newSubStr);
             }
 
-            return target.replace(new RegExp(substr,'g'), newSubStr);
+            return target.replace(new RegExp(substr, 'g'), newSubStr);
+        },
+        queryString2json: function () {
+            var queryStrings = location.search.replace('?', '').split('&');
+            var json = {};
+            for (var i = 0, queryString; queryString = queryStrings[i]; ++i) {
+                var queryStringSplits = queryString.split('=');
+                json[queryStringSplits[0]] = queryStringSplits[1];
+            }
+
+            return json;
         }
     });
 });
