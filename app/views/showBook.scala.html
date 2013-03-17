@@ -1,0 +1,22 @@
+@styles = {
+}
+
+@script = {
+    <script src="@routes.Assets.at("javascripts/showBook.js")"></script>
+}
+
+@layout("書籍詳細 - Social BookShelf")(styles)(script) {
+    <ul class="breadcrumb">
+        <li><a href="/">トップ</a> <span class="divider">/</span> <a href="/book_shelf/detail/" id="bookshelfAnchorLink">本棚詳細</a> <span class="divider">/</span> </li>
+        <li class="active">書籍詳細</li>
+    </ul>
+    <div id="bookInfoContents">
+        <h2>書籍詳細</h2>
+        <div class="bookInfo">
+            <img src="" class="book_image" />
+            <h3 class="book_title"></h3>
+            <p class="book_author"></p>
+            <p class="update_date"></p>
+        </div>
+    </div>
+}

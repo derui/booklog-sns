@@ -4,6 +4,21 @@ define(['lib/backbone'], function () {
     var BaseModel = Backbone.Model.extend({
         urlRoot: function () {
             return '/api' + this.path;
+        },
+        parse: function (json) {
+            var result = json.result;
+            // XSS対策
+            var escapedResult = _.map(result, function (element, index) {
+                for (var key in element) {
+                    if (element.hasOwnProperty(key)) {
+                        element[key] = _.escape(element[key]);
+                    }
+                }
+
+                return element;
+            });
+
+            return escapedResult;
         }
     });
 

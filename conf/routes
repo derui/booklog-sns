@@ -3,10 +3,11 @@
 # ~~~~
 
 # Home page and getting views.
-GET     /                    application.Application.index
-GET     /book_shelf/register application.Application.registerBookShelf
+GET     /                        application.Application.index
+GET     /book_shelf/register     application.Application.registerBookShelf
 GET     /book_shelf/detail/*id   application.Application.showBookShelf(id: Long)
 GET     /book/register           application.Application.registerBook
+GET     /book/detail/*id         application.Application.showBook(id: Long)
 
 # API endpoints
 GET     /api/shelf               application.Application.getAllShelf

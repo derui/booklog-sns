@@ -20,6 +20,8 @@ requirejs.config({
 requirejs(['lib/backbone', 'model', 'view', 'common', 'lib/zepto'], function (Backbone, Model, View) {
     'use strict';
 
+    var shelfId = _.queryString2json()['shelf_id'];
+
     var RegisterBookFormView = View.BaseView.extend({
         events: {'submit': 'save'},
         initialize: function () {
@@ -31,7 +33,7 @@ requirejs(['lib/backbone', 'model', 'view', 'common', 'lib/zepto'], function (Ba
                 return acc;
             }, {});
 
-            data['shelf_id'] = _.queryString2json()['shelf_id'];
+            data['shelf_id'] = shelfId;
 
             this.model.save(data, {success: function (model, response, options) {
                 location.href = '/book/detail/' + response.result[0].id;
@@ -41,4 +43,9 @@ requirejs(['lib/backbone', 'model', 'view', 'common', 'lib/zepto'], function (Ba
     });
 
     var registerBookFormView = new RegisterBookFormView({el: $('#registerBookForm'), model: new Model.Book()});
+
+    $(function(){
+        var $bookshelfAnchorLink =  $('#bookshelfAnchorLink');
+        $bookshelfAnchorLink.attr('href', $bookshelfAnchorLink.attr('href') + shelfId);
+    });
 });
