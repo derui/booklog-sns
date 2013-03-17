@@ -22,7 +22,7 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto'], 
 
     // レンタル情報一覧のビュー
     var RentalInfoListView = View.BaseView.extend({
-        el: '.updateInfos',
+        el: '.updateRentalInfos',
         initialize: function () {
             _.bindAll(this, 'render');
             this.collection.bind('reset', this.render);
@@ -68,7 +68,7 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto'], 
 
     // 本棚一覧のビュー
     var BookShelfInfoListView = View.BaseView.extend({
-        el: '.updateInfos',
+        el: '.updateBookShelfInfos',
         initialize: function () {
             _.bindAll(this, 'render');
             this.collection.bind('reset', this.render);
