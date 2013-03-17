@@ -37,18 +37,21 @@ trait Secured extends Security {
       // Hostと自身のホスト名が同一
       request.headers.get(HeaderNames.HOST).forall(request.host == ),
       // X-Fromヘッダが存在する
-      !request.headers.get("X-From").isEmpty,
-      // オリジンがないか、Originとホストが同一かどうかをチェックする
-      request.headers.get(HeaderNames.ORIGIN) match {
-           case None => true
-           case Some(header) => {
-             val origin = new URI(header)
-             val host = new URI(request.uri)
-             origin.getScheme() == host.getScheme() &&
-             origin.getHost() == host.getHost() &&
-             origin.getPort() == host.getPort()
-           }
-         }
-       ).forall(id)
+      request.headers.get("X-From") match {
+        case None => false
+        case Some(xFrom) =>
+          // オリジンがないか、OriginとX-Fromが同一かどうかをチェックする
+          request.headers.get(HeaderNames.ORIGIN) match {
+            case None => true
+            case Some(header) => {
+              val origin = new URI(header)
+              val host = new URI(xFrom)
+              origin.getScheme() == host.getScheme() &&
+              origin.getHost() == host.getHost() &&
+              origin.getPort() == host.getPort()
+            }
+          }
+      }
+    ).forall(id)
   }
 }
