@@ -20,8 +20,55 @@ requirejs.config({
 requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto'], function (Backbone, Model, View) {
     'use strict';
 
+    // レンタル情報一覧のビュー
+    var RentalInfoListView = View.BaseView.extend({
+        el: '.updateInfos',
+        initialize: function () {
+            _.bindAll(this, 'render');
+            this.collection.bind('reset', this.render);
+        },
+        render: function () {
+            var models = this.collection.models;
+            this.$el.render({
+                "rentalInfos": models
+            }, {
+                '.rentalInfo': {
+                    'rentalInfo<-rentalInfos': {
+                        '.book_image@src': function (arg) {
+                            return arg.rentalInfo.item.attributes.book_image_medium || '';
+                        },
+                        '.book_image@data-src': function (arg) {
+                            if(!arg.rentalInfo.item.attributes.book_image_medium){
+                                return 'holder.js/300x200';
+                            } else {
+                                return '';
+                            }
+                        },
+                        '.book_title': function (arg) {
+                            return '<a href="/book/detail/' + arg.rentalInfo.item.attributes.book_id + '">' + arg.rentalInfo.item.attributes.book_name + '</a>';
+                        },
+                        '.rental_user': function (arg) {
+                            return arg.rentalInfo.item.attributes.rental_user;
+                        },
+                        '.update_date': function (arg) {
+                            return arg.rentalInfo.item.attributes.updated_date;
+                        }
+                    }
+                }
+            });
+        }
+    });
+
+    var rentalList = new Model.RentalList();
+    var rentalInfoListView = new RentalInfoListView({
+        collection: rentalList
+    });
+
+    rentalList.fetch({data: $.param({start: 0, rows: 5})});
+
+    // 本棚一覧のビュー
     var BookShelfInfoListView = View.BaseView.extend({
-        el: '.bookshelfInfos',
+        el: '.updateInfos',
         initialize: function () {
             _.bindAll(this, 'render');
             this.collection.bind('reset', this.render);
@@ -34,7 +81,7 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto'], 
                 '.bookshelfInfo': {
                     'bookshelfInfo<-shelfs': {
                         '.name': function (arg) {
-                            return '<a href="#">' + arg.bookshelfInfo.item.attributes.shelf_name + '</a>';
+                            return '<a href="/book_shelf/detail/' + arg.bookshelfInfo.item.attributes.shelf_id + '">' + arg.bookshelfInfo.item.attributes.shelf_name + '</a>';
                         },
                         '.description': function (arg) {
                             return _(arg.bookshelfInfo.item.attributes.shelf_description).replaceAll('\n', '<br />');

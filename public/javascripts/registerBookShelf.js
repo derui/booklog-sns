@@ -31,8 +31,8 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto'], 
                 return acc;
             }, {});
 
-            this.model.save(data, {success:function(){
-                location.href = '/book_shelf/detail';
+            this.model.save(data, {success:function(model, response, options){
+                location.href = '/book_shelf/detail/' + response.result[0].id;
             }});
             return false;
         }

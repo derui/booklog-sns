@@ -39,8 +39,25 @@ define(['lib/backbone'], function () {
         model: BookShelf
     });
 
+
+    var Rental = BaseModel.extend({
+        urlRoot: '/rental',
+        validate: function (attrs) {
+            if (!attrs.rental_book) {
+                return '書籍のIDは必須です';
+            }
+        }
+    });
+
+    var RentalList = BaseCollection.extend({
+        url: '/rental',
+        model: Rental
+    });
+
     return {
         BookShelf: BookShelf,
-        BookShelfList: BookShelfList
+        BookShelfList: BookShelfList,
+        Rental: Rental,
+        RentalList: RentalList
     };
 });

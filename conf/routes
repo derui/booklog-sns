@@ -3,18 +3,18 @@
 # ~~~~
 
 # Home page
-GET     /                    application.Application.index
-GET     /shelf               application.Application.getAllShelf
-GET     /shelf/*id           application.Application.getShelfDetail(id: Long)
-DELETE  /shelf/*id           application.Application.deleteBookShelf(id: Long)
-GET     /books               application.Application.getBooksInShelf
-GET     /books/*id           application.Application.getBookDetail(id: Long)
-POST    /shelf               application.Application.makeShelf
-POST    /book                application.Application.makeBookInShelf
-POST    /connect             application.Application.connect
-GET     /disconnect          application.Application.disconnect
-GET     /book_shelf/register application.Application.registerBookShelf
-GET     /book_shelf/detail   application.Application.showBookShelf
+GET     /                        application.Application.index
+GET     /shelf                   application.Application.getAllShelf
+GET     /shelf/*id               application.Application.getShelfDetail(id: Long)
+DELETE  /shelf/*id               application.Application.deleteBookShelf(id: Long)
+GET     /books                   application.Application.getBooksInShelf
+GET     /books/*id               application.Application.getBookDetail(id: Long)
+POST    /shelf                   application.Application.makeShelf
+POST    /book                    application.Application.makeBookInShelf
+POST    /connect                 application.Application.connect
+GET     /disconnect              application.Application.disconnect
+GET     /book_shelf/register     application.Application.registerBookShelf
+GET     /book_shelf/detail/*id   application.Application.showBookShelf(id: Long)
 
 # Get and update rental infomations
 GET     /rental              application.Rental.getRentalInfos

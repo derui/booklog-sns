@@ -34,7 +34,7 @@ trait Application extends Controller with JsonResponse with Composable {
     Ok(views.html.registerBookShelf())
   }
 
-  def showBookShelf = Action {
+  def showBookShelf(id: Long) = Action {
     Ok(views.html.showBookShelf())
   }
 
