@@ -12,26 +12,34 @@ import java.math.BigInteger
 
 // Bookテーブルの情報を表すcase class
 case class BookDetail(bookId: BigInteger, shelfId: BigInteger, name: String, author: String,
-                      isbn: String, created: Date, cuser: String, updated: Date, uuser: String)
+                      isbn: String, largeImageUrl : String, mediumImageUrl: String,
+                      smallImageUrl :String, created: Date, cuser: String,
+                      updated: Date, uuser: String)
 
 // Bookを作成する際に必要な情報を表すcase class
-case class BookRegister(shelfId: BigInteger, name: String, author: String, isbn: String)
+case class BookRegister(shelfId: BigInteger, name: String, author: String, isbn: String,
+                        largeImageUrl :String, mediumImageUrl : String,
+                        smallImageUrl:String)
 
 // それぞれの本に対する操作を提供する
 object Book {
 
   val book = {
     get[BigInteger]("book_id") ~
-      get[BigInteger]("shelf_id") ~
-      get[String]("book_name") ~
-      get[String]("book_author") ~
-      get[String]("book_isbn") ~
-      get[Date]("created_date") ~
-      get[String]("created_user") ~
-      get[Date]("updated_date") ~
-      get[String]("updated_user") map {
-        case id ~ shelf_id ~ name ~ author ~ isbn ~ created ~ cuser ~ updated ~ uuser =>
-          BookDetail(id, shelf_id, name, author, isbn, created, cuser, updated, uuser)
+    get[BigInteger]("shelf_id") ~
+    get[String]("book_name") ~
+    get[String]("book_author") ~
+    get[String]("book_isbn") ~
+    get[String]("large_image_url") ~
+    get[String]("medium_image_url") ~
+    get[String]("small_image_url") ~
+    get[Date]("created_date") ~
+    get[String]("created_user") ~
+    get[Date]("updated_date") ~
+    get[String]("updated_user") map {
+        case id ~ shelf_id ~ name ~ author ~ isbn ~ large ~ medium ~ small ~
+      created ~ cuser ~ updated ~ uuser =>
+          BookDetail(id, shelf_id, name, author, isbn, large, medium, small, created, cuser, updated, uuser)
       }
   }
 
@@ -43,11 +51,16 @@ object Book {
         case None => Left("Shelf not found")
         case Some(_) =>
           SQL("""
-          insert into book (shelf_id, book_name, book_author, book_isbn, created_date, created_user, updated_date, updated_user)
-          values ({id}, {name}, {author}, {isbn}, {created}, {cuser}, {updated}, {uuser})
+          insert into book (shelf_id, book_name, book_author, book_isbn,
+              large_image_url, medium_image_url, small_image_url,
+              created_date, created_user, updated_date, updated_user)
+          values ({id}, {name}, {author}, {isbn}, {large}, {medium}, {small},
+              {created}, {cuser}, {updated}, {uuser})
           """).on("id" -> book.shelfId, "name" -> book.name, "author" -> book.author, "isbn" -> book.isbn,
-            "created" -> currentDate, "updated" -> currentDate, "cuser" -> "TODO",
-            "uuser" -> "TODO").executeUpdate()
+                  "large" -> book.largeImageUrl, "medium" -> book.mediumImageUrl,
+                  "small" -> book.smallImageUrl,
+                  "created" -> currentDate, "updated" -> currentDate, "cuser" -> "TODO",
+                  "uuser" -> "TODO").executeUpdate()
           Right(SQL("select last_insert_id() as lastnum from book").apply.head[BigInteger]("lastnum"))
       }
     }
@@ -103,6 +116,9 @@ object Book {
       (__ \ "book_name").write[String] and
       (__ \ "book_author").write[String] and
       (__ \ "book_isbn").write[String] and
+      (__ \ "large_image_url").write[String] and
+      (__ \ "medium_image_url").write[String] and
+      (__ \ "small_image_url").write[String] and
       (__ \ "created_date").format[Date] and
       (__ \ "created_user").write[String] and
       (__ \ "updated_date").write[Date] and

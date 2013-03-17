@@ -4,6 +4,7 @@ import models.Book
 import models.BookShelf
 import play.api.data.Form
 import play.api.data.Forms._
+import play.api.data.validation.Constraint._
 import play.api.libs.json.JsArray
 import play.api.libs.json.JsObject
 import play.api.libs.json.JsValue
@@ -138,12 +139,17 @@ trait Application extends Controller with JsonResponse with Composable {
           "shelf_id" -> number,
           "book_name" -> nonEmptyText,
           "book_author" -> text,
-          "book_isbn" -> text))
+          "book_isbn" -> text,
+          "large_image_url" -> text,
+          "medium_image_url" -> text,
+          "small_image_url" -> text
+        ))
 
       form.bindFromRequest.fold(
         e => BadRequest(e.errors.head.message),
         p => {
-          Book.insert(BookRegister(BigInteger.valueOf(p._1), p._2, p._3, p._4)) match {
+          Book.insert(BookRegister(BigInteger.valueOf(p._1), p._2, p._3, p._4,
+                                   p._5, p._6, p._7)) match {
             case Left(_) => BadRequest(Json.obj("error" -> "指定された本棚が存在しません"))
             case Right(result) => OkJsonOneOf(Json.obj("id" -> result.longValue))
           }
@@ -213,7 +219,7 @@ trait Application extends Controller with JsonResponse with Composable {
   def getBookDetail(id: Long) = Authenticated {
     Action {
       (Book.selectById _ << BigInteger.valueOf)(id) match {
-        case None => OkJson(List())
+        case None => BadRequest(Json.obj("error" -> "指定された本が存在しません"))
         case Some(x) => OkJsonOneOf(Book.toJson(x))
       }
     }
