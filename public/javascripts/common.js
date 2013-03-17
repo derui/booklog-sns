@@ -20,6 +20,8 @@ requirejs(['lib/zepto', 'lib/pure'], function () {
         });
     })(Zepto);
 
+    window.jQuery = Zepto;
+
     // Ajax共通処理：Ajax通信前処理
     $(document).on('ajaxBeforeSend', function (e, xhr, options) {
         // CSRF対策

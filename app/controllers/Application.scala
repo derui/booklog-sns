@@ -38,6 +38,10 @@ trait Application extends Controller with JsonResponse with Composable {
     Ok(views.html.showBookShelf())
   }
 
+  def registerBook = Action {
+    Ok(views.html.registerBook())
+  }
+
   // JavaScript側から、oauth2で認証されたトークンを受け取って、二段階目の認証を行う。
   // 認証結果として正常であれば、以下のフォーマットと一致するjsonをレスポンスとして返す。
   // すでに認証されている場合には、認証されているユーザーを取得して返す。

@@ -15,6 +15,7 @@ POST    /connect                 application.Application.connect
 GET     /disconnect              application.Application.disconnect
 GET     /book_shelf/register     application.Application.registerBookShelf
 GET     /book_shelf/detail/*id   application.Application.showBookShelf(id: Long)
+GET     /book/register           application.Application.registerBook
 
 # Get and update rental infomations
 GET     /rental              application.Rental.getRentalInfos
