@@ -19,6 +19,17 @@ POST    /api/book                application.Application.makeBookInShelf
 POST    /api/connect             application.Application.connect
 GET     /api/disconnect          application.Application.disconnect
 
+# API endpoints
+GET     /api/shelf               application.Application.getAllShelf
+GET     /api/shelf/*id           application.Application.getShelfDetail(id: Long)
+DELETE  /api/shelf/*id           application.Application.deleteBookShelf(id: Long)
+GET     /api/book                application.Application.getBooksInShelf
+GET     /api/book/*id            application.Application.getBookDetail(id: Long)
+POST    /api/shelf               application.Application.makeShelf
+POST    /api/book                application.Application.makeBookInShelf
+POST    /api/connect             application.Application.connect
+GET     /api/disconnect          application.Application.disconnect
+
 # Get and update rental infomations
 GET     /api/rental              application.Rental.getRentalInfos
 GET     /api/rental/*id          application.Rental.getRentalDetails(id: Long)
