@@ -2,26 +2,28 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-# Home page
+# Home page and getting views.
 GET     /                    application.Application.index
-GET     /shelf               application.Application.getAllShelf
-GET     /shelf/*id           application.Application.getShelfDetail(id: Long)
-DELETE  /shelf/*id           application.Application.deleteBookShelf(id: Long)
-GET     /book                application.Application.getBooksInShelf
-GET     /book/*id            application.Application.getBookDetail(id: Long)
-POST    /shelf               application.Application.makeShelf
-POST    /book                application.Application.makeBookInShelf
-POST    /connect             application.Application.connect
-GET     /disconnect          application.Application.disconnect
 GET     /book_shelf/register application.Application.registerBookShelf
 GET     /book_shelf/detail/*id   application.Application.showBookShelf(id: Long)
 GET     /book/register           application.Application.registerBook
 
+# API endpoints
+GET     /api/shelf               application.Application.getAllShelf
+GET     /api/shelf/*id           application.Application.getShelfDetail(id: Long)
+DELETE  /api/shelf/*id           application.Application.deleteBookShelf(id: Long)
+GET     /api/book                application.Application.getBooksInShelf
+GET     /api/book/*id            application.Application.getBookDetail(id: Long)
+POST    /api/shelf               application.Application.makeShelf
+POST    /api/book                application.Application.makeBookInShelf
+POST    /api/connect             application.Application.connect
+GET     /api/disconnect          application.Application.disconnect
+
 # Get and update rental infomations
-GET     /rental              application.Rental.getRentalInfos
-GET     /rental/*id          application.Rental.getRentalDetails(id: Long)
-POST    /rental              application.Rental.doRental
-PUT     /rental/*id          application.Rental.returnRentalBook(id:Long)
+GET     /api/rental              application.Rental.getRentalInfos
+GET     /api/rental/*id          application.Rental.getRentalDetails(id: Long)
+POST    /api/rental              application.Rental.doRental
+PUT     /api/rental/*id          application.Rental.returnRentalBook(id:Long)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /*file               controllers.Assets.at(path="/public", file)
