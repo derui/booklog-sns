@@ -80,6 +80,13 @@ object Connection {
       }
   }
 
+  // セッションから、ユーザーのセッション情報のみを削除する。
+  def disconnectWithoutUserInfo(session : Session): Result[Session] = {
+    checkAuthorization(session).right.flatMap { userid =>
+      Right(session - SESSION_KEY)
+    }
+  }
+
   // 現在セッションに保存されている認証情報と、
   // ユーザーに関連づく各種情報を削除する
   def disconnect(session : Session) : Result[Session] = {

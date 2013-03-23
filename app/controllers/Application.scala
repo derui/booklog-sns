@@ -78,12 +78,26 @@ trait Application extends Controller with JsonResponse with Composable {
     }
   }
 
+  // ユーザーをログアウトする。Google+の認証だけを切断し、次回のログイン時には
+  // 権限の認証は不要とするような状態にする。
+  def logout = Authenticated {
+    Action { implicit request =>
+      Connection.disconnectWithoutUserInfo(session) match {
+        case Left(e) =>  resultToResponse(e)
+        case Right(session) =>
+          Ok("logout complete").withSession {session}
+      }
+    }
+  }
+
   // ユーザーをアプリケーションから切り離す。
-  def disconnect = Action { implicit request =>
-    Connection.disconnect(session) match {
-      case Left(e) => resultToResponse(e)
-      case Right(session) =>
-        Ok("disconnect complete").withSession{ session}
+  def disconnect = Authenticated {
+    Action { implicit request =>
+      Connection.disconnect(session) match {
+        case Left(e) => resultToResponse(e)
+        case Right(session) =>
+          Ok("disconnect complete").withSession{ session}
+      }
     }
   }
 
@@ -246,8 +260,8 @@ trait Application extends Controller with JsonResponse with Composable {
   def updateUserInfo = Authenticated {
     Action { implicit request =>
       val form = Form(
-          "user_display_name" -> text
-        )
+        "user_display_name" -> text
+      )
 
       form.bindFromRequest.fold(
         e => BadRequest(e.errors.head.message),
@@ -284,4 +298,3 @@ trait Application extends Controller with JsonResponse with Composable {
     }
   }
 }
-

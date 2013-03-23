@@ -19,6 +19,7 @@ POST    /api/shelf               application.Application.makeShelf
 POST    /api/book                application.Application.makeBookInShelf
 POST    /api/connect             application.Application.connect
 GET     /api/disconnect          application.Application.disconnect
+POST    /api/logout              application.Application.logout
 GET     /api/user_info          application.Application.getLoginUserInfo
 PUT     /api/user_info          application.Application.updateUserInfo
 
