@@ -87,7 +87,7 @@ trait Rental extends Controller with JsonResponse with Composable {
       form.bindFromRequest.fold(
         e => BadRequest(Json.obj("error" -> e.errors.head.message)),
         p => {
-          RentalInfo.insert(Util.userIdInSession(request),
+          RentalInfo.insert(getAuthUserId,
                             BigInteger.valueOf(p)) match {
             case Left(e) => BadRequest(Json.obj("error" -> e))
             case Right(id) =>

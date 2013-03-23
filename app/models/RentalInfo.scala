@@ -25,14 +25,16 @@ object RentalInfo {
   val rentalInfo = {
     get[BigInteger]("rental_id") ~
     get[BigInteger]("rental_user_id") ~
-    get[BigInteger]("rental_book_id_") ~
-    get[Boolean]("rental_now") ~
+    get[BigInteger]("rental_book_id") ~
+    get[String]("rental_now") ~
     get[Date]("created_date") ~
     get[String]("created_user") ~
     get[Date]("updated_date") ~
     get[String]("updated_user") map {
-      case id ~ user ~ book ~ flag ~ created ~ cuser ~ updated ~ uuser =>
-        RentalInfo(id, user, book, flag, created, cuser, updated, uuser)
+      case id ~ user ~ book ~ "1" ~ created ~ cuser ~ updated ~ uuser =>
+        RentalInfo(id, user, book, true, created, cuser, updated, uuser)
+        case id ~ user ~ book ~ "0" ~ created ~ cuser ~ updated ~ uuser =>
+        RentalInfo(id, user, book, false, created, cuser, updated, uuser)
     }
   }
 
@@ -47,16 +49,16 @@ object RentalInfo {
 
     (userInfo, bookInfo) match {
       case (None, _) | (_, None) => Left("Given user and book are not relation.")
-      case (user, book) =>
+      case (Some(_), Some(_)) =>
         DB.withConnection { implicit connection =>
-          SQL("""
+         SQL("""
               insert into %s (rental_user_id, rental_book_id, rental_now, created_date, created_user,
               updated_date, updated_user)
               values ({user}, {book}, {flag}, {created}, {cuser}, {updated}, {uuser})
               """ format tableName).on("user" -> user, "book" -> book,
                                        "flag" -> "1",
                                        "created" -> currentDate, "updated" -> currentDate,
-                                       "cuser" -> "", "uuser" -> "TODO").executeUpdate
+                                       "cuser" -> user.toString, "uuser" -> user.toString).executeUpdate
           Right(SQL("select last_insert_id() as lastnum from %s" format tableName).apply
           .head[BigInteger]("lastnum"))
         }

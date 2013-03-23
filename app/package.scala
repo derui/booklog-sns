@@ -9,5 +9,9 @@ package object application {
     new controllers.Application with Secured
   }
 
-  val Rental = new controllers.Rental with Secured
+  val Rental = if (isTest) {
+    new controllers.Rental with NonSecured
+  } else {
+    new controllers.Rental with Secured
+  }
 }
