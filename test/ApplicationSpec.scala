@@ -2,7 +2,10 @@ package test
 
 import java.text.SimpleDateFormat
 import java.util.Date
+import models.UserInfo
 import org.specs2.mutable._
+import play.api.db._
+import anorm._
 import play.api.test._
 import play.api.test.Helpers._
 import models.Book
@@ -137,9 +140,74 @@ class ApplicationSpec extends Specification {
       val deleted = route(FakeRequest(DELETE, "/api/shelf/" + shelf_id))
       deleted must beSome
       status(deleted.get) must beEqualTo(OK)
-      (Json.parse(contentAsString(deleted.get)) \ "totalCount").as[Long] must be_==(0L)
+        (Json.parse(contentAsString(deleted.get)) \ "totalCount").as[Long] must be_==(0L)
+    }
+
+    "update user infomation" in new WithApplication {
+      DB.withConnection {implicit conn =>
+        SQL(
+          """
+          insert into UserInfo values (0, '', '', '', '', '', '', '', 0, 0, '2012-01-01 00:00:00', '',
+          '2012-01-01 00:00:00', '')
+          """).executeUpdate
+        val id = SQL("select last_insert_id() as lastnum from UserInfo").apply.head[BigInteger]("lastnum")
+        SQL(
+          """
+          update UserInfo set user_id = 0 where user_id = {id}
+          """).on('id -> id).executeUpdate
+      }
+
+      val userinfo: Map[String, Seq[String]] = Map("user_display_name" -> Seq("name"))
+      val result = route(FakeRequest(PUT, "/api/user_info").withHeaders(
+        CONTENT_TYPE -> "application/x-www-form-urlencode"), userinfo)
+
+      result must beSome
+      status(result.get) must beEqualTo(OK)
+
+      val user = UserInfo.selectById(BigInteger.valueOf(0L))
+      user must beSome
+      user.get.userDisplayName must be_==("name")
+
+      DB.withConnection {implicit conn =>
+        SQL("""delete from UserInfo""").executeUpdate
+      }
+    }
+
+    "get user infomation" in new WithApplication {
+      DB.withConnection {implicit conn =>
+        SQL(
+          """
+          insert into UserInfo values (0, 'name', 'gid', 'guser', 'gurl', 'gphoto', 'token', 'refresh', 0, 0, '2012-01-01 00:00:00', '',
+          '2012-01-01 00:00:00', '')
+          """).executeUpdate
+        val id = SQL("select last_insert_id() as lastnum from UserInfo").apply.head[BigInteger]("lastnum")
+        SQL(
+          """
+          update UserInfo set user_id = 0 where user_id = {id}
+          """).on('id -> id).executeUpdate
+      }
+
+      val result = route(FakeRequest(GET, "/api/user_info").withHeaders(
+        CONTENT_TYPE -> "application/x-www-form-urlencode"))
+
+      result must beSome
+      status(result.get) must beEqualTo(OK)
+
+      val node = Json.parse(contentAsString(result.get))
+        (node \ "totalCount").as[Long] must be_==(1L)
+        ((node \ "result")(0) \ "user_id").as[Long] must be_==(0L)
+        ((node \ "result")(0) \ "user_display_name").as[String] must be_==("name")
+        ((node \ "result")(0) \ "google_user_id").as[String] must be_==("gid")
+        ((node \ "result")(0) \ "google_display_name").as[String] must be_==("guser")
+        ((node \ "result")(0) \ "google_public_profile_url").as[String] must be_==("gurl")
+        ((node \ "result")(0) \ "google_public_profile_photo_url").as[String] must be_==("gphoto")
+        ((node \ "result")(0) \ "google_access_token").as[String] must be_==("token")
+        ((node \ "result")(0) \ "google_refresh_token").as[String] must be_==("refresh")
+
+      DB.withConnection {implicit conn =>
+        SQL("""delete from UserInfo""").executeUpdate
+      }
     }
 
   }
-
 }

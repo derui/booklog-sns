@@ -138,9 +138,9 @@ object Connection {
       case None => registUser(userid, credential)
       case Some(user) =>
         user match {
-          case UserInfo(id, gid, name, url, photo, _, refresh, eAt, eIn, created, cuser, updated, uuser) =>
+          case UserInfo(id, uname, gid, name, url, photo, _, refresh, eAt, eIn, created, cuser, updated, uuser) =>
             val update = UserInfo(
-              id, gid, name, url, photo, credential.getAccessToken,
+              id, uname, gid, name, url, photo, credential.getAccessToken,
               Option(credential.getRefreshToken).getOrElse(refresh),
               credential.getExpirationTimeMilliseconds,
               credential.getExpiresInSeconds,

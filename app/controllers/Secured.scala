@@ -11,6 +11,8 @@ import controllers.Connection._
 
 // 認証処理を挟みたい場合に、こBのtraitをActionにwithしてやる。
 trait Secured extends Security {
+  private var userId = BigInteger.valueOf(0L)
+
   override def Authenticated[A](action : Action[A]) : Action[A] = Action(action.parser) { request =>
 
     // CSRF対策も行う。
@@ -20,12 +22,17 @@ trait Secured extends Security {
           case ConnectResult.UserNotAuthorizedError(message) => Results.Unauthorized(message)
           case _ => Results.Unauthorized("Given error, but not authrozed error")
         }
-        case Right(_) => action(request)
+        case Right(id) => {
+          userId = id
+          action(request)
+        }
       }
     } else {
       Results.BadRequest("Bad Request that maybe given CSRF")
     }
   }
+
+  override def getAuthUserId: BigInteger = userId
 
   // 単純な恒等関数
   def id[A](x:A) = x

@@ -1,5 +1,6 @@
 package controllers
 
+import java.util.Calendar
 import util._
 import models.Book
 import models.BookShelf
@@ -158,7 +159,6 @@ trait Application extends Controller with JsonResponse with Composable {
     }
   }
 
-
   // 指定された場合は指定された件数のみ、指定されない場合は全件取得する
   def getAllShelf = Authenticated {
     Action { implicit request =>
@@ -241,4 +241,41 @@ trait Application extends Controller with JsonResponse with Composable {
       }
     }
   }
+
+  // ログインユーザーの情報を更新する。
+  def updateUserInfo = Authenticated {
+    Action { implicit request =>
+      val form = Form(
+          "user_display_name" -> text
+        )
+
+      form.bindFromRequest.fold(
+        e => BadRequest(e.errors.head.message),
+        p => {
+          UserInfo.selectById(getAuthUserId) match {
+            case None => BadRequest(Json.obj("error" -> "ログインされていません"))
+            case Some(res) => res match {
+              case UserInfo(id, _, gid, gname, gurl, gphoto, access, refresh, at, in,
+                created, cuser, udate, _) =>
+                UserInfo.update(
+                  UserInfo(id, p, gid, gname, gurl, gphoto, access, refresh, at, in,
+                    created, cuser, udate, ""))
+                OkJson(List())
+            }
+          }
+        })
+
+    }
+  }
+
+  // ログインユーザーの情報を取得する。
+  def getLoginUserInfo = Authenticated {
+    Action {
+      UserInfo.selectById(getAuthUserId) match {
+        case None => BadRequest(Json.obj("error" -> "ユーザーの情報が見つかりません"))
+        case Some(res) => OkJsonOneOf(UserInfo.toJson(res))
+      }
+    }
+  }
 }
+
