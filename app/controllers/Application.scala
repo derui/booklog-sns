@@ -273,7 +273,13 @@ trait Application extends Controller with JsonResponse with Composable {
     Action {
       UserInfo.selectById(getAuthUserId) match {
         case None => BadRequest(Json.obj("error" -> "ユーザーの情報が見つかりません"))
-        case Some(res) => OkJsonOneOf(UserInfo.toJson(res))
+        case Some(res) => res match {
+          case UserInfo(id, name, gid, gname, url, photo, _, _, _, _, _, _, _, _) =>
+            OkJsonOneOf(Json.obj("user_id" -> id.longValue, "user_display_name" -> name,
+              "google_user_id" -> gid, "google_display_name" -> gname,
+              "google_public_profile_url" -> url,
+              "google_public_profile_photo_url" -> photo))
+        }
       }
     }
   }

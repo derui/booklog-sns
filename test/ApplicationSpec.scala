@@ -201,8 +201,6 @@ class ApplicationSpec extends Specification {
         ((node \ "result")(0) \ "google_display_name").as[String] must be_==("guser")
         ((node \ "result")(0) \ "google_public_profile_url").as[String] must be_==("gurl")
         ((node \ "result")(0) \ "google_public_profile_photo_url").as[String] must be_==("gphoto")
-        ((node \ "result")(0) \ "google_access_token").as[String] must be_==("token")
-        ((node \ "result")(0) \ "google_refresh_token").as[String] must be_==("refresh")
 
       DB.withConnection {implicit conn =>
         SQL("""delete from UserInfo""").executeUpdate
