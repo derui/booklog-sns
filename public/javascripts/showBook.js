@@ -57,4 +57,19 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto', '
         model: book
     });
     book.fetch();
+
+    var RentalBookButtonView = View.BaseView.extend({
+        el: '#rentalBookButton',
+        events: {
+            "click": "rentalBook"
+        },
+        rentalBook : function(){
+            this.model.save();
+        }
+    });
+
+    var rental = new Model.Rental({'rental_book': location.pathname.split('/').pop()});
+    new RentalBookButtonView({
+        model : rental
+    });
 });
