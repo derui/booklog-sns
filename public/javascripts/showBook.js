@@ -27,7 +27,7 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto'], 
             this.model.bind('change', this.render);
         },
         render: function () {
-            var book = this.model.attributes[0];
+            var book = this.model.attributes.result[0];
             var $bookshelfAnchorLink = $('#bookshelfAnchorLink');
             $bookshelfAnchorLink.attr('href', $bookshelfAnchorLink.attr('href') + book['shelf_id']);
             this.$el.render({

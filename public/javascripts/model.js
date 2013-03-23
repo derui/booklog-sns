@@ -18,28 +18,15 @@ define(['lib/backbone'], function () {
                 return element;
             });
 
-            return escapedResult;
+            json.result = escapedResult;
+
+            return json;
         }
     });
 
     var BaseCollection = Backbone.Collection.extend({
         url: function () {
             return '/api' + this.path;
-        },
-        parse: function (json) {
-            var result = json.result;
-            // XSS対策
-            var escapedResult = _.map(result, function (element, index) {
-                for (var key in element) {
-                    if (element.hasOwnProperty(key)) {
-                        element[key] = _.escape(element[key]);
-                    }
-                }
-
-                return element;
-            });
-
-            return escapedResult;
         }
     });
 

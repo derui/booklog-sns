@@ -30,28 +30,28 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto'], 
         render: function () {
             var models = this.collection.models;
             this.$el.render({
-                "rentalInfos": models
+                "rentalInfos": models[0].attributes.result
             }, {
                 '.rentalInfo': {
                     'rentalInfo<-rentalInfos': {
                         '.book_image@src': function (arg) {
-                            return arg.rentalInfo.item.attributes.book_image_medium || '';
+                            return arg.rentalInfo.item.book_image_medium || '';
                         },
                         '.book_image@data-src': function (arg) {
-                            if(!arg.rentalInfo.item.attributes.book_image_medium){
+                            if(!arg.rentalInfo.item.book_image_medium){
                                 return 'holder.js/300x200';
                             } else {
                                 return '';
                             }
                         },
                         '.book_title': function (arg) {
-                            return '<a href="/book/detail/' + arg.rentalInfo.item.attributes.book_id + '">' + arg.rentalInfo.item.attributes.book_name + '</a>';
+                            return '<a href="/book/detail/' + arg.rentalInfo.item.book_id + '">' + arg.rentalInfo.item.book_name + '</a>';
                         },
                         '.rental_user': function (arg) {
-                            return arg.rentalInfo.item.attributes.rental_user;
+                            return arg.rentalInfo.item.rental_user;
                         },
                         '.update_date': function (arg) {
-                            return arg.rentalInfo.item.attributes.updated_date;
+                            return arg.rentalInfo.item.updated_date;
                         }
                     }
                 }
@@ -76,18 +76,18 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto'], 
         render: function () {
             var models = this.collection.models;
             this.$el.render({
-                "shelfs": models
+                "shelfs": models[0].attributes.result
             }, {
                 '.bookshelfInfo': {
                     'bookshelfInfo<-shelfs': {
                         '.name': function (arg) {
-                            return '<a href="/book_shelf/detail/' + arg.bookshelfInfo.item.attributes.shelf_id + '">' + arg.bookshelfInfo.item.attributes.shelf_name + '</a>';
+                            return '<a href="/book_shelf/detail/' + arg.bookshelfInfo.item.shelf_id + '">' + arg.bookshelfInfo.item.shelf_name + '</a>';
                         },
                         '.description': function (arg) {
-                            return _(arg.bookshelfInfo.item.attributes.shelf_description).replaceAll('\n', '<br />');
+                            return _(arg.bookshelfInfo.item.shelf_description).replaceAll('\n', '<br />');
                         },
                         '.update_date': function (arg) {
-                            return arg.bookshelfInfo.item.attributes.updated_date;
+                            return arg.bookshelfInfo.item.updated_date;
                         }
                     }
                 }
