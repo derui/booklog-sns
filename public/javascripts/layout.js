@@ -20,7 +20,7 @@ requirejs(['lib/zepto'], function () {
                     var loginUserInfo = response.result[0];
                     $('#___signin_0').hide();
                     $('#signinArea').prepend('<span id="loginUserInfoArea"><img src="' + loginUserInfo.googlePublicProfilePhotoUrl + '" id="profilePhoto" /><span>' + loginUserInfo.googleDisplayName + '</span></span>');
-                    $('#dissconectButton').removeClass('disabled');
+                    $('#logoutButton').removeClass('disabled');
                 }
             });
         }

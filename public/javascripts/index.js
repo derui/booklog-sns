@@ -38,7 +38,7 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto'], 
                             return arg.rentalInfo.item.book_image_medium || '';
                         },
                         '.book_image@data-src': function (arg) {
-                            if(!arg.rentalInfo.item.book_image_medium){
+                            if (!arg.rentalInfo.item.book_image_medium) {
                                 return 'holder.js/300x200';
                             } else {
                                 return '';
@@ -102,23 +102,29 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto'], 
 
     bookShelfList.fetch({data: $.param({start: 0, rows: 5})});
 
-    $(function () {
-        $('#dissconectButton').on('click', function () {
-            var $this = $(this);
-
-            if ($this.hasClass('disabled')) {
+    // ログアウトボタンのビュー
+    var LogoutButtonView = View.BaseView.extend({
+        el: '#logoutButton',
+        events: {
+            "click": "logout"
+        },
+        logout: function () {
+            var $logoutButton = this.$el;
+            if ($logoutButton.hasClass('disabled')) {
                 return;
             }
 
             $.ajax({
-                type: 'GET',
-                url: '/disconnect',
+                type: 'POST',
+                url: '/api/logout',
                 success: function () {
                     $('#loginUserInfoArea').remove();
                     $('#___signin_0').css('display', 'inline-block').show();
-                    $this.addClass('disabled');
+                    $logoutButton.addClass('disabled');
                 }
             });
-        });
+        }
     });
+
+    new LogoutButtonView();
 });
