@@ -13,11 +13,14 @@ requirejs.config({
         "lib/backbone": {
             deps: ["../lib/zepto", "../lib/underscore"],
             exports: "Backbone"
+        },
+        "lib/moment": {
+            exports: "moment"
         }
     }
 });
 
-requirejs(['lib/backbone', 'model', 'view', 'common', 'lib/zepto'], function (Backbone, Model, View) {
+requirejs(['lib/backbone', 'model', 'view', 'common', 'lib/zepto', 'lib/moment'], function (Backbone, Model, View) {
     'use strict';
 
     var shelfId = _.queryString2json()['shelf_id'];
@@ -34,6 +37,7 @@ requirejs(['lib/backbone', 'model', 'view', 'common', 'lib/zepto'], function (Ba
             }, {});
 
             data['shelf_id'] = shelfId;
+            data['published_date'] = moment(data['published_date']).format('YYYY/MM/DD');
 
             this.model.save(data, {success: function (model, response, options) {
                 location.href = '/book/detail/' + response.result[0].id;
@@ -44,8 +48,8 @@ requirejs(['lib/backbone', 'model', 'view', 'common', 'lib/zepto'], function (Ba
 
     var registerBookFormView = new RegisterBookFormView({el: $('#registerBookForm'), model: new Model.Book()});
 
-    $(function(){
-        var $bookshelfAnchorLink =  $('#bookshelfAnchorLink');
+    $(function () {
+        var $bookshelfAnchorLink = $('#bookshelfAnchorLink');
         $bookshelfAnchorLink.attr('href', $bookshelfAnchorLink.attr('href') + shelfId);
     });
 });

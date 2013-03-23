@@ -13,39 +13,45 @@
     <h2>書籍を登録する</h2>
     <form id="registerBookForm" class="form-horizontal">
         <div class="control-group">
-            <label class="control-label" for="shelfName">書籍名<span class="required">*</span></label>
+            <label class="control-label" for="bookName">書籍名<span class="required">*</span></label>
             <div class="controls">
-                <input type="text" id="shelfName" class="input-xlarge" name="book_name" required maxlength="50" />
+                <input type="text" id="bookName" class="input-xlarge" name="book_name" required maxlength="50" />
             </div>
         </div>
         <div class="control-group">
-            <label class="control-label" for="shelfName">著者名<span class="required">*</span></label>
+            <label class="control-label" for="bookAuthor">著者名<span class="required">*</span></label>
             <div class="controls">
-                <input type="text" id="shelfName" class="input-xlarge" name="book_author" required maxlength="50" />
+                <input type="text" id="bookAuthor" class="input-xlarge" name="book_author" required maxlength="50" />
             </div>
         </div>
         <div class="control-group">
-            <label class="control-label" for="shelfName">書籍の画像（大）</label>
+            <label class="control-label" for="largeImageUrl">書籍の画像（大）</label>
             <div class="controls">
-                <input type="text" id="shelfName" class="input-xlarge" name="large_image_url" maxlength="100" />
+                <input type="text" id="largeImageUrl" class="input-xlarge" name="large_image_url" maxlength="100" />
             </div>
         </div>
         <div class="control-group">
-            <label class="control-label" for="shelfName">書籍の画像（中）</label>
+            <label class="control-label" for="mediumImageUrl">書籍の画像（中）</label>
             <div class="controls">
-                <input type="text" id="shelfName" class="input-xlarge" name="medium_image_url" maxlength="100" />
+                <input type="text" id="mediumImageUrl" class="input-xlarge" name="medium_image_url" maxlength="100" />
             </div>
         </div>
         <div class="control-group">
-            <label class="control-label" for="shelfName">書籍の画像（小）</label>
+            <label class="control-label" for="smallImageUrl">書籍の画像（小）</label>
             <div class="controls">
-                <input type="text" id="shelfName" class="input-xlarge" name="small_image_url" maxlength="100" />
+                <input type="text" id="smallImageUrl" class="input-xlarge" name="small_image_url" maxlength="100" />
             </div>
         </div>
         <div class="control-group">
-            <label class="control-label" for="shelfName">ISBN</label>
+            <label class="control-label" for="bookIsbn">ISBN</label>
             <div class="controls">
-                <input type="text" id="shelfName" class="input-xlarge" name="book_isbn" maxlength="50" />
+                <input type="text" id="bookIsbn" class="input-xlarge" name="book_isbn" maxlength="50" />
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="publishedDate">出版年月日</label>
+            <div class="controls">
+                <input type="date" id="publishedDate" class="input-xlarge" name="published_date" maxlength="10" pattern="^[0-9]{2}[/][0-9]{2}[/][0-9]{2}$" />
             </div>
         </div>
 

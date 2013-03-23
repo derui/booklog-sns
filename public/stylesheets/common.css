@@ -52,3 +52,7 @@ h2 {
 h1, h2, h3 {
     line-height: 1.5;
 }
+
+input[type=date] {
+    display: -webkit-inline-flex;
+}

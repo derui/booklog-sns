@@ -13,11 +13,14 @@ requirejs.config({
         "lib/backbone": {
             deps: ["../lib/zepto", "../lib/underscore"],
             exports: "Backbone"
+        },
+        "lib/moment": {
+            exports: "moment"
         }
     }
 });
 
-requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto'], function (Backbone, Model, View) {
+requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto', 'lib/moment'], function (Backbone, Model, View) {
     'use strict';
 
     var BookView = View.BaseView.extend({
@@ -41,6 +44,9 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto'], 
                 },
                 '.book_author': function (arg) {
                     return arg.context.book.book_author;
+                },
+                '.published_date': function (arg) {
+                    return moment(arg.context.book.published_date).format('YYYY/MM/DD');
                 }
             });
         }
