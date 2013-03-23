@@ -1,5 +1,6 @@
 package test
 
+import java.util.Date
 import org.specs2.mutable._
 import play.api.test._
 import play.api.test.Helpers._
@@ -20,8 +21,8 @@ class BookSpec extends Specification {
   trait scope extends Scope with After {
     val shelfId : BigInteger = BookShelf.insert("book shelf", "description")
     val result: BigInteger = Book.insert(
-      BookRegister(shelfId, "book name", "book author", "book isbn",
-                   "large image url", "medium image url", "small image url")).right.get
+      BookRegister(shelfId, "book name", "book author", "book isbn", new Date(),
+        "large image url", "medium image url", "small image url")).right.get
 
     def after = {
       BookShelf.delete(shelfId)
@@ -33,8 +34,9 @@ class BookSpec extends Specification {
     val shelfId : BigInteger = BookShelf.insert("book shelf", "description")
     val results: List[BigInteger] = (1 to 10).map { e =>
       Book.insert(BookRegister(shelfId, "book name" + e.toString, "book author" + e.toString, e.toString,
-                               "large image url", "medium image url", "small image url"
-                             )).right.get
+        new Date(),
+        "large image url", "medium image url", "small image url"
+      )).right.get
     }.toList
 
     def after = {
@@ -47,7 +49,8 @@ class BookSpec extends Specification {
     "can insert and delete a book information in the book shelf" in {
       running(FakeApplication()) {
         val shelfId = BookShelf.insert("book shelf", "description")
-        val result = Book.insert(BookRegister(shelfId, "book name", "author", "isbn", "", "", ""))
+        val result = Book.insert(BookRegister(shelfId, "book name", "author", "isbn",
+          new Date(), "", "", ""))
         result must beAnInstanceOf[Either[String, BigInteger]]
         val id = result.right.get
         id must beGreaterThan(BigInteger.valueOf(0L))

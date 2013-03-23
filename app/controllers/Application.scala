@@ -46,15 +46,15 @@ trait Application extends Controller with JsonResponse with Composable {
   // 認証結果として正常であれば、以下のフォーマットと一致するjsonをレスポンスとして返す。
   // すでに認証されている場合には、認証されているユーザーを取得して返す。
   /**
-   * {
-   *   "id":0,
-   *   "googleUserId":"",
-   *   "googleDisplayName":"",
-   *   "googlePublicProfileUrl":"",
-   *   "googlePublicProfilePhotoUrl":"",
-   *   "googleExpiresAt":0
-   * }
-   */
+    * {
+    *   "id":0,
+    *   "googleUserId":"",
+    *   "googleDisplayName":"",
+    *   "googlePublicProfileUrl":"",
+    *   "googlePublicProfilePhotoUrl":"",
+    *   "googleExpiresAt":0
+    * }
+    */
   def connect = Action { implicit request =>
     request.body.asJson match {
       case None => BadRequest("Auth request must be json format!")
@@ -104,11 +104,11 @@ trait Application extends Controller with JsonResponse with Composable {
   private def userInfoToToken(userinfo:UserInfo) : List[JsValue] = {
     val json = UserInfo.toJson(userinfo)
     List(Json.obj("id" -> (json \ "user_id").as[Long],
-             "googleUserId" -> (json \ "google_user_id").as[String],
-             "googleDisplayName" -> (json \ "google_display_name").as[String],
-             "googlePublicProfileUrl" -> (json \ "google_public_profile_url").as[String],
-             "googlePublicProfilePhotoUrl" -> (json \ "google_public_profile_photo_url").as[String],
-             "googleExpiresAt" -> (json \ "google_expires_at").as[Long]))
+      "googleUserId" -> (json \ "google_user_id").as[String],
+      "googleDisplayName" -> (json \ "google_display_name").as[String],
+      "googlePublicProfileUrl" -> (json \ "google_public_profile_url").as[String],
+      "googlePublicProfilePhotoUrl" -> (json \ "google_public_profile_photo_url").as[String],
+      "googleExpiresAt" -> (json \ "google_expires_at").as[Long]))
   }
 
   case class Shelf(name: String)
@@ -139,16 +139,18 @@ trait Application extends Controller with JsonResponse with Composable {
           "book_name" -> nonEmptyText,
           "book_author" -> text,
           "book_isbn" -> text,
+          "published_date" -> date("yyyy/MM/dd"),
           "large_image_url" -> text,
           "medium_image_url" -> text,
           "small_image_url" -> text
         ))
 
       form.bindFromRequest.fold(
-        e => BadRequest(e.errors.head.message),
+        e => {println(e.errors)
+          BadRequest(e.errors.head.message)},
         p => {
           Book.insert(BookRegister(BigInteger.valueOf(p._1), p._2, p._3, p._4,
-                                   p._5, p._6, p._7)) match {
+            p._5, p._6, p._7, p._8)) match {
             case Left(_) => BadRequest(Json.obj("error" -> "指定された本棚が存在しません"))
             case Right(result) => OkJsonOneOf(Json.obj("id" -> result.longValue))
           }
@@ -212,13 +214,15 @@ trait Application extends Controller with JsonResponse with Composable {
         case Some(x) => {
           // 本棚に関連づいているbookの一覧を取得する。
           val bookToJson = (x:List[BookDetail]) => x.map {
-            case BookDetail(bid, _, name, author, isbn, l, m, s, _, _, _, _) =>
+            case BookDetail(bid, _, name, author, isbn, publish, l, m, s, _, _, _, _) =>
               Json.obj("book_id" -> bid.longValue, "book_name" -> name, "book_author" -> author,
-                       "book_isbn" -> isbn, "large_image_url" -> l, "medium_image_url" -> m,
-                       "small_image_url" -> s)
+                "book_isbn" -> isbn, "published_date" -> publish,
+                "large_image_url" -> l, "medium_image_url" -> m,
+                "small_image_url" -> s)
           }
           val bookUrls = (bookToJson << (Book.allInShelf(_:BigInteger, None, None)) << BigInteger.valueOf)(id)
-          val transformer = (__ \ "books").json.put(JsonUtil.listToArray(bookUrls))
+          val transformer = (__).json.update(
+            __.read[JsObject].map {o => o ++ Json.obj("books" -> JsonUtil.listToArray(bookUrls))})
           BookShelf.toJson(x).transform(transformer).fold(
             invalid => BadRequest(Json.obj("error" -> invalid.toString)),
             valid => OkJsonOneOf(valid)
