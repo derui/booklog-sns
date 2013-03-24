@@ -32,12 +32,20 @@ requirejs(['lib/backbone', 'model', 'view', 'common', 'lib/zepto', 'lib/moment']
         }, save: function () {
             var arr = this.$el.serializeArray();
             var data = _(arr).reduce(function (acc, field) {
-                acc[field.name] = field.value;
+                var value = field.value;
+
+                if (value) {
+                    acc[field.name] = value;
+                }
+
                 return acc;
             }, {});
 
             data['shelf_id'] = shelfId;
-            data['published_date'] = moment(data['published_date']).format('YYYY/MM/DD');
+
+            if (data['published_date']) {
+                data['published_date'] = moment(data['published_date']).format('YYYY/MM/DD');
+            }
 
             this.model.save(data, {success: function (model, response, options) {
                 location.href = '/book/detail/' + response.result[0].id;
