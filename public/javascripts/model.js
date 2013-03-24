@@ -76,11 +76,17 @@ define(['lib/backbone'], function () {
         }
     });
 
+    var BookList = BaseCollection.extend({
+        path: '/book',
+        model: Book
+    })
+
     return {
         BookShelf: BookShelf,
         BookShelfList: BookShelfList,
         Rental: Rental,
         RentalList: RentalList,
-        Book: Book
+        Book: Book,
+        BookList: BookList
     };
 });

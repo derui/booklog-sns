@@ -29,8 +29,7 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto'], 
         },
         render: function () {
             var bookShelf = this.model.attributes.result[0];
-            var book = this.model.attributes.result[0].books;
-            console.log(book);
+            var book = bookShelf;
             this.$el.render({
                 "bookShelf": bookShelf,
                 "book" : book
@@ -40,14 +39,30 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto'], 
                 },
                 '.shelf_description': function (arg) {
                     return arg.context.bookShelf.shelf_description;
-                },
+                }
+            });
+        }
+    });
+
+    // 書籍一覧のビュー
+    var BookListView = View.BaseView.extend({
+        el: '.bookInfo',
+        initialize: function () {
+            _.bindAll(this, 'render');
+            this.collection.bind('change', this.render);
+        },
+        render: function () {
+            var models = this.collection.models;
+            this.$el.render({
+                "books": models[0].attributes.result
+            }, {
                 '.bookInfo': {
                     'bookInfo<-books': {
                         '.book_title' : function (arg) {
-                            return arg.context.book.book_title;
+                            return arg.bookInfo.item.book_title;
                         },
                         '.book_image@src' : function (arg) {
-                            return arg.context.book.medium_image_url;
+                            return arg.bookInfo.item.medium_image_url;
                         }
                     }
                 }
@@ -55,52 +70,21 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto'], 
         }
     });
 
-//    // 書籍一覧のビュー
-//    var BookView = View.BaseView.extend({
-//        el: '.bookInfo',
-//        initialize: function () {
-//            _.bindAll(this, 'render');
-//            this.model.bind('change', this.render);
-//        },
-//        render: function () {
-//            var book = this.model.attributes.result[0].books;
-//            console.log(book);
-//            var $bookshelfAnchorLink = $('#bookshelfAnchorLink');
-//            $bookshelfAnchorLink.attr('href', $bookshelfAnchorLink.attr('href') + book['shelf_id']);
-//            this.$el.render({
-//                "book": book
-//            }, {
-//                '.book_image@src': function (arg) {
-//                    return arg.context.book.medium_image_url;
-//                },
-//                '.book_title': function (arg) {
-//                    return arg.context.book.book_name;
-//                },
-//                '.book_author': function (arg) {
-//                    return arg.context.book.book_author;
-//                },
-//                '.published_date': function (arg) {
-//                    return moment(arg.context.book.published_date).format('YYYY/MM/DD');
-//                }
-//            });
-//        }
-//    });
-
     var bookShelf = new Model.BookShelf({'id': location.pathname.split('/').pop()});
     var bookShelfView = new BookShelfView({
         model: bookShelf
     });
     bookShelf.fetch();
 
-//    var book = new Model.Book();
-//    var bookView = new BookView({
-//        model: book
-//    });
-
+    var bookList = new Model.BookList();
+    var bookView = new BookListView({
+        collection: bookList
+    });
+    bookList.fetch({data: $.param({'shelf': location.pathname.split('/').pop()})});
 
     $(function () {
         $('#registerBookButton').on('click', function () {
-            location.href = '/bookShelf/register?shelf_id=' + location.pathname.split('/').pop();
+            location.href = '/book/register?shelf_id=' + location.pathname.split('/').pop();
         });
     });
 });
