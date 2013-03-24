@@ -29,8 +29,9 @@ class ApplicationSpec extends Specification {
   // 基本的なデータの追加・削除をするためのtrait
   trait scope extends Scope with After {
     val shelfId: BigInteger = BookShelf.insert("book shelf", "description")
-    val result: BigInteger = Book.insert(BookRegister(shelfId, "book name", "book author", "book isbn",
-      new Date(), "", "", "")).right.get
+    val result: BigInteger = Book.insert(BookRegister(shelfId, "book name",
+      Some("book author"), Some("book isbn"),
+      None,None, None, None)).right.get
 
     def after = {
       BookShelf.delete(shelfId)
@@ -41,8 +42,8 @@ class ApplicationSpec extends Specification {
   trait manyData extends Scope with After {
     val shelfId: BigInteger = BookShelf.insert("book shelf", "description")
     val results: List[BigInteger] = (1 to 10).map { e =>
-      Book.insert(BookRegister(shelfId, "book name" + e.toString, "book author" + e.toString, e.toString,
-        new Date(), "", "", "")).right.get
+      Book.insert(BookRegister(shelfId, "book name" + e.toString, Some("book author" + e.toString),
+        Some(e.toString),None, None, None, None)).right.get
     }.toList
 
     def after = {
@@ -109,11 +110,7 @@ class ApplicationSpec extends Specification {
 
       val book_req : Map[String, Seq[String]]= Map("shelf_id" -> Seq(shelf_id.toString),
         "book_name" -> Seq("book name"),
-        "book_author" -> Seq(""),
-        "book_isbn" -> Seq(""),
         "published_date" -> Seq("2012/02/01"),
-        "medium_image_url" -> Seq(""),
-        "small_image_url" -> Seq(""),
         "large_image_url" -> Seq("large image url"))
       val book_result = route(FakeRequest(POST, "/api/book").withHeaders(
         CONTENT_TYPE -> "application/x-www-form-urlencode"), book_req)
@@ -130,12 +127,12 @@ class ApplicationSpec extends Specification {
         (node \ "totalCount").as[Long] must be_==(1L)
         ((node \ "result")(0) \ "book_id").as[Long] must be_==(book_id)
         ((node \ "result")(0) \ "book_name").as[String] must be_==("book name")
-        ((node \ "result")(0) \ "book_author").as[String] must be_==("")
-        ((node \ "result")(0) \ "book_isbn").as[String] must be_==("")
+        ((node \ "result")(0) \ "book_author").asOpt[String] must beNone
+        ((node \ "result")(0) \ "book_isbn").asOpt[String] must beNone
         ((node \ "result")(0) \ "published_date").as[Date] must be_==("2012/02/01") ^^ ("%tY/%<tm/%<td" format (_:Date))
         ((node \ "result")(0) \ "large_image_url").as[String] must be_==("large image url")
-        ((node \ "result")(0) \ "medium_image_url").as[String] must be_==("")
-        ((node \ "result")(0) \ "small_image_url").as[String] must be_==("")
+        ((node \ "result")(0) \ "medium_image_url").asOpt[String] must beNone
+        ((node \ "result")(0) \ "small_image_url").asOpt[String] must beNone
 
       val deleted = route(FakeRequest(DELETE, "/api/shelf/" + shelf_id))
       deleted must beSome

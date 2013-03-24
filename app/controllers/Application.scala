@@ -152,14 +152,14 @@ trait Application extends Controller with JsonResponse with Composable {
         tuple(
           "shelf_id" -> number,
           "book_name" -> nonEmptyText,
-          "book_author" -> text,
-          "book_isbn" -> text,
-          "published_date" -> date("yyyy/MM/dd"),
-          "large_image_url" -> text,
-          "medium_image_url" -> text,
-          "small_image_url" -> text
+          "book_author" -> optional(text),
+          "book_isbn" -> optional(text),
+          "published_date" -> optional(date("yyyy/MM/dd")),
+          "large_image_url" -> optional(text),
+          "medium_image_url" -> optional(text),
+          "small_image_url" -> optional(text)
         ))
-
+      
       form.bindFromRequest.fold(
         e => {println(e.errors)
           BadRequest(e.errors.head.message)},

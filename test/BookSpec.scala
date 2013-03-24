@@ -21,8 +21,8 @@ class BookSpec extends Specification {
   trait scope extends Scope with After {
     val shelfId : BigInteger = BookShelf.insert("book shelf", "description")
     val result: BigInteger = Book.insert(
-      BookRegister(shelfId, "book name", "book author", "book isbn", new Date(),
-        "large image url", "medium image url", "small image url")).right.get
+      BookRegister(shelfId, "book name", Some("book author"), Some("book isbn"),
+        None, Some("large image url"), Some("medium image url"), Some("small image url"))).right.get
 
     def after = {
       BookShelf.delete(shelfId)
@@ -33,9 +33,8 @@ class BookSpec extends Specification {
   trait manyData extends Scope with After {
     val shelfId : BigInteger = BookShelf.insert("book shelf", "description")
     val results: List[BigInteger] = (1 to 10).map { e =>
-      Book.insert(BookRegister(shelfId, "book name" + e.toString, "book author" + e.toString, e.toString,
-        new Date(),
-        "large image url", "medium image url", "small image url"
+      Book.insert(BookRegister(shelfId, "book name" + e.toString, Some("book author" + e.toString),
+        Some(e.toString), None, Some("large image url"), Some("medium image url"), Some("small image url")
       )).right.get
     }.toList
 
@@ -49,8 +48,9 @@ class BookSpec extends Specification {
     "can insert and delete a book information in the book shelf" in {
       running(FakeApplication()) {
         val shelfId = BookShelf.insert("book shelf", "description")
-        val result = Book.insert(BookRegister(shelfId, "book name", "author", "isbn",
-          new Date(), "", "", ""))
+        val result = Book.insert(BookRegister(shelfId, "book name", Some("author"), Some("isbn"),
+          None, None, None, None))
+
         result must beAnInstanceOf[Either[String, BigInteger]]
         val id = result.right.get
         id must beGreaterThan(BigInteger.valueOf(0L))
@@ -66,11 +66,12 @@ class BookSpec extends Specification {
           shelf must beSome
           val s = shelf.get
           s.name must beEqualTo("book name")
-          s.author must beEqualTo("book author")
-          s.isbn must beEqualTo("book isbn")
-          s.largeImageUrl must be_==("large image url")
-          s.mediumImageUrl must be_==("medium image url")
-          s.smallImageUrl must be_==("small image url")
+          s.author must beEqualTo(Some("book author"))
+          s.isbn must beEqualTo(Some("book isbn"))
+          s.publishedDate must beNone
+          s.largeImageUrl must be_==(Some("large image url"))
+          s.mediumImageUrl must be_==(Some("medium image url"))
+          s.smallImageUrl must be_==(Some("small image url"))
           val jsoned = Book.toJson(s)
           (jsoned \ "created_date").as[String] must be_==("%tF %<tT" format s.created)
           (jsoned \ "updated_date").as[String] must be_==("%tF %<tT" format s.updated)

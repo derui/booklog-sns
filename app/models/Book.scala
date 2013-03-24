@@ -11,16 +11,18 @@ import play.api.libs.functional.syntax._
 import java.math.BigInteger
 
 // Bookテーブルの情報を表すcase class
-case class BookDetail(bookId: BigInteger, shelfId: BigInteger, name: String, author: String,
-  isbn: String, publishedDate: Date,
-  largeImageUrl : String, mediumImageUrl: String,
-  smallImageUrl :String, created: Date, cuser: String,
+case class BookDetail(bookId: BigInteger, shelfId: BigInteger, name: String,
+  author: Option[String],
+  isbn: Option[String], publishedDate: Option[Date],
+  largeImageUrl : Option[String], mediumImageUrl: Option[String],
+  smallImageUrl : Option[String], created: Date, cuser: String,
   updated: Date, uuser: String)
 
 // Bookを作成する際に必要な情報を表すcase class
-case class BookRegister(shelfId: BigInteger, name: String, author: String, isbn: String,
-  publishedDate: Date, largeImageUrl :String, mediumImageUrl : String,
-  smallImageUrl:String)
+case class BookRegister(shelfId: BigInteger, name: String,
+  author: Option[String], isbn: Option[String],
+  publishedDate: Option[Date], largeImageUrl :Option[String],
+  mediumImageUrl : Option[String], smallImageUrl:Option[String])
 
 // それぞれの本に対する操作を提供する
 object Book {
@@ -29,12 +31,12 @@ object Book {
     get[BigInteger]("book_id") ~
     get[BigInteger]("shelf_id") ~
     get[String]("book_name") ~
-    get[String]("book_author") ~
-    get[String]("book_isbn") ~
-    get[Date]("published_date") ~
-    get[String]("large_image_url") ~
-    get[String]("medium_image_url") ~
-    get[String]("small_image_url") ~
+    get[Option[String]]("book_author") ~
+    get[Option[String]]("book_isbn") ~
+    get[Option[Date]]("published_date") ~
+    get[Option[String]]("large_image_url") ~
+    get[Option[String]]("medium_image_url") ~
+    get[Option[String]]("small_image_url") ~
     get[Date]("created_date") ~
     get[String]("created_user") ~
     get[Date]("updated_date") ~
@@ -116,12 +118,12 @@ object Book {
       (__ \ "book_id").write[BigInteger] and
         (__ \ "shelf_id").write[BigInteger] and
         (__ \ "book_name").write[String] and
-        (__ \ "book_author").write[String] and
-        (__ \ "book_isbn").write[String] and
-        (__ \ "published_date").write[Date] and
-        (__ \ "large_image_url").write[String] and
-        (__ \ "medium_image_url").write[String] and
-        (__ \ "small_image_url").write[String] and
+        (__ \ "book_author").write[Option[String]] and
+        (__ \ "book_isbn").write[Option[String]] and
+        (__ \ "published_date").write[Option[Date]] and
+        (__ \ "large_image_url").write[Option[String]] and
+        (__ \ "medium_image_url").write[Option[String]] and
+        (__ \ "small_image_url").write[Option[String]] and
         (__ \ "created_date").format[Date] and
         (__ \ "created_user").write[String] and
         (__ \ "updated_date").write[Date] and
