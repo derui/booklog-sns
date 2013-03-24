@@ -13,8 +13,8 @@ import java.math.BigInteger
 case class RentalInfo(rentalId: BigInteger,
                       rentalUserId: BigInteger, rentalBookId: BigInteger,
                       rentalNow : Boolean,
-                      created: Date, createdUser: String,
-                      updated: Date, updatedUser: String)
+                      created: Date, createdUser: String, createdUserName : String,
+                      updated: Date, updatedUser: String, updatedUserName : String)
 /**
  * 本棚データベースに対する操作をまとめたオブジェクト
  */
@@ -29,12 +29,14 @@ object RentalInfo {
     get[String]("rental_now") ~
     get[Date]("created_date") ~
     get[String]("created_user") ~
+    get[String]("user_display_name") ~
     get[Date]("updated_date") ~
-    get[String]("updated_user") map {
-      case id ~ user ~ book ~ "1" ~ created ~ cuser ~ updated ~ uuser =>
-        RentalInfo(id, user, book, true, created, cuser, updated, uuser)
-        case id ~ user ~ book ~ "0" ~ created ~ cuser ~ updated ~ uuser =>
-        RentalInfo(id, user, book, false, created, cuser, updated, uuser)
+    get[String]("updated_user") ~
+    get[String]("user_display_name") map {
+      case id ~ user ~ book ~ "1" ~ created ~ cuser ~ cusername~updated ~ uuser~uusername =>
+        RentalInfo(id, user, book, true, created, cuser, cusername, updated, uuser, uusername)
+        case id ~ user ~ book ~ "0" ~ created ~ cuser~cusername~updated~uuser~uusername =>
+        RentalInfo(id, user, book, false, created, cuser, cusername, updated, uuser, uusername)
     }
   }
 
@@ -72,18 +74,34 @@ object RentalInfo {
     }
   }
 
+  private val commonSelect = """select
+    r.rental_id,
+    r.rental_user_id,
+    r.rental_book_id,
+    r.rental_now,
+    r.created_date,
+    r.created_user,
+    c.user_display_name,
+    r.updated_date,
+    r.updated_user,
+    u.user_display_name
+  from RentalInfo r join UserInfo c on
+    c.user_id = r.created_user
+  join UserInfo u on
+    u.user_id = r.updated_user
+"""
+
   // 全件取得
   def findAll(start: Option[Int], load: Option[Int]): List[RentalInfo] = {
     DB.withConnection { implicit conn =>
       (start, load) match {
         case (Some(start), Some(load)) =>
-          SQL("select * from %s order by updated_date desc limit {start}, {count}"
-              format tableName
+          SQL(commonSelect + "order by updated_date desc limit {start}, {count}"
             ).on("start" -> start, "count" -> load).as(rentalInfo *)
         case (None, Some(load)) =>
-          SQL("select * from %s order by updated_date limit {count}" format tableName
+          SQL(commonSelect + "order by updated_date limit {count}"
             ).on("count" -> load).as(rentalInfo *)
-        case _ => SQL("select * from %s" format tableName).as(rentalInfo *)
+        case _ => SQL(commonSelect).as(rentalInfo *)
       }
     }
   }
@@ -91,7 +109,7 @@ object RentalInfo {
   // idが一致する一件だけ取得
   def selectById(id: BigInteger): Option[RentalInfo] = {
     DB.withConnection { implicit conn =>
-      val shelfs = SQL("select * from %s where rental_id = {id}" format tableName)
+      val shelfs = SQL(commonSelect + "where rental_id = {id}")
       .on("id" -> id).as(rentalInfo *)
       shelfs match {
         case (s :: _) => Some(s)
@@ -106,13 +124,15 @@ object RentalInfo {
     implicit val dateWriter = Writes[Date] { date => Json.toJson("%tF %<tT" format date)}
     implicit val writer = (
       (__ \ "rental_id").write[BigInteger] and
-      (__ \ "rental_user_id").write[BigInteger] and
-      (__ \ "rental_book_id").write[BigInteger] and
-      (__ \ "rental_now").write[Boolean] and
-      (__ \ "created_date").write[Date] and
-      (__ \ "created_user").write[String] and
-      (__ \ "updated_date").write[Date] and
-      (__ \ "updated_user").write[String])(unlift(RentalInfo.unapply))
+        (__ \ "rental_user_id").write[BigInteger] and
+        (__ \ "rental_book_id").write[BigInteger] and
+        (__ \ "rental_now").write[Boolean] and
+        (__ \ "created_date").write[Date] and
+        (__ \ "created_user").write[String] and
+        (__ \ "created_user_name").write[String] and
+        (__ \ "updated_date").write[Date] and
+        (__ \ "updated_user").write[String] and
+        (__ \ "updated_user_name").write[String])(unlift(RentalInfo.unapply))
     Json.toJson(target)
   }
 }

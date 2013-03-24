@@ -138,7 +138,7 @@ trait Application extends Controller with JsonResponse with Composable {
       form.bindFromRequest.fold(
         e => BadRequest(e.errors.head.message),
         p => {
-          val result = BookShelf.insert(p._1, p._2)
+          val result = BookShelf.insert(p._1, p._2, getAuthUserId)
           OkJsonOneOf(Json.obj("id" -> result.longValue))
         })
     }
@@ -165,7 +165,7 @@ trait Application extends Controller with JsonResponse with Composable {
           BadRequest(e.errors.head.message)},
         p => {
           Book.insert(BookRegister(BigInteger.valueOf(p._1), p._2, p._3, p._4,
-            p._5, p._6, p._7, p._8)) match {
+            p._5, p._6, p._7, p._8), getAuthUserId) match {
             case Left(_) => BadRequest(Json.obj("error" -> "指定された本棚が存在しません"))
             case Right(result) => OkJsonOneOf(Json.obj("id" -> result.longValue))
           }
@@ -220,7 +220,7 @@ trait Application extends Controller with JsonResponse with Composable {
     }
   }
 
-  // 1件だけ取得する
+  // 本棚の情報を1件だけ取得する
   def getShelfDetail(id: Long) = Authenticated {
     Action {
       (BookShelf.selectById _ << BigInteger.valueOf)(id) match {
@@ -228,7 +228,7 @@ trait Application extends Controller with JsonResponse with Composable {
         case Some(x) => {
           // 本棚に関連づいているbookの一覧を取得する。
           val bookToJson = (x:List[BookDetail]) => x.map {
-            case BookDetail(bid, _, name, author, isbn, publish, l, m, s, _, _, _, _) =>
+            case BookDetail(bid, _, name, author, isbn, publish, l, m, s, _, _,_ , _, _, _) =>
               Json.obj("book_id" -> bid.longValue, "book_name" -> name, "book_author" -> author,
                 "book_isbn" -> isbn, "published_date" -> publish,
                 "large_image_url" -> l, "medium_image_url" -> m,

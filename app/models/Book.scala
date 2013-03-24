@@ -16,7 +16,8 @@ case class BookDetail(bookId: BigInteger, shelfId: BigInteger, name: String,
   isbn: Option[String], publishedDate: Option[Date],
   largeImageUrl : Option[String], mediumImageUrl: Option[String],
   smallImageUrl : Option[String], created: Date, cuser: String,
-  updated: Date, uuser: String)
+  cuserName : String,
+  updated: Date, uuser: String, uuserName: String)
 
 // Bookを作成する際に必要な情報を表すcase class
 case class BookRegister(shelfId: BigInteger, name: String,
@@ -39,16 +40,19 @@ object Book {
     get[Option[String]]("small_image_url") ~
     get[Date]("created_date") ~
     get[String]("created_user") ~
+    get[String]("user_display_name") ~
     get[Date]("updated_date") ~
-    get[String]("updated_user") map {
+    get[String]("updated_user") ~
+    get[String]("user_display_name") map {
       case id ~ shelf_id ~ name ~ author ~ isbn ~ publish ~
-          large ~ medium ~ small ~ created ~ cuser ~ updated ~ uuser =>
-        BookDetail(id, shelf_id, name, author, isbn, publish, large, medium, small, created, cuser, updated, uuser)
+          large ~ medium ~ small ~ created ~ cuser ~ cusername ~ updated ~ uuser ~ uusername =>
+        BookDetail(id, shelf_id, name, author, isbn, publish, large, medium, small,
+          created, cuser, cusername, updated, uuser, uusername)
     }
   }
 
   // 一件追加
-  def insert(book: BookRegister): Either[String, BigInteger] = {
+  def insert(book: BookRegister, userId: BigInteger): Either[String, BigInteger] = {
     val currentDate = Calendar.getInstance().getTime();
     DB.withConnection { implicit conn =>
       BookShelf.selectById(book.shelfId) match {
@@ -63,8 +67,8 @@ object Book {
           """).on('id -> book.shelfId, 'name -> book.name, 'author -> book.author, 'isbn -> book.isbn,
             'large -> book.largeImageUrl, 'medium -> book.mediumImageUrl,
             'small -> book.smallImageUrl, 'publish -> book.publishedDate,
-            'created -> currentDate, 'updated -> currentDate, 'cuser -> "TODO",
-            'uuser -> "TODO").executeUpdate()
+            'created -> currentDate, 'updated -> currentDate, 'cuser -> userId.toString,
+            'uuser -> userId.toString()).executeUpdate()
           Right(SQL("select last_insert_id() as lastnum from book").apply.head[BigInteger]("lastnum"))
       }
     }
@@ -86,7 +90,7 @@ object Book {
     * @return List[Book] 取得した本
     */
   def allInShelf(shelfId: BigInteger, start: Option[Int], load: Option[Int]): List[BookDetail] = {
-    val commonSql = "select * from book where shelf_id = {shelf_id} order by updated_date"
+    val commonSql = commonSelect + "where shelf_id = {shelf_id} order by updated_date"
     DB.withConnection { implicit conn =>
       (start, load) match {
         case (Some(start), Some(load)) =>
@@ -95,16 +99,37 @@ object Book {
         case (None, Some(load)) =>
           SQL(commonSql + " limit {count}").on('shelf_id -> shelfId, 'count -> load).as(book *)
         case _ =>
-          SQL("select * from book where shelf_id = {shelf_id}").on(
-            'shelf_id -> shelfId).as(book *)
+          SQL(commonSql).on('shelf_id -> shelfId).as(book *)
       }
     }
   }
 
+  private val commonSelect: String = """select
+    b.book_id,
+    b.shelf_id,
+    b.book_name,
+    b.book_author,
+    b.book_isbn,
+    b.published_date,
+    b.large_image_url,
+    b.medium_image_url,
+    b.small_image_url,
+    b.created_date,
+    b.created_user,
+    c.user_display_name,
+    b.updated_date,
+    b.updated_user,
+    u.user_display_name
+ from book b join UserInfo c on
+c.user_id = b.created_user
+join UserInfo u on
+u.user_id = b.updated_user
+"""
+
   // book_idが一致する一件だけ取得する
   def selectById(book_id: BigInteger): Option[BookDetail] = {
     DB.withConnection { implicit conn =>
-      SQL("select * from book where book_id = {book_id}").on('book_id -> book_id).as(book *) match {
+      SQL(commonSelect + "where b.book_id = {book_id}").on('book_id -> book_id).as(book *) match {
         case (x :: _) => Some(x)
         case Nil => None
       }
@@ -126,8 +151,10 @@ object Book {
         (__ \ "small_image_url").write[Option[String]] and
         (__ \ "created_date").format[Date] and
         (__ \ "created_user").write[String] and
+        (__ \ "created_user_name").write[String] and
         (__ \ "updated_date").write[Date] and
-        (__ \ "updated_user").write[String])(unlift(BookDetail.unapply))
+        (__ \ "updated_user").write[String] and
+        (__ \ "updated_user_name").write[String])(unlift(BookDetail.unapply))
     Json.toJson(book)
   }
 }

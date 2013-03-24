@@ -1,7 +1,12 @@
 package test
 
+import anorm._
+import java.sql.Connection
 import java.util.Date
+import models.UserInfo
 import org.specs2.mutable._
+import play.api.db._
+import play.api.Play.current
 import play.api.test._
 import play.api.test.Helpers._
 import models.Book
@@ -19,37 +24,68 @@ class BookSpec extends Specification {
 
   // 基本的なデータの追加・削除をするためのtrait
   trait scope extends Scope with After {
-    val shelfId : BigInteger = BookShelf.insert("book shelf", "description")
+    val shelfId : BigInteger = BookShelf.insert("book shelf", "description", BigInteger.valueOf(0L))
     val result: BigInteger = Book.insert(
       BookRegister(shelfId, "book name", Some("book author"), Some("book isbn"),
-        None, Some("large image url"), Some("medium image url"), Some("small image url"))).right.get
+        None, Some("large image url"), Some("medium image url"), Some("small image url")),
+      BigInteger.valueOf(0L)
+    ).right.get
+    println(Book.selectById(result))
+
+    DB.withConnection {implicit conn:Connection =>
+      SQL(
+        """
+          insert into UserInfo values (0, 'name', 'gid', 'guser', 'gurl', 'gphoto', 'token', 'refresh', 0, 0, '2012-01-01 00:00:00', '',
+          '2012-01-01 00:00:00', '')
+          """).executeUpdate
+      val user = SQL("select last_insert_id() as lastnum from UserInfo").apply.head[BigInteger]("lastnum")
+      SQL(
+        """
+          update UserInfo set user_id = 0 where user_id = {id}
+          """).on('id -> user).executeUpdate
+    }
 
     def after = {
       BookShelf.delete(shelfId)
       Book.delete(result)
+      UserInfo.delete(BigInteger.valueOf(0L))
     }
   }
 
   trait manyData extends Scope with After {
-    val shelfId : BigInteger = BookShelf.insert("book shelf", "description")
+    val shelfId : BigInteger = BookShelf.insert("book shelf", "description", BigInteger.valueOf(0L))
     val results: List[BigInteger] = (1 to 10).map { e =>
       Book.insert(BookRegister(shelfId, "book name" + e.toString, Some("book author" + e.toString),
         Some(e.toString), None, Some("large image url"), Some("medium image url"), Some("small image url")
-      )).right.get
+      ),BigInteger.valueOf(0L)).right.get
     }.toList
 
+    DB.withConnection {implicit conn:Connection =>
+      SQL(
+        """
+          insert into UserInfo values (0, 'name', 'gid', 'guser', 'gurl', 'gphoto', 'token', 'refresh', 0, 0, '2012-01-01 00:00:00', '',
+          '2012-01-01 00:00:00', '')
+          """).executeUpdate
+      val user = SQL("select last_insert_id() as lastnum from UserInfo").apply.head[BigInteger]("lastnum")
+      SQL(
+        """
+          update UserInfo set user_id = 0 where user_id = {id}
+          """).on('id -> user).executeUpdate
+    }
+    
     def after = {
       results.map(Book.delete)
       BookShelf.delete(shelfId)
+      UserInfo.delete(BigInteger.valueOf(0L))
     }
   }
 
   "Book" should {
     "can insert and delete a book information in the book shelf" in {
       running(FakeApplication()) {
-        val shelfId = BookShelf.insert("book shelf", "description")
+        val shelfId = BookShelf.insert("book shelf", "description", BigInteger.valueOf(0L))
         val result = Book.insert(BookRegister(shelfId, "book name", Some("author"), Some("isbn"),
-          None, None, None, None))
+          None, None, None, None), BigInteger.valueOf(0L))
 
         result must beAnInstanceOf[Either[String, BigInteger]]
         val id = result.right.get

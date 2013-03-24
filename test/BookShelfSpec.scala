@@ -14,7 +14,7 @@ class BookShelfSpec extends Specification {
 
   // 基本的なデータの追加・削除をするためのtrait
   trait scope extends Scope with After {
-    val result: BigInteger = BookShelf.insert("book shelf", "shelf description")
+    val result: BigInteger = BookShelf.insert("book shelf", "shelf description", BigInteger.valueOf(0L))
 
     def after = {
       BookShelf.delete(result)
@@ -23,7 +23,7 @@ class BookShelfSpec extends Specification {
 
   trait manyData extends Scope with After {
     val results: List[BigInteger] = (1 to 10).map { e =>
-      BookShelf.insert("book shelf" + e.toString, "shelf description" + e.toString)
+      BookShelf.insert("book shelf" + e.toString, "shelf description" + e.toString, BigInteger.valueOf(0L))
     }.toList
 
     def after = {
@@ -35,7 +35,7 @@ class BookShelfSpec extends Specification {
   "BookShelf" should {
     "can insert and delete a book shelf information" in {
       running(FakeApplication()) {
-        val result = BookShelf.insert("book shelf", "shelf description")
+        val result = BookShelf.insert("book shelf", "shelf description", BigInteger.valueOf(0L))
         result must beGreaterThan(BigInteger.valueOf(0L))
         BookShelf.delete(result) must beEqualTo(1)
       }

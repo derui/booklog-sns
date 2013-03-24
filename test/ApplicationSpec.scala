@@ -1,5 +1,6 @@
 package test
 
+import java.sql.Connection
 import java.text.SimpleDateFormat
 import java.util.Date
 import models.UserInfo
@@ -28,10 +29,10 @@ class ApplicationSpec extends Specification {
 
   // 基本的なデータの追加・削除をするためのtrait
   trait scope extends Scope with After {
-    val shelfId: BigInteger = BookShelf.insert("book shelf", "description")
+    val shelfId: BigInteger = BookShelf.insert("book shelf", "description", BigInteger.valueOf(0L))
     val result: BigInteger = Book.insert(BookRegister(shelfId, "book name",
       Some("book author"), Some("book isbn"),
-      None,None, None, None)).right.get
+      None,None, None, None), BigInteger.valueOf(0L)).right.get
 
     def after = {
       BookShelf.delete(shelfId)
@@ -40,10 +41,11 @@ class ApplicationSpec extends Specification {
   }
 
   trait manyData extends Scope with After {
-    val shelfId: BigInteger = BookShelf.insert("book shelf", "description")
+    val shelfId: BigInteger = BookShelf.insert("book shelf", "description", BigInteger.valueOf(0L))
     val results: List[BigInteger] = (1 to 10).map { e =>
       Book.insert(BookRegister(shelfId, "book name" + e.toString, Some("book author" + e.toString),
-        Some(e.toString),None, None, None, None)).right.get
+        Some(e.toString),None, None, None, None),
+      BigInteger.valueOf(0L)).right.get
     }.toList
 
     def after = {
@@ -78,9 +80,24 @@ class ApplicationSpec extends Specification {
     }
 
     "get infomation of a book shelf if it is registered" in new WithApplication {
+
+      DB.withConnection {implicit conn:Connection =>
+        SQL(
+          """
+          insert into UserInfo values (0, 'name', 'gid', 'guser', 'gurl', 'gphoto', 'token', 'refresh', 0, 0, '2012-01-01 00:00:00', '',
+          '2012-01-01 00:00:00', '')
+          """).executeUpdate
+        val user = SQL("select last_insert_id() as lastnum from UserInfo").apply.head[BigInteger]("lastnum")
+        SQL(
+          """
+          update UserInfo set user_id = 0 where user_id = {id}
+          """).on('id -> user).executeUpdate
+      }
+
       val data: Map[String, Seq[String]] = Map("shelf_name" -> Seq("name"),
         "shelf_description" -> Seq("desc"))
-      val result = route(FakeRequest(POST, "/api/shelf").withHeaders(CONTENT_TYPE -> "application/x-www-form-urlencode"), data)
+      val result = route(FakeRequest(POST, "/api/shelf").withHeaders(
+        CONTENT_TYPE -> "application/x-www-form-urlencode"), data)
 
       result must beSome
       val id = ((Json.parse(contentAsString(result.get)) \ "result")(0) \ "id").as[Long]
@@ -98,12 +115,29 @@ class ApplicationSpec extends Specification {
       deleted must beSome
       status(deleted.get) must beEqualTo(OK)
         (Json.parse(contentAsString(deleted.get)) \ "totalCount").as[Long] must be_==(0L)
+
+      DB.withConnection {implicit conn => SQL("delete from UserInfo").executeUpdate}
     }
 
     "makes and delete book information with" in new WithApplication {
+
+      DB.withConnection {implicit conn:Connection =>
+        SQL(
+          """
+          insert into UserInfo values (0, 'name', 'gid', 'guser', 'gurl', 'gphoto', 'token', 'refresh', 0, 0, '2012-01-01 00:00:00', '',
+          '2012-01-01 00:00:00', '')
+          """).executeUpdate
+        val user = SQL("select last_insert_id() as lastnum from UserInfo").apply.head[BigInteger]("lastnum")
+        SQL(
+          """
+          update UserInfo set user_id = 0 where user_id = {id}
+          """).on('id -> user).executeUpdate
+      }
+
       val shelf: Map[String, Seq[String]] = Map("shelf_name" -> Seq("name"),
         "shelf_description" -> Seq("desc"))
-      val result = route(FakeRequest(POST, "/api/shelf").withHeaders(CONTENT_TYPE -> "application/x-www-form-urlencode"), shelf)
+      val result = route(FakeRequest(POST, "/api/shelf").withHeaders(
+        CONTENT_TYPE -> "application/x-www-form-urlencode"), shelf)
 
       result must beSome
       val shelf_id = ((Json.parse(contentAsString(result.get)) \ "result")(0) \ "id").as[Long]
@@ -138,6 +172,8 @@ class ApplicationSpec extends Specification {
       deleted must beSome
       status(deleted.get) must beEqualTo(OK)
         (Json.parse(contentAsString(deleted.get)) \ "totalCount").as[Long] must be_==(0L)
+
+      DB.withConnection {implicit conn => SQL("""delete from UserInfo""").executeUpdate}
     }
 
     "update user infomation" in new WithApplication {
