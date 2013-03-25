@@ -66,5 +66,60 @@ class RentalSpec extends Specification {
         SQL("""delete from UserInfo""").executeUpdate
       }
     }
+
+    "be able to get rental infomation by book id" in new WithApplication {
+      DB.withConnection {implicit conn =>
+        SQL(
+          """
+          insert into book values (0, 0, '', '', '', '2012-01-01 00:00:00', '', '', '', '2012-01-01 00:00:00', '',
+          '2012-01-01 00:00:00', '')
+          """).executeUpdate
+        val id = SQL("select last_insert_id() as lastnum from book").apply.head[BigInteger]("lastnum")
+        SQL(
+          """
+          update book set book_id = 0 where book_id = {id}
+          """).on('id -> id).executeUpdate
+        SQL(
+          """
+          insert into UserInfo values (0, 'name', 'gid', 'guser', 'gurl', 'gphoto', 'token', 'refresh', 0, 0, '2012-01-01 00:00:00', '',
+          '2012-01-01 00:00:00', '')
+          """).executeUpdate
+        val user = SQL("select last_insert_id() as lastnum from UserInfo").apply.head[BigInteger]("lastnum")
+        SQL(
+          """
+          update UserInfo set user_id = 0 where user_id = {id}
+          """).on('id -> user).executeUpdate
+
+        SQL(
+          """
+          insert into RentalInfo values (0, 0, 0, '1', '2012-01-01 00:00:00', '',
+          '2012-01-01 00:00:00', '')
+          """).executeUpdate
+        val rental = SQL("select last_insert_id() as lastnum from RentalInfo").apply.head[BigInteger]("lastnum")
+        SQL(
+          """
+          update RentalInfo set rental_id = 0 where rental_id = {id}
+          """).on('id -> rental).executeUpdate
+      }
+
+      val result = route(FakeRequest(GET, "/api/rental/?book_id=0").withHeaders(
+        CONTENT_TYPE -> "application/x-www-form-urlencode"))
+
+      result must beSome
+      println(contentAsString(result.get))
+      status(result.get) must beEqualTo(OK)
+
+      val info = Json.parse(contentAsString(result.get))
+      (info \ "totalCount").as[Long] must be_==(1L)
+      ((info \ "result")(0) \ "rental_user_id").as[Long] must be_==(0L)
+        ((info \ "result")(0) \ "rental_book_id").as[Long] must be_==(0L)
+        ((info \ "result")(0) \ "rental_now").as[Boolean] must beTrue
+
+      DB.withConnection {implicit conn =>
+        SQL("""delete from RentalInfo""").executeUpdate
+        SQL("""delete from book""").executeUpdate
+        SQL("""delete from UserInfo""").executeUpdate
+      }
+    }
   }
 }

@@ -106,6 +106,18 @@ object RentalInfo {
     }
   }
 
+  // bookIdが一致する一件だけ取得。ひとつのbookIdにつき、一件のレンタル情報が紐付く
+  def selectByBookId(bookId : BigInteger): Option[RentalInfo] = {
+    DB.withConnection { implicit conn =>
+      val shelfs = SQL(commonSelect + "where rental_book_id = {id}")
+      .on('id -> bookId).as(rentalInfo *)
+      shelfs match {
+        case (s :: _) => Some(s)
+        case _ => None
+      }
+    }
+  }
+
   // idが一致する一件だけ取得
   def selectById(id: BigInteger): Option[RentalInfo] = {
     DB.withConnection { implicit conn =>

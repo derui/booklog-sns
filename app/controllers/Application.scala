@@ -139,7 +139,7 @@ trait Application extends Controller with JsonResponse with Composable {
         e => BadRequest(e.errors.head.message),
         p => {
           val result = BookShelf.insert(p._1, p._2, getAuthUserId)
-          OkJsonOneOf(Json.obj("id" -> result.longValue))
+          okJsonOneOf(Json.obj("id" -> result.longValue))
         })
     }
   }
@@ -167,7 +167,7 @@ trait Application extends Controller with JsonResponse with Composable {
           Book.insert(BookRegister(BigInteger.valueOf(p._1), p._2, p._3, p._4,
             p._5, p._6, p._7, p._8), getAuthUserId) match {
             case Left(_) => BadRequest(Json.obj("error" -> "指定された本棚が存在しません"))
-            case Right(result) => OkJsonOneOf(Json.obj("id" -> result.longValue))
+            case Right(result) => okJsonOneOf(Json.obj("id" -> result.longValue))
           }
         })
     }
@@ -185,7 +185,7 @@ trait Application extends Controller with JsonResponse with Composable {
         e => BadRequest(e.errors.head.message),
         p => {
           val jsoned = BookShelf.all(p._1, p._2).map(BookShelf.toJson)
-          OkJson(jsoned)
+          okJson(jsoned)
         })
     }
   }
@@ -195,7 +195,7 @@ trait Application extends Controller with JsonResponse with Composable {
     Action {
       val deleted = BookShelf.delete(BigInteger.valueOf(id))
       if (deleted == 1) {
-        OkJson(List())
+        okJson(List())
       } else {
         BadRequest(Json.obj("error" -> "指定された本棚が存在しません"))
       }
@@ -215,7 +215,7 @@ trait Application extends Controller with JsonResponse with Composable {
         e => BadRequest(e.errors.head.message),
         p => {
           val books = Book.allInShelf(BigInteger.valueOf(p._1), p._2, p._3).map(Book.toJson)
-          OkJson(books)
+          okJson(books)
         })
     }
   }
@@ -224,7 +224,7 @@ trait Application extends Controller with JsonResponse with Composable {
   def getShelfDetail(id: Long) = Authenticated {
     Action {
       (BookShelf.selectById _ << BigInteger.valueOf)(id) match {
-        case None => OkJson(List())
+        case None => okJson(List())
         case Some(x) => {
           // 本棚に関連づいているbookの一覧を取得する。
           val bookToJson = (x:List[BookDetail]) => x.map {
@@ -239,7 +239,7 @@ trait Application extends Controller with JsonResponse with Composable {
             __.read[JsObject].map {o => o ++ Json.obj("books" -> JsonUtil.listToArray(bookUrls))})
           BookShelf.toJson(x).transform(transformer).fold(
             invalid => BadRequest(Json.obj("error" -> invalid.toString)),
-            valid => OkJsonOneOf(valid)
+            valid => okJsonOneOf(valid)
           )
         }
       }
@@ -251,7 +251,7 @@ trait Application extends Controller with JsonResponse with Composable {
     Action {
       (Book.selectById _ << BigInteger.valueOf)(id) match {
         case None => BadRequest(Json.obj("error" -> "指定された本が存在しません"))
-        case Some(x) => OkJsonOneOf(Book.toJson(x))
+        case Some(x) => okJsonOneOf(Book.toJson(x))
       }
     }
   }
@@ -274,7 +274,7 @@ trait Application extends Controller with JsonResponse with Composable {
                 UserInfo.update(
                   UserInfo(id, p, gid, gname, gurl, gphoto, access, refresh, at, in,
                     created, cuser, udate, ""))
-                OkJson(List())
+                okJson(List())
             }
           }
         })
@@ -289,7 +289,7 @@ trait Application extends Controller with JsonResponse with Composable {
         case None => BadRequest(Json.obj("error" -> "ユーザーの情報が見つかりません"))
         case Some(res) => res match {
           case UserInfo(id, name, gid, gname, url, photo, _, _, _, _, _, _, _, _) =>
-            OkJsonOneOf(Json.obj("user_id" -> id.longValue, "user_display_name" -> name,
+            okJsonOneOf(Json.obj("user_id" -> id.longValue, "user_display_name" -> name,
               "google_user_id" -> gid, "google_display_name" -> gname,
               "google_public_profile_url" -> url,
               "google_public_profile_photo_url" -> photo))

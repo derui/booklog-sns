@@ -25,6 +25,9 @@ trait JsonResponse {
   def responseToJsonOneOf(value: JsValue) : JsObject =
     responseToJson(List(value))
 
-  def OkJson(ary:List[JsValue]) : PlainResult = Ok(responseToJson(ary))
-  def OkJsonOneOf(value:JsValue) : PlainResult = Ok(responseToJsonOneOf(value))
+  def okJson(ary:List[JsValue]) : PlainResult = Ok(responseToJson(ary))
+  def okJsonOneOf(value:JsValue) : PlainResult = Ok(responseToJsonOneOf(value))
+
+  def error(error:String) : PlainResult = BadRequest(Json.obj("error" -> error))
+  def okEmpty() : PlainResult = Ok(responseToJson(List()))
 }

@@ -1,6 +1,7 @@
 package controllers
 
 import models.Book
+import models.BookDetail
 import models.BookShelf
 import play.api.data.Form
 import play.api.data.Forms._
@@ -32,15 +33,32 @@ trait Rental extends Controller with JsonResponse with Composable {
   this: Security =>
 
 
-    // 指定されたレンタル情報を取得する
-    def getRentalDetails(id: Long) = Authenticated {
-      Action { implicit request =>
-        RentalInfo.selectById(BigInteger.valueOf(id)) match {
-          case None => BadRequest(Json.obj("error" -> "Not found rental id given"))
-          case Some(rental) => OkJsonOneOf(RentalInfo.toJson(rental))
-        }
+  // 指定されたレンタル情報を取得する
+  def getRentalDetails(id: Long) = Authenticated {
+    Action { implicit request =>
+      RentalInfo.selectById(BigInteger.valueOf(id)) match {
+        case None => BadRequest(Json.obj("error" -> "Not found rental id given"))
+        case Some(rental) => okJsonOneOf(RentalInfo.toJson(rental))
       }
     }
+  }
+
+  // 渡されたレンタル情報から、書籍情報も取得して返却する。
+  private def jsonize(rental : RentalInfo) : Option[JsValue] = {
+    Book.selectById(rental.rentalBookId).map { book =>
+          Json.obj("rental_id" -> rental.rentalId.longValue,
+            "rental_user_id" -> rental.rentalUserId.longValue,
+            "rental_book_id" -> rental.rentalBookId.longValue,
+            "rental_now" -> rental.rentalNow,
+            "created_date" -> rental.created,
+            "created_user" -> rental.createdUser,
+            "updated_date" -> rental.updated,
+            "updated_user" -> rental.updatedUser,
+            "large_image_url" -> book.largeImageUrl,
+            "medium_image_url" -> book.mediumImageUrl,
+            "small_image_url" -> book.smallImageUrl
+          )}
+  }
 
   // レンタル情報の全件を取得する
   def getRentalInfos = Authenticated {
@@ -53,26 +71,10 @@ trait Rental extends Controller with JsonResponse with Composable {
       form.bindFromRequest.fold(
         e => BadRequest(e.errors.head.message),
         p => {
-          val jsoned = RentalInfo.findAll(p._1, p._2).map { rental =>
-            Book.selectById(rental.rentalBookId) match {
-              case None => Json.obj()
-              case Some(book) =>
-                Json.obj("rental_id" -> rental.rentalId.longValue,
-                         "rental_user_id" -> rental.rentalUserId.longValue,
-                         "rental_book_id" -> rental.rentalBookId.longValue,
-                         "rental_now" -> rental.rentalNow,
-                         "created_date" -> rental.created,
-                         "created_user" -> rental.createdUser,
-                         "updated_date" -> rental.updated,
-                         "updated_user" -> rental.updatedUser,
-                         "large_image_url" -> book.largeImageUrl,
-                         "medium_image_url" -> book.mediumImageUrl,
-                         "small_image_url" -> book.smallImageUrl
-                       )
-            }
-          }
-          OkJson(jsoned)
-        })
+          okJson(RentalInfo.findAll(p._1, p._2).map(jsonize(_))
+            .filterNot(x => x.isEmpty).map(_.get))
+        }
+      )
     }
   }
 
@@ -82,16 +84,16 @@ trait Rental extends Controller with JsonResponse with Composable {
   def doRental = Authenticated {
     Action { implicit request =>
       val form = Form(
-          "rental_book" -> number)
+        "rental_book" -> number)
 
       form.bindFromRequest.fold(
         e => BadRequest(Json.obj("error" -> e.errors.head.message)),
         p => {
           RentalInfo.insert(getAuthUserId,
-                            BigInteger.valueOf(p)) match {
+            BigInteger.valueOf(p)) match {
             case Left(e) => BadRequest(Json.obj("error" -> e))
             case Right(id) =>
-              OkJsonOneOf(Json.obj("rental_id" -> id.longValue))
+              okJsonOneOf(Json.obj("rental_id" -> id.longValue))
           }
         }
       )
@@ -102,7 +104,24 @@ trait Rental extends Controller with JsonResponse with Composable {
   def returnRentalBook(id:Long) = Authenticated {
     Action { implicit request =>
       RentalInfo.delete(BigInteger.valueOf(id))
-      OkJson(List())
+      okJson(List())
+    }
+  }
+
+  def getRentalInfoByBookId = Authenticated {
+    Action { implicit request =>
+      val form = Form(
+        "book_id" -> number)
+
+      form.bindFromRequest.fold(
+        e => error(e.errors.head.message),
+        p => {
+          RentalInfo.selectByBookId(BigInteger.valueOf(p)) match {
+            case None => okEmpty()
+            case Some(rental) => okJsonOneOf(RentalInfo.toJson(rental))
+          }
+        })
     }
   }
 }
+

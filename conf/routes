@@ -25,6 +25,7 @@ PUT     /api/user_info          application.Application.updateUserInfo
 
 # Get and update rental infomations
 GET     /api/rental              application.Rental.getRentalInfos
+GET     /api/rental/             application.Rental.getRentalInfoByBookId
 GET     /api/rental/*id          application.Rental.getRentalDetails(id: Long)
 POST    /api/rental              application.Rental.doRental
 PUT     /api/rental/*id          application.Rental.returnRentalBook(id:Long)
