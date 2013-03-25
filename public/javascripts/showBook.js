@@ -46,7 +46,13 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto', '
                     return arg.context.book.book_author;
                 },
                 '.published_date': function (arg) {
-                    return moment(arg.context.book.published_date).format('YYYY/MM/DD');
+                    var publishedDate = arg.context.book.published_date;
+
+                    if (!publishedDate) {
+                        return '';
+                    } else {
+                        return moment(publishedDate).format('YYYY/MM/DD');
+                    }
                 }
             });
         }
@@ -63,13 +69,13 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto', '
         events: {
             "click": "rentalBook"
         },
-        rentalBook : function(){
+        rentalBook: function () {
             this.model.save();
         }
     });
 
     var rental = new Model.Rental({'rental_book': location.pathname.split('/').pop()});
     new RentalBookButtonView({
-        model : rental
+        model: rental
     });
 });
