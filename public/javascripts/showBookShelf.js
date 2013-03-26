@@ -46,23 +46,23 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto'], 
 
     // 書籍一覧のビュー
     var BookListView = View.BaseView.extend({
-        el: '.bookInfo',
+        el: '.test',
         initialize: function () {
             _.bindAll(this, 'render');
-            this.collection.bind('change', this.render);
+            this.collection.bind('reset', this.render);
         },
         render: function () {
             var models = this.collection.models;
             this.$el.render({
                 "books": models[0].attributes.result
             }, {
-                '.bookInfo': {
-                    'bookInfo<-books': {
+                '.bookInfoArea': {
+                    'bookInfoArea<-books': {
                         '.book_title' : function (arg) {
-                            return arg.bookInfo.item.book_title;
+                            return arg.bookInfoArea.item.book_name;
                         },
                         '.book_image@src' : function (arg) {
-                            return arg.bookInfo.item.medium_image_url;
+                            return arg.bookInfoArea.item.medium_image_url;
                         }
                     }
                 }
@@ -77,7 +77,7 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto'], 
     bookShelf.fetch();
 
     var bookList = new Model.BookList();
-    var bookView = new BookListView({
+    var bookListView = new BookListView({
         collection: bookList
     });
     bookList.fetch({data: $.param({'shelf': location.pathname.split('/').pop()})});
