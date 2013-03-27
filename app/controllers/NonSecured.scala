@@ -12,5 +12,5 @@ import controllers.Connection._
 // テスト用に、認証処理を行わない。
 trait NonSecured extends Security {
   override def Authenticated[A](action : Action[A]) : Action[A] = Action(action.parser) (action.apply)
-  override def getAuthUserId : BigInteger = BigInteger.valueOf(0L)
+  override def getAuthUserId : Long = 0L
 }

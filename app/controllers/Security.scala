@@ -7,5 +7,5 @@ import play.api.mvc.Action
 trait Security {
   def Authenticated[A](action:Action[A]) : Action[A]
 
-  def getAuthUserId: BigInteger
+  def getAuthUserId: Long
 }

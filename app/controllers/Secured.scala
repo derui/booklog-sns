@@ -11,7 +11,7 @@ import controllers.Connection._
 
 // 認証処理を挟みたい場合に、こBのtraitをActionにwithしてやる。
 trait Secured extends Security {
-  private var userId = BigInteger.valueOf(0L)
+  private var userId = 0L
 
   override def Authenticated[A](action : Action[A]) : Action[A] = Action(action.parser) { request =>
 
@@ -32,7 +32,7 @@ trait Secured extends Security {
     }
   }
 
-  override def getAuthUserId: BigInteger = userId
+  override def getAuthUserId: Long = userId
 
   // 単純な恒等関数
   def id[A](x:A) = x
@@ -53,9 +53,9 @@ trait Secured extends Security {
             case Some(header) => {
               val origin = new URI(header)
               val host = new URI(xFrom)
-              origin.getScheme() == host.getScheme() &&
-              origin.getHost() == host.getHost() &&
-              origin.getPort() == host.getPort()
+              origin.getScheme == host.getScheme &&
+              origin.getHost == host.getHost &&
+              origin.getPort == host.getPort
             }
           }
       }

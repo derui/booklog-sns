@@ -8,7 +8,7 @@ import play.api.libs.json.Json
 import play.api.libs.json.Json.toJsFieldJsValueWrapper
 import play.api.libs.json.Reads
 import play.api.libs.json.Writes
-import util.Composable
+import util.Composeable
 import play.api.mvc._
 import play.api.mvc.Results._
 

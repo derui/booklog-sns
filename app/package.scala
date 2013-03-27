@@ -1,3 +1,4 @@
+
 package object application {
 
   import play.api.Play._

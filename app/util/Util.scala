@@ -3,16 +3,16 @@ package util
 import play.api.mvc._
 import java.math.BigInteger
 
-trait ComposableFunction1[-T1, +R] {
+trait ComposeableFunction1[-T1, +R] {
   val f: T1 => R
   def >>[A](g: R => A): T1 => A = f andThen g
   def <<[A](g: A => T1): A => R = f compose g
 
 }
 
-trait Composable {
+trait Composeable {
   // composeの組み合わせを、<</>>で制御できるようにする
-  implicit def toComposableFunction1[T1, R](func: T1 => R) = new ComposableFunction1[T1, R] { val f = func }
+  implicit def toComposeableFunction1[T1, R](func: T1 => R) = new ComposeableFunction1[T1, R] { val f = func }
 }
 
 /**

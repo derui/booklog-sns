@@ -1,124 +1,84 @@
 package test
 
-import anorm._
-import java.math.BigInteger
-import models.RentalInfo
-import models.UserInfo
-import org.specs2.matcher._
+import java.sql.Date
+import java.util.Calendar
+import models._
 import org.specs2.mutable._
 import org.specs2.specification.Scope
-import play.api.db._
 import play.api.test._
 import play.api.test.Helpers._
 import play.api.libs.json._
-import play.api.libs.functional.syntax._
+import scala.slick.driver.MySQLDriver.simple.{Session => _, _}
+import scala.slick.driver.MySQLDriver.simple.{Session => DBSession}
+import models.DBWrap.UsePerDB
 
 class RentalSpec extends Specification {
 
+  val now = new Date(Calendar.getInstance.getTimeInMillis)
+
+  trait OneData extends Scope with After with UsePerDB {
+    db.withSession {
+      implicit session: DBSession =>
+        (for {s <- Books} yield s).delete
+        (for {s <- UserInforms} yield s).delete
+
+        val book = Books.ins.insert(0L, "", None, None, None, None, None, None, now, 0L, now, 0L)
+        (for {b <- Books if b.bookId === book} yield (b.bookId)).update(0L)
+
+        val user = UserInforms.ins.insert("", "", "", "", "", "", None, None, None, now, 0L, now, 0L)
+        (for {
+          u <- UserInforms
+          if u.userId === user
+        } yield (u.userId)).update(0L)
+    }
+
+    override def after {
+      db.withSession {
+        implicit session: DBSession =>
+          (for {s <- BookShelves} yield s).delete
+          (for {s <- Books} yield s).delete
+          (for {s <- UserInforms} yield s).delete
+      }
+    }
+  }
+
   "Rental" should {
     "be able to rental book" in new WithApplication {
-      DB.withConnection {implicit conn =>
-        SQL(
-          """
-          insert into book values (0, 0, '', '', '', '2012-01-01 00:00:00', '', '', '', '2012-01-01 00:00:00', '',
-          '2012-01-01 00:00:00', '')
-          """).executeUpdate
-        val id = SQL("select last_insert_id() as lastnum from book").apply.head[BigInteger]("lastnum")
-        SQL(
-          """
-          update book set book_id = 0 where book_id = {id}
-          """).on('id -> id).executeUpdate
-        SQL(
-          """
-          insert into UserInfo values (0, 'name', 'gid', 'guser', 'gurl', 'gphoto', 'token', 'refresh', 0, 0, '2012-01-01 00:00:00', '',
-          '2012-01-01 00:00:00', '')
-          """).executeUpdate
-        val user = SQL("select last_insert_id() as lastnum from UserInfo").apply.head[BigInteger]("lastnum")
-        SQL(
-          """
-          update UserInfo set user_id = 0 where user_id = {id}
-          """).on('id -> user).executeUpdate
-      }
+      new OneData {
+        val req: Map[String, Seq[String]] = Map("rental_book" -> Seq("0"))
+        val result = route(FakeRequest(POST, "/api/rental").withHeaders(
+          CONTENT_TYPE -> "application/x-www-form-urlencode"), req)
 
-      val req: Map[String, Seq[String]] = Map("rental_book" -> Seq("0"))
-      val result = route(FakeRequest(POST, "/api/rental").withHeaders(
-        CONTENT_TYPE -> "application/x-www-form-urlencode"), req)
+        result must beSome
+        status(result.get) must beEqualTo(OK)
 
-      result must beSome
-      status(result.get) must beEqualTo(OK)
+        val rentalId: Long =
+          ((Json.parse(contentAsString(result.get)) \ "result")(0) \ "rental_id").as[Long]
 
-      val rentalId : Long =
-        ((Json.parse(contentAsString(result.get)) \ "result")(0) \ "rental_id").as[Long]
+        val rentaled = route(FakeRequest(GET, "/api/rental/%d" format rentalId))
 
-      val rentaled = route(FakeRequest(GET, "/api/rental/%d" format rentalId).withHeaders(
-        CONTENT_TYPE -> "application/x-www-form-urlencode"))
-
-      rentaled must beSome
-      val info = Json.parse(contentAsString(rentaled.get))
-      (info \ "totalCount").as[Long] must be_==(1L)
-      ((info \ "result")(0) \ "rental_user_id").as[Long] must be_==(0L)
+        rentaled must beSome
+        val info = Json.parse(contentAsString(rentaled.get))
+        (info \ "totalCount").as[Long] must be_==(1L)
+        ((info \ "result")(0) \ "rental_user_id").as[Long] must be_==(0L)
         ((info \ "result")(0) \ "rental_book_id").as[Long] must be_==(0L)
         ((info \ "result")(0) \ "rental_now").as[Boolean] must beTrue
-
-      DB.withConnection {implicit conn =>
-        SQL("""delete from RentalInfo""").executeUpdate
-        SQL("""delete from book""").executeUpdate
-        SQL("""delete from UserInfo""").executeUpdate
       }
     }
 
-    "be able to get rental infomation by book id" in new WithApplication {
-      DB.withConnection {implicit conn =>
-        SQL(
-          """
-          insert into book values (0, 0, '', '', '', '2012-01-01 00:00:00', '', '', '', '2012-01-01 00:00:00', '',
-          '2012-01-01 00:00:00', '')
-          """).executeUpdate
-        val id = SQL("select last_insert_id() as lastnum from book").apply.head[BigInteger]("lastnum")
-        SQL(
-          """
-          update book set book_id = 0 where book_id = {id}
-          """).on('id -> id).executeUpdate
-        SQL(
-          """
-          insert into UserInfo values (0, 'name', 'gid', 'guser', 'gurl', 'gphoto', 'token', 'refresh', 0, 0, '2012-01-01 00:00:00', '',
-          '2012-01-01 00:00:00', '')
-          """).executeUpdate
-        val user = SQL("select last_insert_id() as lastnum from UserInfo").apply.head[BigInteger]("lastnum")
-        SQL(
-          """
-          update UserInfo set user_id = 0 where user_id = {id}
-          """).on('id -> user).executeUpdate
+    "be able to get rental information by book id" in new WithApplication {
+      new OneData {
+        val result = route(FakeRequest(GET, "/api/rental/?book_id=0"))
 
-        SQL(
-          """
-          insert into RentalInfo values (0, 0, 0, '1', '2012-01-01 00:00:00', '',
-          '2012-01-01 00:00:00', '')
-          """).executeUpdate
-        val rental = SQL("select last_insert_id() as lastnum from RentalInfo").apply.head[BigInteger]("lastnum")
-        SQL(
-          """
-          update RentalInfo set rental_id = 0 where rental_id = {id}
-          """).on('id -> rental).executeUpdate
-      }
+        result must beSome
+        println(contentAsString(result.get))
+        status(result.get) must beEqualTo(OK)
 
-      val result = route(FakeRequest(GET, "/api/rental/?book_id=0").withHeaders(
-        CONTENT_TYPE -> "application/x-www-form-urlencode"))
-
-      result must beSome
-      println(contentAsString(result.get))
-      status(result.get) must beEqualTo(OK)
-
-      val info = Json.parse(contentAsString(result.get))
-      (info \ "totalCount").as[Long] must be_==(1L)
-      ((info \ "result")(0) \ "rental_user_id").as[Long] must be_==(0L)
+        val info = Json.parse(contentAsString(result.get))
+        (info \ "totalCount").as[Long] must be_==(1L)
+        ((info \ "result")(0) \ "rental_user_id").as[Long] must be_==(0L)
         ((info \ "result")(0) \ "rental_book_id").as[Long] must be_==(0L)
         ((info \ "result")(0) \ "rental_now").as[Boolean] must beTrue
-
-      DB.withConnection {implicit conn =>
-        SQL("""delete from RentalInfo""").executeUpdate
-        SQL("""delete from book""").executeUpdate
-        SQL("""delete from UserInfo""").executeUpdate
       }
     }
   }
