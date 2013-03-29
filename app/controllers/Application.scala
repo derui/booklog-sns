@@ -11,6 +11,8 @@ import java.util.Calendar
 import scala.slick.driver.MySQLDriver.simple.{Session => _, _}
 import scala.slick.driver.MySQLDriver.simple.{Session => DBSession}
 import models.DBWrap.UsePerDB
+import play.api.Play
+import play.api.Play.current
 
 trait Application extends Controller with JsonResponse with Composeable with UsePerDB {
   this: Security =>
@@ -326,6 +328,16 @@ trait Application extends Controller with JsonResponse with Composeable with Use
             case Some(res) => okJsonOneOf(UserInforms.toJson(res))
           }
       }
+    }
+  }
+
+  // 現在の動作環境がdevelop/productionかどうかを返す。
+  // テスト環境の場合は、developとして返す。
+  def detectCurrentEnvironment = Action {
+    if (Play.isProd) {
+      Ok(Json.obj("environment" -> "production"))
+    } else {
+      Ok(Json.obj("environment" -> "develop"))
     }
   }
 }

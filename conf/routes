@@ -23,12 +23,15 @@ POST    /api/logout              application.Application.logout
 GET     /api/user_info          application.Application.getLoginUserInfo
 PUT     /api/user_info          application.Application.updateUserInfo
 
-# Get and update rental infomations
+# Get and update rental information
 GET     /api/rental              application.Rental.getRentalInformAll
 GET     /api/rental/             application.Rental.getRentalInfoByBookId
 GET     /api/rental/*id          application.Rental.getRentalDetails(id: Long)
 POST    /api/rental              application.Rental.doRental
 PUT     /api/rental/*id          application.Rental.returnRentalBook(id:Long)
+
+# Detect current environment on running Play.
+GET     /api/detect_env         application.Application.detectCurrentEnvironment
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /*file               controllers.Assets.at(path="/public", file)

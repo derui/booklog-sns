@@ -168,5 +168,14 @@ class ApplicationSpec extends Specification {
         ((node \ "result")(0) \ "google_public_profile_photo_url").as[String] must be_==("")
       }
     }
+
+    "detect environment" in new WithApplication {
+      val env = route(FakeRequest(GET, "/api/detect_env"))
+      env must beSome
+      status(env.get) must beEqualTo(OK)
+
+      val node = Json.parse(contentAsString(env.get))
+      (node \ "environment").as[String] must be_==("develop")
+    }
   }
 }
