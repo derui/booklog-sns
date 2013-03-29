@@ -23,6 +23,7 @@ import java.util.Calendar
 import com.google.api.services.plus.model.Person
 import java.sql.Date
 import scala.slick.driver.MySQLDriver.simple._
+import play.api.Play.current
 
 object ConnectResult {
 
@@ -58,8 +59,8 @@ object Connection extends UsePerDB with Composeable {
   // このクラスの結果を表す型
   type Result[A] = Either[ConnectResult, A]
 
-  private val CLIENT_ID: String = "881447546058.apps.googleusercontent.com"
-  private val SECRET_ID: String = "Pa2UhdEQxC_o0HCu8ad-PzzS"
+  private val CLIENT_ID: String = current.configuration.getString("application.client_id").get
+  private val SECRET_ID: String = current.configuration.getString("application.secret_id").get
 
   private val JSON_FACTORY: JsonFactory = new JacksonFactory()
   private val TRANSPORT: HttpTransport = new NetHttpTransport()
