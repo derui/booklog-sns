@@ -13,7 +13,7 @@ import scala.slick.driver.MySQLDriver.simple.{Session =>_, _}
 import scala.slick.driver.MySQLDriver.simple.{Session => DBSession}
 import db.wrapper.specs2._
 
-class BookSpec extends Specification {
+class BooksSpec extends Specification {
 
   def now = new Date(Calendar.getInstance.getTimeInMillis)
 

@@ -21,6 +21,7 @@ class RentalSpec extends Specification {
       implicit session: DBSession =>
         (for {s <- Books} yield s).delete
         (for {s <- UserInforms} yield s).delete
+        (for {s <- RentalInforms} yield s).delete
 
         val book = Books.ins.insert(0L, "", None, None, None, None, None, None, now, 0L, now, 0L)
         (for {b <- Books if b.bookId === book} yield (b.bookId)).update(0L)
@@ -35,9 +36,9 @@ class RentalSpec extends Specification {
     override def after {
       db.withSession {
         implicit session: DBSession =>
-          (for {s <- BookShelves} yield s).delete
           (for {s <- Books} yield s).delete
           (for {s <- UserInforms} yield s).delete
+          (for {s <- RentalInforms} yield s).delete
       }
     }
   }
@@ -68,10 +69,17 @@ class RentalSpec extends Specification {
 
     "be able to get rental information by book id" in new WithApplication {
       new OneData {
+
+        val req: Map[String, Seq[String]] = Map("rental_book" -> Seq("0"))
+        val posted = route(FakeRequest(POST, "/api/rental").withHeaders(
+          CONTENT_TYPE -> "application/x-www-form-urlencode"), req)
+
+        posted must beSome
+        status(posted.get) must beEqualTo(OK)
+
         val result = route(FakeRequest(GET, "/api/rental/?book_id=0"))
 
         result must beSome
-        println(contentAsString(result.get))
         status(result.get) must beEqualTo(OK)
 
         val info = Json.parse(contentAsString(result.get))

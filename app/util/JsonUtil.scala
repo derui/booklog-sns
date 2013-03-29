@@ -12,7 +12,7 @@ object JsonUtil {
   // 新規作成ユーザー名と更新ユーザー名を、baseの変換後のjsonに付加した結果を返す。
   def jsonWithUserName[A, B <: JsValue](base: A, createdUserName: String, updatedUserName: String, f:(A) => B): JsValue = {
 
-    val transformer = (__ \ "created_user_name").json.update(
+    val transformer = (__).json.update(
       __.read[JsObject].map {
         o => o ++ Json.obj("created_user_name" -> createdUserName) ++ Json.obj("updated_user_name" -> updatedUserName)
       })
