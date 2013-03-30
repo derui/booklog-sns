@@ -1,5 +1,6 @@
 package controllers
 
+import java.sql.Timestamp
 import models._
 import play.api.data.Form
 import play.api.data.Forms._
@@ -8,9 +9,9 @@ import play.api.libs.json.Json
 import play.api.libs.json.Json.toJsFieldJsValueWrapper
 import play.api.mvc._
 import util._
+import play.api.libs.json._
 import scala.Some
 import models.DBWrap.UsePerDB
-import java.sql.Date
 import java.util.Calendar
 import scala.slick.driver.MySQLDriver.simple.{Session => _, _}
 import scala.slick.driver.MySQLDriver.simple.{Session => DBSession}
@@ -42,20 +43,18 @@ trait Rental extends Controller with JsonResponse with Composeable with UsePerDB
     val (rental, createdUserName, updatedUserName) = rentalWithName
     Books.selectById(rental.rentalBookId).map {
       case (book, _, _) =>
-        Json.obj("rental_id" -> rental.rentalId,
-          "rental_user_id" -> rental.rentalUserId,
-          "rental_book_id" -> rental.rentalBookId,
-          "rental_now" -> rental.rentalNow,
-          "created_date" -> rental.created,
-          "created_user" -> rental.createdUser,
-          "created_user_name" -> createdUserName,
-          "updated_date" -> rental.updated,
-          "updated_user" -> rental.updatedUser,
-          "updated_user_name" -> updatedUserName,
-          "large_image_url" -> book.largeImageUrl,
-          "medium_image_url" -> book.mediumImageUrl,
-          "small_image_url" -> book.smallImageUrl
-        )
+        val rentalJson =
+          rentalWithName match {
+            case (rental, cname, uname) => JsonUtil.jsonWithUserName(rental, cname, uname, RentalInforms.toJson _)
+          }
+
+        val transformer = (__).json.update(
+          __.read[JsObject].map {
+            o => o ++ Json.obj("large_image_url" -> book.largeImageUrl,
+              "medium_image_url" -> book.mediumImageUrl,
+              "small_image_url" -> book.smallImageUrl)
+          })
+        rentalJson.transform(transformer).get
     }
   }
 
@@ -93,7 +92,7 @@ trait Rental extends Controller with JsonResponse with Composeable with UsePerDB
           p => {
             db withTransaction {
               implicit ds =>
-                val now = new Date(Calendar.getInstance().getTimeInMillis)
+                val now = new Timestamp(Calendar.getInstance().getTimeInMillis)
                 val id = RentalInforms.ins.insert(getAuthUserId,
                   p, true, now, getAuthUserId, now, getAuthUserId)
                 okJsonOneOf(Json.obj("rental_id" -> id))

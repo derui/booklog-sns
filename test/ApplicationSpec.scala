@@ -1,6 +1,7 @@
 package test
 
 import java.text.SimpleDateFormat
+import java.sql.Timestamp
 import java.sql.Date
 import java.util.Calendar
 import org.specs2.mutable._
@@ -15,7 +16,7 @@ import db.wrapper.specs2.AutoRollback
 import models.DBWrap.UsePerDB
 
 class ApplicationSpec extends Specification {
-  val now = new Date(Calendar.getInstance.getTimeInMillis)
+  val now = new Timestamp(Calendar.getInstance.getTimeInMillis)
 
   // 基本的なデータの追加・削除をするためのtrait
   trait OneData extends Scope with After with UsePerDB {

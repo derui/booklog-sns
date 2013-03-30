@@ -1,6 +1,7 @@
 package test
 
 import java.sql.Date
+import java.sql.Timestamp
 import java.util.Calendar
 import models._
 import org.specs2.mutable._
@@ -14,7 +15,8 @@ import models.DBWrap.UsePerDB
 
 class RentalSpec extends Specification {
 
-  val now = new Date(Calendar.getInstance.getTimeInMillis)
+  val now = new Timestamp(Calendar.getInstance.getTimeInMillis)
+  val nowDate = new Date(Calendar.getInstance.getTimeInMillis)
 
   trait OneData extends Scope with After with UsePerDB {
     db.withSession {
@@ -64,6 +66,8 @@ class RentalSpec extends Specification {
         ((info \ "result")(0) \ "rental_user_id").as[Long] must be_==(0L)
         ((info \ "result")(0) \ "rental_book_id").as[Long] must be_==(0L)
         ((info \ "result")(0) \ "rental_now").as[Boolean] must beTrue
+        ((info \ "result")(0) \ "created_date").as[String] must be_==("%tF %<tT" format now)
+        ((info \ "result")(0) \ "updated_date").as[String] must be_==("%tF %<tT" format now)
       }
     }
 

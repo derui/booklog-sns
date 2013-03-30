@@ -14,7 +14,8 @@ object JsonUtil {
 
     val transformer = (__).json.update(
       __.read[JsObject].map {
-        o => o ++ Json.obj("created_user_name" -> createdUserName) ++ Json.obj("updated_user_name" -> updatedUserName)
+        o => o ++ Json.obj("created_user_name" -> createdUserName) ++
+        Json.obj("updated_user_name" -> updatedUserName)
       })
     f(base).transform(transformer).get
   }

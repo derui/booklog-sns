@@ -2,7 +2,7 @@ package test
 
 import anorm._
 import java.util.Calendar
-import java.sql.Date
+import java.sql.Timestamp
 import models._
 import org.specs2.mutable._
 import play.api.test._
@@ -15,7 +15,7 @@ import db.wrapper.specs2._
 
 class BooksSpec extends Specification {
 
-  def now = new Date(Calendar.getInstance.getTimeInMillis)
+  def now = new Timestamp(Calendar.getInstance.getTimeInMillis)
 
   trait OneDataWithAutoRollback extends AutoRollback {
     override def fixture(implicit session:DBSession): Unit = {

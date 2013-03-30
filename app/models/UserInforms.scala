@@ -1,6 +1,6 @@
 package models
 
-import java.sql.Date
+import java.sql.Timestamp
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import scala.slick.driver.MySQLDriver.simple._
@@ -18,7 +18,7 @@ case class UserInform(userId: Long,
                       userGoogleRefreshToken: Option[String],
                       userGoogleExpiresAt: Option[Long],
                       userGoogleExpiresIn: Option[Long],
-                      created: Date, createdUser: Long, updated: Date, updatedUser: Long)
+                      created: Timestamp, createdUser: Long, updated: Timestamp, updatedUser: Long)
 
 // それぞれの本に対する操作を提供する
 object UserInforms extends Table[UserInform]("user_info") {
@@ -47,11 +47,11 @@ object UserInforms extends Table[UserInform]("user_info") {
 
   def userGoogleExpiresIn = column[Option[Long]]("user_google_expires_in")
 
-  def createdDate = column[Date]("created_date")
+  def createdDate = column[Timestamp]("created_date")
 
   def createdUser = column[Long]("created_user")
 
-  def updatedDate = column[Date]("updated_date")
+  def updatedDate = column[Timestamp]("updated_date")
 
   def updatedUser = column[Long]("updated_user")
 
@@ -77,7 +77,7 @@ object UserInforms extends Table[UserInform]("user_info") {
   }
 
   def toJson(user: UserInform): JsValue = {
-    implicit val dateWriter = Writes[Date] {date => Json.toJson("%tF %<tT" format date)}
+    implicit val dateWriter = Writes[Timestamp] {date => Json.toJson("%tF %<tT" format date)}
     implicit val writer = (
       (__ \ "user_id").write[Long] and
         (__ \ "user_display_name").write[String] and
@@ -89,9 +89,9 @@ object UserInforms extends Table[UserInform]("user_info") {
         (__ \ "google_refresh_token").write[Option[String]] and
         (__ \ "google_expires_at").write[Option[Long]] and
         (__ \ "google_expires_in").write[Option[Long]] and
-        (__ \ "created_date").write[Date] and
+        (__ \ "created_date").write[Timestamp] and
         (__ \ "created_user").write[Long] and
-        (__ \ "updated_date").write[Date] and
+        (__ \ "updated_date").write[Timestamp] and
         (__ \ "updated_user").write[Long])(unlift(UserInform.unapply))
     Json.toJson(user)
   }

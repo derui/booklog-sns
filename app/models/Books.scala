@@ -1,6 +1,7 @@
 package models
 
 import java.sql.Date
+import java.sql.Timestamp
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import scala.slick.driver.MySQLDriver.simple._
@@ -12,8 +13,8 @@ case class Book(bookId: Long, shelfId: Long, name: String,
                 author: Option[String], isbn: Option[String], publishedDate: Option[Date],
                 largeImageUrl: Option[String], mediumImageUrl: Option[String],
                 smallImageUrl: Option[String],
-                created: Date, createdUser: Long,
-                updated: Date, updatedUser: Long)
+                created: Timestamp, createdUser: Long,
+                updated: Timestamp, updatedUser: Long)
 
 // それぞれの本に対する操作を提供する
 object Books extends Table[Book]("book") {
@@ -38,11 +39,11 @@ object Books extends Table[Book]("book") {
 
   def smallImageUrl = column[Option[String]]("small_image_url", O DBType "varchar (300)")
 
-  def createdDate = column[Date]("created_date")
+  def createdDate = column[Timestamp]("created_date")
 
   def createdUser = column[Long]("created_user")
 
-  def updatedDate = column[Date]("updated_date")
+  def updatedDate = column[Timestamp]("updated_date")
 
   def updatedUser = column[Long]("updated_user")
 
@@ -97,7 +98,7 @@ object Books extends Table[Book]("book") {
   }
 
   def toJson(book: Book): JsValue = {
-    implicit val dateWriter = Writes[Date] {
+    implicit val dateWriter = Writes[Timestamp] {
       date => Json.toJson("%tF %<tT" format date)
     }
     implicit val writer = (
@@ -110,9 +111,9 @@ object Books extends Table[Book]("book") {
         (__ \ "large_image_url").write[Option[String]] and
         (__ \ "medium_image_url").write[Option[String]] and
         (__ \ "small_image_url").write[Option[String]] and
-        (__ \ "created_date").write[Date] and
+        (__ \ "created_date").write[Timestamp] and
         (__ \ "created_user").write[Long] and
-        (__ \ "updated_date").write[Date] and
+        (__ \ "updated_date").write[Timestamp] and
         (__ \ "updated_user").write[Long])(unlift(Book.unapply))
     Json.toJson(book)
   }

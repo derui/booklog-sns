@@ -21,7 +21,7 @@ import models.DBWrap.UsePerDB
 import scala.language.postfixOps
 import java.util.Calendar
 import com.google.api.services.plus.model.Person
-import java.sql.Date
+import java.sql.Timestamp
 import scala.slick.driver.MySQLDriver.simple._
 import play.api.Play.current
 
@@ -132,7 +132,7 @@ object Connection extends UsePerDB with Composeable {
       Option(plus.people().get("me")).map((get) => get.execute) match {
         case None => Left(ConnectResult.GoogleApiError("Cannot get person data"))
         case Some(profile: Person) =>
-          val nowDate = new Date(Calendar.getInstance().getTimeInMillis)
+          val nowDate = new Timestamp(Calendar.getInstance().getTimeInMillis)
           db.withSession {
             implicit session =>
               val id = UserInforms.ins.insert(

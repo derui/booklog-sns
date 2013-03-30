@@ -1,5 +1,6 @@
 package test
 
+import java.sql.Timestamp
 import java.sql.Date
 import java.util.Calendar
 import org.specs2.mutable._
@@ -13,7 +14,8 @@ import scala.slick.driver.MySQLDriver.simple._
 
 class BookShelvesSpec extends Specification {
 
-  def now = new Date(Calendar.getInstance.getTimeInMillis)
+  def now = new Timestamp(Calendar.getInstance.getTimeInMillis)
+  def nowDate = new Date(Calendar.getInstance.getTimeInMillis)
 
   // 基本的なデータの追加・削除をするためのtrait
   trait OneDataAutoRollback extends AutoRollback {
@@ -74,7 +76,6 @@ class BookShelvesSpec extends Specification {
         new ManyDataAutoRollback {
           {
             val shelfs = BookShelves.findAll(None, None)
-            println(shelfs)
             shelfs.size must beEqualTo(10)
           }
 

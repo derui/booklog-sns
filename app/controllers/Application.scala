@@ -6,6 +6,7 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.json._
 import play.api.mvc._
+import java.sql.Timestamp
 import java.sql.Date
 import java.util.Calendar
 import scala.slick.driver.MySQLDriver.simple.{Session => _, _}
@@ -142,7 +143,7 @@ trait Application extends Controller with JsonResponse with Composeable with Use
           p => {
             db withSession {
               implicit ds =>
-                val now = new Date(Calendar.getInstance().getTimeInMillis)
+                val now = new Timestamp(Calendar.getInstance().getTimeInMillis)
                 val result = BookShelves.ins.insert(
                   p._1, p._2, now, getAuthUserId, now, getAuthUserId)
                 okJsonOneOf(Json.obj("id" -> result))
@@ -173,7 +174,7 @@ trait Application extends Controller with JsonResponse with Composeable with Use
           p => {
             db.withTransaction {
               implicit ds =>
-                val now = new Date(Calendar.getInstance().getTimeInMillis)
+                val now = new Timestamp(Calendar.getInstance().getTimeInMillis)
                 val result = Books.ins.insert(p._1, p._2, p._3, p._4,
                   p._5.map(s => new Date(s.getTime)), p._6, p._7, p._8, now, getAuthUserId, now, getAuthUserId)
 

@@ -1,14 +1,14 @@
 package models
 
-import java.sql.Date
+import java.sql.Timestamp
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import scala.slick.driver.MySQLDriver.simple._
 import scala.language.postfixOps
 import models.DBWrap._
 
-case class BookShelf(id: Long, name: String, description: String, created: Date,
-                 createdUser: Long, updated: Date, updatedUser: Long)
+case class BookShelf(id: Long, name: String, description: String, created: Timestamp,
+                 createdUser: Long, updated: Timestamp, updatedUser: Long)
 
 /**
  * 本棚データベースに対する操作をまとめたオブジェクト
@@ -23,11 +23,11 @@ object BookShelves extends Table[BookShelf]("book_shelf") {
 
   def description = column[String]("shelf_description", O DBType "varchar (100)")
 
-  def createdDate = column[Date]("created_date")
+  def createdDate = column[Timestamp]("created_date")
 
   def createdUser = column[Long]("created_user")
 
-  def updatedDate = column[Date]("updated_date")
+  def updatedDate = column[Timestamp]("updated_date")
 
   def updatedUser = column[Long]("updated_user")
 
@@ -69,14 +69,14 @@ object BookShelves extends Table[BookShelf]("book_shelf") {
   
   // 対象をjsonに変換する
   def toJson(target: BookShelf): JsValue = {
-    implicit val dateWriter = Writes[Date] {date => Json.toJson("%tF %tT" format(date, date))}
+    implicit val dateWriter = Writes[Timestamp] {date => Json.toJson("%tF %<tT" format date)}
     implicit val writer = (
       (__ \ "shelf_id").write[Long] and
         (__ \ "shelf_name").write[String] and
         (__ \ "shelf_description").write[String] and
-        (__ \ "created_date").write[Date] and
+        (__ \ "created_date").write[Timestamp] and
         (__ \ "created_user").write[Long] and
-        (__ \ "updated_date").write[Date] and
+        (__ \ "updated_date").write[Timestamp] and
         (__ \ "updated_user").write[Long])(unlift(BookShelf.unapply))
     Json.toJson(target)
   }
