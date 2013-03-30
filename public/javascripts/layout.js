@@ -18,7 +18,7 @@ requirejs.config({
     }
 });
 
-requirejs(['lib/backbone', 'view', 'lib/pure', 'lib/zepto'], function (Backbone, View) {
+requirejs(['lib/backbone', 'view', 'lib/pure', 'lib/zepto', 'common'], function (Backbone, View) {
     'use strict';
 
     window.signinCallback = function signinCallback(authResult) {
@@ -69,7 +69,7 @@ requirejs(['lib/backbone', 'view', 'lib/pure', 'lib/zepto'], function (Backbone,
 
                 // _.environment(); で環境が取得できるよう定義
                 _.mixin({
-                    'environment': function () {
+                    environment: function () {
                         return environment;
                     }
                 });

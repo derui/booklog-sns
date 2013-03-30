@@ -47,6 +47,11 @@ requirejs(['lib/underscore', 'lib/zepto', 'lib/pure'], function () {
             }
 
             return json;
+        },
+        getPrimaryKeyFromUrl: function (pathname) {
+            var pathname = pathname || location.pathname;
+
+            return pathname.split('/').pop();
         }
     });
 });

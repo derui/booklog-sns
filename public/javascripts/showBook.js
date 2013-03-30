@@ -20,7 +20,7 @@ requirejs.config({
     }
 });
 
-requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto', 'lib/moment'], function (Backbone, Model, View) {
+requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'lib/zepto', 'lib/moment'], function (Backbone, Model, View) {
     'use strict';
 
     var BookView = View.BaseView.extend({
@@ -32,7 +32,7 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto', '
         render: function () {
             var book = this.model.attributes.result[0];
             var $bookshelfAnchorLink = $('#bookshelfAnchorLink');
-            $bookshelfAnchorLink.attr('href', $bookshelfAnchorLink.attr('href') + book['shelf_id']);
+            $bookshelfAnchorLink.attr('href', $bookshelfAnchorLink.attr('href') + book.shelf_id);
             this.$el.render({
                 "book": book
             }, {
@@ -58,24 +58,72 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto', '
         }
     });
 
-    var book = new Model.Book({'id': location.pathname.split('/').pop()});
+    var bookId = _.getPrimaryKeyFromUrl();
+    var book = new Model.Book({'id': bookId});
     var bookView = new BookView({
         model: book
     });
     book.fetch();
 
-    var RentalBookButtonView = View.BaseView.extend({
-        el: '#rentalBookButton',
-        events: {
-            "click": "rentalBook"
-        },
-        rentalBook: function () {
-            this.model.save();
+    var RentalInfoAreaView = View.BaseView.extend({
+        el: '#rentalInfoArea',
+        initialize: function () {
+            var $rentalInfoArea = this.$el;
+
+            $.getJSON('/api/rental/?book_id=' + bookId, function (data) {
+                var totalCount = data.totalCount;
+
+                if (totalCount) {
+                    var result = data.result[0];
+                    $rentalInfoArea.append('<div class="alert alert-info">' +
+                        'この本は、すでに' + result.updated_user_name + 'さんにレンタルされています' +
+                        '<br />' +
+                        '<button class="btn" href="#" id="bringBackBookButton">' +
+                        '<i class="icon-arrow-left"></i> この本を返却する' +
+                        '</button>' +
+                        '</div>');
+
+                    var BringBackBookButtonView = View.BaseView.extend({
+                        el: '#bringBackBookButton',
+                        events: {
+                            "click": "bringBackBook"
+                        },
+                        bringBackBook: function () {
+                            this.$el.addClass('disabled');
+                            this.model.destroy({success: function (model, response) {
+                                location.reload();
+                            }});
+                        }
+                    });
+
+                    var bringBackBookButtonView = new BringBackBookButtonView({
+                        model: new Model.Rental({'id': result.rental_id})
+                    });
+                } else {
+                    $rentalInfoArea.append('<button class="btn" href="#" id="rentalBookButton">' +
+                        '<i class="icon-arrow-right"></i> この本を借りる' +
+                        '</button>');
+
+                    var RentalBookButtonView = View.BaseView.extend({
+                        el: '#rentalBookButton',
+                        events: {
+                            "click": "rentalBook"
+                        },
+                        rentalBook: function () {
+                            this.$el.addClass('disabled');
+                            this.model.save({'rental_book': bookId}, {success: function (model, response) {
+                                location.reload();
+                            }});
+                        }
+                    });
+
+                    var rentalBookButtonView = new RentalBookButtonView({
+                        model: new Model.Rental()
+                    });
+                }
+            });
         }
     });
 
-    var rental = new Model.Rental({'rental_book': location.pathname.split('/').pop()});
-    new RentalBookButtonView({
-        model: rental
-    });
+    var rentalInfoAreaView = new RentalInfoAreaView();
 });
