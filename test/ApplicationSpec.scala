@@ -178,5 +178,6 @@ class ApplicationSpec extends Specification {
       val node = Json.parse(contentAsString(env.get))
       (node \ "environment").as[String] must be_==("develop")
     }
+    
   }
 }

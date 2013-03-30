@@ -1,6 +1,7 @@
 package test
 
 import anorm._
+import java.sql.Date
 import java.util.Calendar
 import java.sql.Timestamp
 import models._
@@ -15,13 +16,15 @@ import db.wrapper.specs2._
 
 class BooksSpec extends Specification {
 
-  def now = new Timestamp(Calendar.getInstance.getTimeInMillis)
+  val time = Calendar.getInstance.getTimeInMillis
+  def now = new Timestamp(time)
+  def nowDate = new Date(time)
 
   trait OneDataWithAutoRollback extends AutoRollback {
     override def fixture(implicit session:DBSession): Unit = {
       val shelfId = BookShelves.ins.insert("book shelf", "description", now, 0L, now, 0L)
       val bookId = Books.ins.insert(0L, "book name", Some("book author"), Some("book isbn"),
-        None, Some("large image url"), Some("medium image url"), Some("small image url"),
+        Some(nowDate), Some("large image url"), Some("medium image url"), Some("small image url"),
         now, 0L, now, 0L)
       val userId = UserInforms.ins.insert("name", "gid", "guser", "gurl", "gphoto", "token", Some("refresh"),
         Some(0L), Some(0L), now, 0L, now, 0L)
@@ -73,13 +76,13 @@ class BooksSpec extends Specification {
           s.name must beEqualTo("book name")
           s.author must beEqualTo(Some("book author"))
           s.isbn must beEqualTo(Some("book isbn"))
-          s.publishedDate must beNone
           s.largeImageUrl must be_==(Some("large image url"))
           s.mediumImageUrl must be_==(Some("medium image url"))
           s.smallImageUrl must be_==(Some("small image url"))
           val jsoned = Books.toJson(s)
             (jsoned \ "created_date").as[String] must be_==("%tF %<tT" format s.created)
             (jsoned \ "updated_date").as[String] must be_==("%tF %<tT" format s.updated)
+            (jsoned \ "published_date").as[String] must be_==("%tF %<tT" format s.publishedDate.get)
         }
       }
     }

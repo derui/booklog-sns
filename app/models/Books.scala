@@ -98,9 +98,8 @@ object Books extends Table[Book]("book") {
   }
 
   def toJson(book: Book): JsValue = {
-    implicit val dateWriter = Writes[Timestamp] {
-      date => Json.toJson("%tF %<tT" format date)
-    }
+    implicit val timestampWriter = Writes[Timestamp] {date => Json.toJson("%tF %<tT" format date)}
+    implicit val dateWriter = Writes[Date] {date => Json.toJson("%tF %<tT" format date)}
     implicit val writer = (
       (__ \ "book_id").write[Long] and
         (__ \ "shelf_id").write[Long] and

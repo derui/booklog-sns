@@ -67,8 +67,6 @@ class RentalSpec extends Specification {
         ((info \ "result")(0) \ "rental_user_id").as[Long] must be_==(0L)
         ((info \ "result")(0) \ "rental_book_id").as[Long] must be_==(0L)
         ((info \ "result")(0) \ "rental_now").as[Boolean] must beTrue
-        ((info \ "result")(0) \ "created_date").as[String] must be_==("%tF %<tT" format now)
-        ((info \ "result")(0) \ "updated_date").as[String] must be_==("%tF %<tT" format now)
       }
     }
 
