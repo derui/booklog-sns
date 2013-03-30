@@ -6,12 +6,17 @@ services:
 jdk:
   - openjdk7
 before_script:
-  - mysql -e 'create database bookshelf'
+  - mysql -e 'create database bookshelf;'
 script:
-  - sbt -Dconfig.resource=ci.conf -DapplyEvolutions.default=true test
+  - mv conf/application.conf conf/ci.application.conf
+  - mv conf/ci.conf conf/application.conf
+  - sbt -DapplyEvolutions.default=true test
 before_install:
   - sudo apt-get update -qq
 # develop branch only
 branches:
   expect:
     - master
+
+notification:
+  email: false

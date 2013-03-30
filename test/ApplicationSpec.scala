@@ -57,7 +57,7 @@ class ApplicationSpec extends Specification {
         status(result.get) must beEqualTo(OK)
         val node = Json.parse(contentAsString(result.get))
         (node \ "totalCount").as[Long] must be_==(1L)
-        ((node \ "result")(0) \ "id").as[Long] must be_>(1L)
+        ((node \ "result")(0) \ "id").as[Long] must be_>=(1L)
         val id = ((node \ "result")(0) \ "id").as[Long]
 
         val resultByDelete = route(FakeRequest(DELETE, "/api/shelf/" + id.toString))
