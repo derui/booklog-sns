@@ -47,7 +47,7 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto'], 
 
     // 書籍一覧のビュー
     var BookListView = View.BaseView.extend({
-        el: '.test',
+        el: '.bookList',
         initialize: function () {
             this.collection.on('reset', this.render, this);
         },
@@ -59,7 +59,8 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto'], 
                 '.bookInfoArea': {
                     'bookInfoArea<-books': {
                         '.book_title': function (arg) {
-                            return arg.bookInfoArea.item.book_name;
+                            return '<a href="/book/detail/' + arg.bookInfoArea.item.book_id + '">' +
+                            arg.bookInfoArea.item.book_name + '</a>';
                         },
                         '.book_image@src': function (arg) {
                             return arg.bookInfoArea.item.medium_image_url;
