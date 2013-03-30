@@ -15,8 +15,9 @@ import models.DBWrap.UsePerDB
 
 class RentalSpec extends Specification {
 
-  val now = new Timestamp(Calendar.getInstance.getTimeInMillis)
-  val nowDate = new Date(Calendar.getInstance.getTimeInMillis)
+  val time = Calendar.getInstance.getTimeInMillis
+  val now = new Timestamp(time)
+  val nowDate = new Date(time)
 
   trait OneData extends Scope with After with UsePerDB {
     db.withSession {

@@ -14,8 +14,9 @@ import scala.slick.driver.MySQLDriver.simple._
 
 class BookShelvesSpec extends Specification {
 
-  def now = new Timestamp(Calendar.getInstance.getTimeInMillis)
-  def nowDate = new Date(Calendar.getInstance.getTimeInMillis)
+  val time = Calendar.getInstance.getTimeInMillis
+  def now = new Timestamp(time)
+  def nowDate = new Date(time)
 
   // 基本的なデータの追加・削除をするためのtrait
   trait OneDataAutoRollback extends AutoRollback {
