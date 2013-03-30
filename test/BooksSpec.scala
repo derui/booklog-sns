@@ -32,7 +32,7 @@ class BooksSpec extends Specification {
     }
   }
 
-  trait manyData extends AutoRollback {
+  trait ManyDataWithAutoRollback extends AutoRollback {
     override def fixture(implicit session:DBSession): Unit = {
       val shelfId = BookShelves.ins.insert("book shelf", "description", now, 0L, now, 0L)
 
@@ -86,7 +86,7 @@ class BooksSpec extends Specification {
 
     "can select many registered book shelf with limitation" in {
       running(FakeApplication()) {
-        new manyData {
+        new ManyDataWithAutoRollback {
           {
             val books = Books.findAllInShelf(0L, None, None)
             books.size must beEqualTo(10)

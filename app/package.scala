@@ -15,4 +15,10 @@ package object application {
   } else {
     new controllers.Rental with Secured
   }
+
+  val AWSRequest = if (isTest) {
+    new controllers.AWSRequest with NonSecured
+  } else {
+    new controllers.AWSRequest with Secured
+  }
 }

@@ -148,13 +148,13 @@ class ApplicationSpec extends Specification {
       new OneData {
 
         val userInfo: Map[String, Seq[String]] = Map("user_display_name" -> Seq("name"))
-        val result = route(FakeRequest(PUT, "/api/user_info").withHeaders(
+        val result = route(FakeRequest(PUT, "/api/login_user_info").withHeaders(
           CONTENT_TYPE -> "application/x-www-form-urlencode"), userInfo)
 
         result must beSome
         status(result.get) must beEqualTo(OK)
 
-        val updated = route(FakeRequest(GET, "/api/user_info"))
+        val updated = route(FakeRequest(GET, "/api/login_user_info"))
 
         updated must beSome
         status(updated.get) must beEqualTo(OK)

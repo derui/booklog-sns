@@ -1,11 +1,12 @@
 package db.wrapper.specs2
 
 import org.specs2.mutable.After
+import org.specs2.specification.Scope
 import models.DBWrap.UsePerDB
 import scala.slick.driver.MySQLDriver.simple._
 
 // traitの範囲を終了した時点で、行われたものをrollbackする。
-trait AutoRollback extends After with UsePerDB {
+trait AutoRollback extends Scope with After with UsePerDB {
   implicit val session: Session = db.createSession()
   session.conn.setAutoCommit(false)
 

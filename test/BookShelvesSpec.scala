@@ -74,6 +74,7 @@ class BookShelvesSpec extends Specification {
         new ManyDataAutoRollback {
           {
             val shelfs = BookShelves.findAll(None, None)
+            println(shelfs)
             shelfs.size must beEqualTo(10)
           }
 
