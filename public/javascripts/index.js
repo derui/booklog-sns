@@ -103,30 +103,4 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto'], 
     });
 
     bookShelfList.fetch({reset: true, data: $.param({start: 0, rows: 5})});
-
-    // ログアウトボタンのビュー
-    var LogoutButtonView = View.BaseView.extend({
-        el: '#logoutButton',
-        events: {
-            "click": "logout"
-        },
-        logout: function () {
-            var $logoutButton = this.$el;
-            if ($logoutButton.hasClass('disabled')) {
-                return;
-            }
-
-            $.ajax({
-                type: 'POST',
-                url: '/api/logout',
-                success: function () {
-                    $('#loginUserInfoArea').remove();
-                    $('#___signin_0').css('display', 'inline-block').show();
-                    $logoutButton.addClass('disabled');
-                }
-            });
-        }
-    });
-
-    new LogoutButtonView();
 });

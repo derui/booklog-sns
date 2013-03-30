@@ -75,29 +75,33 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'lib/zepto', 'lib/moment
 
                 if (totalCount) {
                     var result = data.result[0];
-                    $rentalInfoArea.append('<div class="alert alert-info">' +
-                        'この本は、すでに' + result.updated_user_name + 'さんにレンタルされています' +
-                        '<br />' +
-                        '<button class="btn" href="#" id="bringBackBookButton">' +
-                        '<i class="icon-arrow-left"></i> この本を返却する' +
-                        '</button>' +
-                        '</div>');
 
-                    var BringBackBookButtonView = View.BaseView.extend({
-                        el: '#bringBackBookButton',
-                        events: {
-                            "click": "bringBackBook"
-                        },
-                        bringBackBook: function () {
-                            this.$el.addClass('disabled');
-                            this.model.destroy({success: function (model, response) {
-                                location.reload();
-                            }});
-                        }
-                    });
+                    _.loginUserInfo(function (loginUserInfo) {
+                        $rentalInfoArea.append('<div class="alert alert-info">' +
+                            'この本は、すでに' + result.updated_user_name + 'さんにレンタルされています' +
+                            (result.rental_user_id === loginUserInfo.user_id ?
+                                '<br />' +
+                                    '<button class="btn" href="#" id="bringBackBookButton">' +
+                                    '<i class="icon-arrow-left"></i> この本を返却する' +
+                                    '</button>' +
+                                    '</div>' : ''));
 
-                    var bringBackBookButtonView = new BringBackBookButtonView({
-                        model: new Model.Rental({'id': result.rental_id})
+                        var BringBackBookButtonView = View.BaseView.extend({
+                            el: '#bringBackBookButton',
+                            events: {
+                                "click": "bringBackBook"
+                            },
+                            bringBackBook: function () {
+                                this.$el.addClass('disabled');
+                                this.model.destroy({success: function (model, response) {
+                                    location.reload();
+                                }});
+                            }
+                        });
+
+                        var bringBackBookButtonView = new BringBackBookButtonView({
+                            model: new Model.Rental({'id': result.rental_id})
+                        });
                     });
                 } else {
                     $rentalInfoArea.append('<button class="btn" href="#" id="rentalBookButton">' +

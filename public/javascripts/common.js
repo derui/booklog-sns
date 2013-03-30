@@ -21,7 +21,7 @@ requirejs(['lib/underscore', 'lib/zepto', 'lib/pure'], function () {
     })(Zepto);
 
     // Ajax共通処理：Ajax通信前処理
-    $(document).on('ajaxBeforeSend', function (e, xhr, options) {
+    $(document).on('ajaxBeforeSend', function (e, xhr) {
         // CSRF対策
         xhr.setRequestHeader('X-From', location.href);
     });
@@ -48,10 +48,40 @@ requirejs(['lib/underscore', 'lib/zepto', 'lib/pure'], function () {
 
             return json;
         },
-        getPrimaryKeyFromUrl: function (pathname) {
-            var pathname = pathname || location.pathname;
+        getPrimaryKeyFromUrl: function (paramPathname) {
+            var pathname = paramPathname || location.pathname;
 
             return pathname.split('/').pop();
+        },
+        environment: function (success, error) {
+            $.ajax({
+                url: '/api/detect_env',
+                success: function (data) {
+                    if (_.isFunction(success)) {
+                        success(data.environment);
+                    }
+                },
+                error: function () {
+                    if (_.isFunction(error)) {
+                        error();
+                    }
+                }
+            });
+        },
+        loginUserInfo: function (success, error) {
+            $.ajax({
+                url: '/api/login_user_info',
+                success: function (data) {
+                    if (_.isFunction(success)) {
+                        success(data.result[0]);
+                    }
+                },
+                error: function () {
+                    if (_.isFunction(error)) {
+                        error();
+                    }
+                }
+            });
         }
     });
 });
