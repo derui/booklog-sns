@@ -24,15 +24,14 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto'], 
     var BookShelfView = View.BaseView.extend({
         el: '.bookShelfInfo',
         initialize: function () {
-            _.bindAll(this, 'render');
-            this.model.bind('change', this.render);
+            this.model.on('change', this.render, this);
         },
         render: function () {
             var bookShelf = this.model.attributes.result[0];
             var book = bookShelf;
             this.$el.render({
                 "bookShelf": bookShelf,
-                "book" : book
+                "book": book
             }, {
                 '.shelf_name': function (arg) {
                     return arg.context.bookShelf.shelf_name;
@@ -41,6 +40,8 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto'], 
                     return arg.context.bookShelf.shelf_description;
                 }
             });
+
+            return this;
         }
     });
 
@@ -48,8 +49,7 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto'], 
     var BookListView = View.BaseView.extend({
         el: '.test',
         initialize: function () {
-            _.bindAll(this, 'render');
-            this.collection.bind('reset', this.render);
+            this.collection.on('reset', this.render, this);
         },
         render: function () {
             var models = this.collection.models;
@@ -58,15 +58,17 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto'], 
             }, {
                 '.bookInfoArea': {
                     'bookInfoArea<-books': {
-                        '.book_title' : function (arg) {
+                        '.book_title': function (arg) {
                             return arg.bookInfoArea.item.book_name;
                         },
-                        '.book_image@src' : function (arg) {
+                        '.book_image@src': function (arg) {
                             return arg.bookInfoArea.item.medium_image_url;
                         }
                     }
                 }
             });
+
+            return this;
         }
     });
 
@@ -80,7 +82,7 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto'], 
     var bookListView = new BookListView({
         collection: bookList
     });
-    bookList.fetch({data: $.param({'shelf': location.pathname.split('/').pop()})});
+    bookList.fetch({reset: true, data: $.param({'shelf': location.pathname.split('/').pop()})});
 
     $(function () {
         $('#registerBookButton').on('click', function () {

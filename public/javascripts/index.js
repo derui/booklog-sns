@@ -24,8 +24,7 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto'], 
     var RentalInfoListView = View.BaseView.extend({
         el: '.updateRentalInfos',
         initialize: function () {
-            _.bindAll(this, 'render');
-            this.collection.bind('reset', this.render);
+            this.collection.on('reset', this.render, this);
         },
         render: function () {
             var models = this.collection.models;
@@ -56,6 +55,8 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto'], 
                     }
                 }
             });
+
+            return this;
         }
     });
 
@@ -64,14 +65,13 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto'], 
         collection: rentalList
     });
 
-    rentalList.fetch({data: $.param({start: 0, rows: 5})});
+    rentalList.fetch({reset: true, data: $.param({start: 0, rows: 5})});
 
     // 本棚一覧のビュー
     var BookShelfInfoListView = View.BaseView.extend({
         el: '.updateBookShelfInfos',
         initialize: function () {
-            _.bindAll(this, 'render');
-            this.collection.bind('reset', this.render);
+            this.collection.on('reset', this.render, this);
         },
         render: function () {
             var models = this.collection.models;
@@ -92,6 +92,8 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto'], 
                     }
                 }
             });
+
+            return this;
         }
     });
 
@@ -100,7 +102,7 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto'], 
         collection: bookShelfList
     });
 
-    bookShelfList.fetch({data: $.param({start: 0, rows: 5})});
+    bookShelfList.fetch({reset: true, data: $.param({start: 0, rows: 5})});
 
     // ログアウトボタンのビュー
     var LogoutButtonView = View.BaseView.extend({
