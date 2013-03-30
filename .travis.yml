@@ -1,6 +1,6 @@
 language: scala
 scala:
-  - "2.10.0"
+  - 2.10.0
 services:
   - mysql
 jdk:
@@ -8,7 +8,7 @@ jdk:
 before_script:
   - mysql -e 'create database bookshelf'
 script:
-  - sbt -Dconfig.resource=ci.conf -DapplyEvolutions.default=true ++$SCALA_VERSION test
+  - sbt -Dconfig.resource=ci.conf -DapplyEvolutions.default=true test
 before_install:
   - sudo apt-get update -qq
 # develop branch only
