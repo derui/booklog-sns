@@ -54,10 +54,10 @@ trait Application extends Controller with JsonResponse with Composeable with Use
   def connect = Action {
     implicit request =>
       request.body.asJson match {
-        case None => BadRequest("Auth request must be json format!")
+        case None => error("認証時のフォーマットがJSONではありません")
         case Some(json) =>
           Token.fromJson(json) match {
-            case Left(e) => BadRequest(e)
+            case Left(e) => error(e)
             case Right(token) => {
               Connection.connect(token) match {
                 case Left(result) => resultToResponse(result)
@@ -106,13 +106,13 @@ trait Application extends Controller with JsonResponse with Composeable with Use
   // ConnectResultをレスポンス用の文字列に変換する
   private def resultToResponse[String](result: ConnectResult): PlainResult = {
     result match {
-      case ConnectResult.TokenError(e) => BadRequest(e.getMessage)
-      case ConnectResult.MissingAccessToken(m) => BadRequest(m)
-      case ConnectResult.VerificationError(m) => BadRequest(m)
-      case ConnectResult.GoogleApiError(m) => BadRequest(m)
-      case ConnectResult.UserUpdateError(id) => BadRequest("To update faied at %d" format id)
-      case ConnectResult.UserInsertError(m) => BadRequest(m)
-      case ConnectResult.UserNotFoundError(id) => BadRequest("User not found : id = %d" format id)
+      case ConnectResult.TokenError(e) => error(e.getMessage)
+      case ConnectResult.MissingAccessToken(m) => error(m)
+      case ConnectResult.VerificationError(m) => error(m)
+      case ConnectResult.GoogleApiError(m) => error(m)
+      case ConnectResult.UserUpdateError(id) => error("To update faied at %d" format id)
+      case ConnectResult.UserInsertError(m) => error(m)
+      case ConnectResult.UserNotFoundError(id) => error("User not found : id = %d" format id)
       case ConnectResult.UserNotAuthorizedError(e) => Unauthorized(e)
     }
   }
@@ -139,7 +139,7 @@ trait Application extends Controller with JsonResponse with Composeable with Use
             "shelf_description" -> nonEmptyText))
 
         form.bindFromRequest.fold(
-          e => BadRequest(e.errors.head.message),
+          e => error(e.errors.head.message),
           p => {
             db withSession {
               implicit ds =>
@@ -170,7 +170,7 @@ trait Application extends Controller with JsonResponse with Composeable with Use
           ))
 
         form.bindFromRequest.fold(
-          e => BadRequest(e.errors.head.message),
+          e => error(e.errors.head.message),
           p => {
             db.withTransaction {
               implicit ds =>
@@ -194,7 +194,7 @@ trait Application extends Controller with JsonResponse with Composeable with Use
             "rows" -> optional(number)))
 
         form.bindFromRequest.fold(
-          e => BadRequest(e.errors.head.message),
+          e => error(e.errors.head.message),
           p => {
             db.withSession {
               implicit ds =>
@@ -216,7 +216,7 @@ trait Application extends Controller with JsonResponse with Composeable with Use
           if (deleted == 1) {
             okJson(List())
           } else {
-            BadRequest(Json.obj("error" -> "指定された本棚が存在しません"))
+            error("指定された本棚が存在しません")
           }
       }
     }
@@ -233,7 +233,7 @@ trait Application extends Controller with JsonResponse with Composeable with Use
             "rows" -> optional(number)))
 
         form.bindFromRequest.fold(
-          e => BadRequest(e.errors.head.message),
+          e => error(e.errors.head.message),
           p => {
             db.withSession {
               implicit ds =>
@@ -269,7 +269,7 @@ trait Application extends Controller with JsonResponse with Composeable with Use
                 })
               val tupled = (x: BookShelves.BookShelfWithName) => JsonUtil.jsonWithUserName(x._1, x._2, x._3, BookShelves.toJson _)
               tupled(x).transform(transformer).fold(
-                invalid => BadRequest(Json.obj("error" -> invalid.toString)),
+                invalid => error(invalid.toString),
                 valid => okJsonOneOf(valid)
               )
             }
@@ -284,7 +284,7 @@ trait Application extends Controller with JsonResponse with Composeable with Use
       db withSession {
         implicit ds: DBSession =>
           Books.selectById(id) match {
-            case None => BadRequest(Json.obj("error" -> "指定された本が存在しません"))
+            case None => error("指定された本が存在しません")
             case Some(x) => okJsonOneOf(JsonUtil.jsonWithUserName(x._1, x._2, x._3, Books.toJson _))
           }
       }
@@ -300,12 +300,12 @@ trait Application extends Controller with JsonResponse with Composeable with Use
         )
 
         form.bindFromRequest.fold(
-          e => BadRequest(e.errors.head.message),
+          e => error(e.errors.head.message),
           p => {
             db withTransaction {
               implicit ds =>
                 UserInforms.selectById(getAuthUserId) match {
-                  case None => BadRequest(Json.obj("error" -> "ログインされていません"))
+                  case None => error("ログインされていません")
                   case Some(res) => {
                     val q = for {u <- UserInforms
                                  if u.userId === res.userId
@@ -325,7 +325,7 @@ trait Application extends Controller with JsonResponse with Composeable with Use
       db.withSession {
         implicit ds: DBSession =>
           UserInforms.selectById(getAuthUserId) match {
-            case None => BadRequest(Json.obj("error" -> "ユーザーの情報が見つかりません"))
+            case None => error("ユーザーの情報が見つかりません")
             case Some(res) => okJsonOneOf(UserInforms.toJson(res))
           }
       }

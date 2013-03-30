@@ -15,6 +15,7 @@ import play.api.libs.Files
 import play.api.libs.json.JsArray
 import play.api.libs.json.JsObject
 import play.api.libs.json.Json
+import scala.io.BufferedSource
 import scala.io.Source
 import scala.xml.Document
 import scala.xml.NodeSeq
@@ -38,7 +39,11 @@ object ItemSearch extends Request with Composeable {
   // ItemLookupの形式でリクエストを作成する。
   override def send(request : AWSRequest) : Document = {
     val source = Source.fromURL(makeRequestURI(request))
-    ConstructingParser.fromSource(source, false).document
+    try {
+      ConstructingParser.fromSource(source, false).document
+    } finally {
+      source.asInstanceOf[BufferedSource].close
+    }
   }
 
   // XMLを返却用に変換する

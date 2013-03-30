@@ -38,7 +38,7 @@ trait AWSRequest extends Controller with JsonResponse with Composeable {
         "page" -> optional(number))
 
       form.bindFromRequest.fold(
-        e => BadRequest(e.errors.head.message),
+        e => error(e.errors.head.message),
         p => {
           val ope = ParamGen.operation(_:List[ParamKey], "ItemSearch")
           val version = ParamGen.version(_:List[ParamKey])

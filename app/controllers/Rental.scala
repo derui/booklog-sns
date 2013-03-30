@@ -31,7 +31,7 @@ trait Rental extends Controller with JsonResponse with Composeable with UsePerDB
         db.withSession {
           implicit ds =>
             RentalInforms.selectById(id).flatMap(jsonize _) match {
-              case None => BadRequest(Json.obj("error" -> "Not found rental id given"))
+              case None => error("指定されたレンタル情報は存在しません")
               case Some(rental) => okJsonOneOf(rental)
             }
         }
@@ -68,7 +68,7 @@ trait Rental extends Controller with JsonResponse with Composeable with UsePerDB
             "rows" -> optional(number)))
 
         form.bindFromRequest.fold(
-          e => BadRequest(e.errors.head.message),
+          e => error(e.errors.head.message),
           p => {
             db.withSession {
               implicit ds =>
@@ -88,7 +88,7 @@ trait Rental extends Controller with JsonResponse with Composeable with UsePerDB
           "rental_book" -> number)
 
         form.bindFromRequest.fold(
-          e => BadRequest(Json.obj("error" -> e.errors.head.message)),
+          e => error(e.errors.head.message),
           p => {
             db withTransaction {
               implicit ds =>
