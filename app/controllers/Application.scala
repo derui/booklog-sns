@@ -65,7 +65,7 @@ trait Application extends Controller with JsonResponse with Composeable with Use
                   // すでに登録されているユーザーか、今回登録されたユーザー情報を返す。
                   // 認証が完了したユーザーについては、セッションに認証データを登録しておく
 
-                  Ok((userInfoToToken _ >> responseToJson _)(userInfo)).withSession {
+                  okJsonOneOf(UserInforms.toJson(userInfo)).withSession {
                     Connection.addAuthToSession(session, userInfo)
                   }
               }
@@ -115,17 +115,6 @@ trait Application extends Controller with JsonResponse with Composeable with Use
       case ConnectResult.UserNotFoundError(id) => error("User not found : id = %d" format id)
       case ConnectResult.UserNotAuthorizedError(e) => Unauthorized(e)
     }
-  }
-
-  // 渡されたUserInfoを返却用のjsonに変換する。
-  private def userInfoToToken(userInfo: UserInform): List[JsValue] = {
-    val json = UserInforms.toJson(userInfo)
-    List(Json.obj("id" -> (json \ "user_id").as[Long],
-      "googleUserId" -> (json \ "google_user_id").as[String],
-      "googleDisplayName" -> (json \ "google_display_name").as[String],
-      "googlePublicProfileUrl" -> (json \ "google_public_profile_url").as[String],
-      "googlePublicProfilePhotoUrl" -> (json \ "google_public_profile_photo_url").as[String],
-      "googleExpiresAt" -> (json \ "google_expires_at").as[Long]))
   }
 
   case class Shelf(name: String)
