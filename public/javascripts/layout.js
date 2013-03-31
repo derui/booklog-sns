@@ -24,11 +24,7 @@ requirejs(['lib/backbone', 'view', 'lib/pure', 'lib/zepto', 'common'], function 
     _.loginUserInfo(
         // ログインユーザの情報が取得できた場合、ログインユーザの情報を表示する
         function (loginUserInfo) {
-            $('#signinArea').prepend('<span id="loginUserInfoArea">' +
-                '<img src="' + loginUserInfo.google_public_profile_photo_url + '" id="profilePhoto" />' +
-                '<span>' + loginUserInfo.google_display_name + '</span>' +
-                '</span>');
-            $('#logoutButton').removeClass('disabled');
+            showLoginUserInfo(loginUserInfo);
         },
         // ログインユーザの情報が取得できなかった場合、未ログインとみなす
         function () {
@@ -36,37 +32,38 @@ requirejs(['lib/backbone', 'view', 'lib/pure', 'lib/zepto', 'common'], function 
         });
 
     // ログアウトボタンのビュー
-    var LogoutButtonView = View.BaseView.extend({
-        el: '#logoutButton',
-        events: {
-            "click": "logout"
-        },
-        logout: function () {
-            var $logoutButton = this.$el;
-            if ($logoutButton.hasClass('disabled')) {
-                return;
-            }
-
-            $.ajax({
-                type: 'POST',
-                url: '/api/logout',
-                success: function () {
-                    $('#loginUserInfoArea').remove();
-                    $logoutButton.addClass('disabled');
-                    var $signinButton = $('#___signin_0');
-
-                    if ($signinButton.length) {
-                        $signinButton.css('display', 'inline-block').show();
-                    } else {
-                        loginGooglePlus();
-                    }
-
-                }
-            });
-        }
-    });
-
-    var logoutButtonView = new LogoutButtonView();
+    // TODO ログアウト処理再検討のため、コメントアウト
+//    var LogoutButtonView = View.BaseView.extend({
+//        el: '#logoutButton',
+//        events: {
+//            "click": "logout"
+//        },
+//        logout: function () {
+//            var $logoutButton = this.$el;
+//            if ($logoutButton.hasClass('disabled')) {
+//                return;
+//            }
+//
+//            $.ajax({
+//                type: 'POST',
+//                url: '/api/logout',
+//                success: function () {
+//                    $('#loginUserInfoArea').remove();
+//                    $logoutButton.addClass('disabled');
+//                    var $signinButton = $('#___signin_0');
+//
+//                    if ($signinButton.length) {
+//                        $signinButton.css('display', 'inline-block').show();
+//                    } else {
+//                        loginGooglePlus();
+//                    }
+//
+//                }
+//            });
+//        }
+//    });
+//
+//    var logoutButtonView = new LogoutButtonView();
 
     function loginGooglePlus() {
         // Google+でログイン後に呼ばれるコールバック関数を定義する
@@ -84,11 +81,7 @@ requirejs(['lib/backbone', 'view', 'lib/pure', 'lib/zepto', 'common'], function 
                     success: function (response) {
                         var loginUserInfo = response.result[0];
                         $('#___signin_0').hide();
-                        $('#signinArea').prepend('<span id="loginUserInfoArea">' +
-                            '<img src="' + loginUserInfo.googlePublicProfilePhotoUrl + '" id="profilePhoto" />' +
-                            '<span>' + loginUserInfo.googleDisplayName + '</span>' +
-                            '</span>');
-                        $('#logoutButton').removeClass('disabled');
+                        showLoginUserInfo(loginUserInfo);
                     }
                 });
             } else {
@@ -131,5 +124,13 @@ requirejs(['lib/backbone', 'view', 'lib/pure', 'lib/zepto', 'common'], function 
 
             var signinButtonView = new SigninButtonView();
         });
+    }
+
+    function showLoginUserInfo(loginUserInfo) {
+        $('#signinArea').prepend('<span id="loginUserInfoArea">' +
+            '<img src="' + loginUserInfo.google_public_profile_photo_url + '" id="profilePhoto" />' +
+            '<span>' + loginUserInfo.google_display_name + '</span>' +
+            '</span>');
+        $('#logoutButton').removeClass('disabled');
     }
 });
