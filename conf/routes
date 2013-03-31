@@ -29,6 +29,7 @@ GET     /api/rental/             application.Rental.getRentalInfoByBookId
 GET     /api/rental/*id          application.Rental.getRentalDetails(id: Long)
 POST    /api/rental              application.Rental.doRental
 DELETE     /api/rental/*id          application.Rental.returnRentalBook(id:Long)
+GET     /api/rental_history/     application.Rental.getRentalHistory
 
 # Get book infomations from Amazon Advertise API
 GET     /api/amazon_search/*keyword       application.AWSRequest.searchBy(keyword:String)

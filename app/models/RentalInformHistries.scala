@@ -7,19 +7,15 @@ import play.api.libs.functional.syntax._
 import scala.slick.driver.MySQLDriver.simple._
 import scala.language.postfixOps
 
-case class RentalInform(rentalId: Long, rentalUserId: Long,
-  rentalBookId: Long, rentalNow : Boolean,
-  created: Timestamp, createdUser: Long,
-  updated: Timestamp, updatedUser: Long)
-
 /**
- * 本棚データベースに対する操作をまとめたオブジェクト
+ * レンタル情報についての履歴を管理するテーブル。レンタル情報と制約以外は同一の
+ * インターフェースを保持する。
  */
-object RentalInforms extends Table[RentalInform]("rental_info") {
+object RentalInformHistories extends Table[RentalInform]("rental_info_history") {
 
   type RentalInfoWithName = (RentalInform, String, String)
-
-  def rentalId = column[Long]("rental_id", O PrimaryKey, O AutoInc)
+  
+  def rentalId = column[Long]("rental_id")
   def rentalUserId = column[Long]("rental_user_id")
   def rentalBookId = column[Long]("rental_book_id")
   def rentalNow = column[Boolean]("rental_now", O DBType "varchar (1)")
@@ -31,60 +27,40 @@ object RentalInforms extends Table[RentalInform]("rental_info") {
   def * = rentalId ~ rentalUserId ~ rentalBookId ~ rentalNow ~ createdDate ~ createdUser ~
   updatedDate ~ updatedUser <> (RentalInform, RentalInform.unapply _)
 
-  def ins = rentalUserId ~ rentalBookId ~ rentalNow ~ createdDate ~ createdUser ~
-    updatedDate ~ updatedUser returning rentalId
-
-  // rentalIdに一致する一件を取得する
-  def selectById(rentalId : Long)(implicit session :Session) : Option[RentalInfoWithName] = {
+  // rentalIdの履歴を取得する。
+  def selectById(rentalId : Long)(implicit session :Session) : List[RentalInfoWithName] = {
     val query = for {
-      r <- RentalInforms
+      r <- RentalInformHistories
       u <- UserInforms
       c <- UserInforms
       if r.createdUser === c.userId && r.updatedUser === u.userId && r.rentalId === rentalId
     } yield (r, c.userDisplayName, u.userDisplayName)
 
-    query.firstOption
+    query.list
   }
 
-  // bookIdに一致する一件を取得する。
-  def selectByBookId(bookId : Long)(implicit session : Session) : Option[RentalInfoWithName] = {
+  // bookIdに一致する履歴を取得する
+  def selectByBookId(bookId : Long)(implicit session : Session) : List[RentalInfoWithName] = {
     val query = for {
-      r <- RentalInforms
+      r <- RentalInformHistories
       u <- UserInforms
       c <- UserInforms
       if r.createdUser === c.userId && r.updatedUser === u.userId && r.rentalBookId === bookId
     } yield (r, c.userDisplayName, u.userDisplayName)
 
-    query.firstOption
+    query.list
   }
 
-  // 全体から取得する。開始または限度が渡された場合は、それに基づいて取得する。
-  def findAll(start: Option[Int], limits:Option[Int])(implicit session : Session) : List[RentalInfoWithName] ={
+  // userIdに一致する履歴を取得する
+  def selectByUserId(userId : Long)(implicit session : Session) : List[RentalInfoWithName] = {
     val query = for {
-      r <- RentalInforms.sortBy(_.updatedDate.desc)
+      r <- RentalInformHistories
       u <- UserInforms
       c <- UserInforms
-      if r.createdUser === c.userId && r.updatedUser === u.userId
+      if r.createdUser === c.userId && r.updatedUser === u.userId && r.rentalUserId === userId
     } yield (r, c.userDisplayName, u.userDisplayName)
 
-    (start, limits) match {
-      case (Some(s), None) => query.drop(s).list
-      case (None, Some(l)) => query.take(l).list
-      case (Some(s), Some(l)) => query.drop(s).take(l).list
-      case _ => query.list
-    }
-  }
-
-  // 指定されたレンタル情報を削除する。削除されたレンタル情報は、レンタル履歴に新たに登録される。
-  def delete(rentalId: Long)(implicit session :Session) : Int = {
-    val query = for {
-      r <- RentalInforms
-      if r.rentalId === rentalId
-    } yield (r)
-
-    val rental = query.first
-    RentalInformHistories.insert(rental)
-    query.delete
+    query.list
   }
 
   // 対象をjsonに変換する

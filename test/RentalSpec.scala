@@ -42,6 +42,7 @@ class RentalSpec extends Specification {
           (for {s <- Books} yield s).delete
           (for {s <- UserInforms} yield s).delete
           (for {s <- RentalInforms} yield s).delete
+          (for {s <- RentalInformHistories} yield s).delete
       }
     }
   }
@@ -67,6 +68,58 @@ class RentalSpec extends Specification {
         ((info \ "result")(0) \ "rental_user_id").as[Long] must be_==(0L)
         ((info \ "result")(0) \ "rental_book_id").as[Long] must be_==(0L)
         ((info \ "result")(0) \ "rental_now").as[Boolean] must beTrue
+      }
+    }
+
+    "be able to return book rentaled" in new WithApplication {
+      new OneData {
+        val req: Map[String, Seq[String]] = Map("rental_book" -> Seq("0"))
+        val result = route(FakeRequest(POST, "/api/rental").withHeaders(
+          CONTENT_TYPE -> "application/x-www-form-urlencode"), req)
+
+        result must beSome
+        status(result.get) must beEqualTo(OK)
+
+        val rentalId: Long =
+          ((Json.parse(contentAsString(result.get)) \ "result")(0) \ "rental_id").as[Long]
+
+        val rentaled = route(FakeRequest(DELETE, "/api/rental/%d" format rentalId))
+
+        rentaled must beSome
+        status(result.get) must beEqualTo(OK)
+
+        status(route(FakeRequest(GET, "/api/rental/%d" format rentalId)).get) must beEqualTo(BAD_REQUEST)
+      }
+    }
+
+    "register rental history information when delete it" in new WithApplication {
+      new OneData {
+        val req: Map[String, Seq[String]] = Map("rental_book" -> Seq("0"))
+        val result = route(FakeRequest(POST, "/api/rental").withHeaders(
+          CONTENT_TYPE -> "application/x-www-form-urlencode"), req)
+
+        result must beSome
+        status(result.get) must beEqualTo(OK)
+
+        val rentalId: Long =
+          ((Json.parse(contentAsString(result.get)) \ "result")(0) \ "rental_id").as[Long]
+
+        val rentaled = route(FakeRequest(DELETE, "/api/rental/%d" format rentalId))
+
+        rentaled must beSome
+        status(result.get) must beEqualTo(OK)
+
+        val history = route(FakeRequest(GET, "/api/rental_history/?book_id=0"))
+
+        history must beSome
+        status(history.get) must beEqualTo(OK)
+
+        val hist = Json.parse(contentAsString(history.get))
+        (hist \ "totalCount").as[Long] must be_==(1L)
+        ((hist \ "result")(0) \ "rental_id").as[Long] must be_==(rentalId)
+        ((hist \ "result")(0) \ "rental_user_id").as[Long] must be_==(0L)
+        ((hist \ "result")(0) \ "rental_book_id").as[Long] must be_==(0L)
+        ((hist \ "result")(0) \ "rental_now").as[Boolean] must beTrue
       }
     }
 
