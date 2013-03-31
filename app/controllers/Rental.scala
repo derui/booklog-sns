@@ -50,7 +50,8 @@ trait Rental extends Controller with JsonResponse with Composeable with UsePerDB
 
         val transformer = (__).json.update(
           __.read[JsObject].map {
-            o => o ++ Json.obj("large_image_url" -> book.largeImageUrl,
+            o => o ++ Json.obj("rental_book_name" -> book.name,
+              "large_image_url" -> book.largeImageUrl,
               "medium_image_url" -> book.mediumImageUrl,
               "small_image_url" -> book.smallImageUrl)
           })
