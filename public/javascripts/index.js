@@ -55,6 +55,9 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto', '
                                 'さんが' +
                                 moment(rentalInfo.updated_date).format('YYYY/MM/DD') +
                                 'にレンタルしました';
+                        },
+                        '.rentalUserInfo@class+': function (arg) {
+                            return ' alert alert-info';
                         }
                     }
                 }
