@@ -1,4 +1,4 @@
-requirejs(['lib/underscore', 'lib/zepto', 'lib/pure'], function () {
+requirejs(['lib/underscore', 'lib/zepto', 'lib/pure', 'lib/moment'], function () {
     'use strict';
 
     // PUREをZepto.jsで使えるようにするおまじない
@@ -82,6 +82,12 @@ requirejs(['lib/underscore', 'lib/zepto', 'lib/pure'], function () {
                     }
                 }
             });
+        },
+        convertLineBreak2BR: function (targetText) {
+            return _(targetText).replaceAll('\n', '<br />');
+        },
+        parseDateForJST: function (targetDate) {
+            return moment(targetDate).add('hours', 9);
         }
     });
 });

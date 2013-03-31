@@ -91,10 +91,10 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto', '
                             return '<a href="/book_shelf/detail/' + arg.bookshelfInfo.item.shelf_id + '">' + arg.bookshelfInfo.item.shelf_name + '</a>';
                         },
                         '.description': function (arg) {
-                            return _(arg.bookshelfInfo.item.shelf_description).replaceAll('\n', '<br />');
+                            return _.convertLineBreak2BR(arg.bookshelfInfo.item.shelf_description);
                         },
                         '.update_date': function (arg) {
-                            return moment(arg.bookshelfInfo.item.updated_date).format('YYYY/MM/DD HH:mm');
+                            return _.parseDateForJST(arg.bookshelfInfo.item.updated_date).format('YYYY/MM/DD HH:mm');
                         }
                     }
                 }
