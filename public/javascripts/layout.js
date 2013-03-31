@@ -101,7 +101,7 @@ requirejs(['lib/backbone', 'view', 'lib/pure', 'lib/zepto', 'common'], function 
             var clientid = '';
 
             // 環境に応じてclientidを切り替える
-            switch (_.environment()) {
+            switch (environment) {
                 case 'develop':
                     clientid = '881447546058.apps.googleusercontent.com';
                     break;
