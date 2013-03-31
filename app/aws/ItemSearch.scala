@@ -48,8 +48,8 @@ object ItemSearch extends Request with Composeable {
 
   // XMLを返却用に変換する
   def documentToJson(doc:Document) : (JsObject, Int) = {
+    val res = I.itemSearchResponse(doc)
     val items = itemsToJson(I.items(doc))
-
     (Json.obj("total_result" -> I.totalResults(doc).text.toInt,
       "total_page" -> I.totalPage(doc).text.toInt,
       "items" -> JsonUtil.listToArray(items)),
@@ -74,7 +74,7 @@ object ItemSearch extends Request with Composeable {
 
   // 実行時のタイムスタンプを取得する
   private def timestamp:String = {
-    val fmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+    val fmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.000Z'")
     fmt.setTimeZone(TimeZone.getTimeZone("GMT"))
     fmt.format(Calendar.getInstance.getTime)
   }
@@ -97,12 +97,11 @@ object ItemSearch extends Request with Composeable {
   private def makeSignature(secretKey:String, base:String): Param = {
     val spec = new SecretKeySpec(secretKey.getBytes, "HmacSHA256")
 
-    val mac = Mac.getInstance("HmacSHA256")
+    val mac = Mac.getInstance(spec.getAlgorithm())
     mac.init(spec)
-
-    val baseByteArray = base.getBytes("UTF-8")
-
-    val rawHmac = mac.doFinal(baseByteArray)
+    
+    val rawHmac = mac.doFinal(base.getBytes("UTF-8"))
+    
     Param("Signature", Base64Util.encode(rawHmac))
   }
 }

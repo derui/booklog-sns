@@ -8,9 +8,12 @@ import scala.xml.XML
 object ItemLookupTag {
 
   // ルートに存在するタグ
-  def items(doc:NodeSeq): NodeSeq = doc \ "Item"
-  def totalPage(doc:NodeSeq): NodeSeq = doc \ "TotalPages"
-  def totalResults(doc:NodeSeq): NodeSeq = doc \ "TotalResults"
+  def itemSearchResponse(doc:NodeSeq): NodeSeq = doc \ "ItemSearchResponse"
+
+  // ItemSearchResponse直下に存在するタグ
+  def items(doc:NodeSeq): NodeSeq = doc \\ "Item"
+  def totalPage(doc:NodeSeq): NodeSeq = doc \\ "TotalPages"
+  def totalResults(doc:NodeSeq): NodeSeq = doc \\ "TotalResults"
 
   // Item内に存在するタグ
   def itemAttributes(doc:NodeSeq):NodeSeq = doc \ "ItemAttributes"

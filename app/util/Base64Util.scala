@@ -15,8 +15,8 @@ object Base64Util {
     val masks = List(doMask(_:Int, 18), doMask(_:Int, 12), doMask(_:Int, 6),
       doMask(_:Int, 0))
 
-    val base = baseData << (2 - srcLength)
-    val chars = masks.drop(srcLength + 2).map{f => f(base)}.map(x => base64Char(x))
+    val base = baseData << 8 * (3 - srcLength)
+    val chars = masks.take(srcLength + 1).map{f => f(base)}.map(x => base64Char(x))
     (chars ::: List.fill(4 - chars.length)('=')).foldLeft(new StringBuilder()) { (builder, x) =>
       builder.append(x)
     }.toString
@@ -28,7 +28,8 @@ object Base64Util {
     def encodePer24 : (List[Int]) => List[String] = list => list match {
       case Nil => List()
       case x :: Nil => List(encode24(x, 1))
-      case x :: y :: rest => encode24(x << 8 | y, 2) :: encodePer24(rest)
+      case x :: y :: Nil => List(encode24((x << 8) + y, 2))
+      case x :: y :: z :: rest => encode24((x << 16) + (y << 8) + z, 3) :: encodePer24(rest)
     }
 
     encodePer24(dataList.map(x => if (x < 0) x + 256 else x))

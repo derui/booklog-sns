@@ -29,7 +29,7 @@ trait AWSRequest extends Controller with JsonResponse with Composeable {
   val commonParam = ParamGen.common(List(), accessKey, associateTag)
 
   private def makeRequest(param:List[ParamKey]) : Request = {
-    Request(ParamGen.format(param), accessKey, secretKey, associateTag, amazonURL)
+    Request(ParamGen.format(param), secretKey, accessKey, associateTag, amazonURL)
   }
 
   def searchBy(keyword:String) = Authenticated {
