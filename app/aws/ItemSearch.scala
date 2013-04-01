@@ -62,8 +62,8 @@ object ItemSearch extends Request with Composeable {
       val attr = I.itemAttributes(item)
       Json.obj("author" -> I.author(attr).text,
         "title" -> I.title(attr).text,
-        "isbn" -> I.title(attr).text,
-        "ean" -> I.title(attr).text,
+        "isbn" -> I.isbn(attr).text,
+        "ean" -> I.ean(attr).text,
         "asin" -> I.asin(attr).text,
         "publication_date" -> I.publicationDate(attr).text,
         "small_image" -> (I.url _ << I.smallImage _)(item).text,
