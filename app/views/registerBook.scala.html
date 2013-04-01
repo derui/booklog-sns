@@ -8,58 +8,21 @@
 @layout("書籍を登録する - Social BookShelf")(styles)(script) {
     <ul class="breadcrumb">
         <li><a href="/">トップ</a> <span class="divider">/</span> <a href="/book_shelf/detail/" id="bookshelfAnchorLink">本棚詳細</a> <span class="divider">/</span> </li>
-        <li class="active">書籍を登録する</li>
+        <li class="active">書籍登録</li>
     </ul>
-    <h2>書籍を登録する</h2>
-    <form id="registerBookForm" class="form-horizontal">
-        <div class="control-group">
-            <label class="control-label" for="bookName">書籍名<span class="required">*</span></label>
-            <div class="controls">
-                <input type="text" id="bookName" class="input-xlarge" name="book_name" required maxlength="50" />
-            </div>
-        </div>
-        <div class="control-group">
-            <label class="control-label" for="bookAuthor">著者名<span class="required">*</span></label>
-            <div class="controls">
-                <input type="text" id="bookAuthor" class="input-xlarge" name="book_author" required maxlength="50" />
-            </div>
-        </div>
-        <div class="control-group">
-            <label class="control-label" for="largeImageUrl">書籍の画像（大）</label>
-            <div class="controls">
-                <input type="text" id="largeImageUrl" class="input-xlarge" name="large_image_url" maxlength="100" />
-            </div>
-        </div>
-        <div class="control-group">
-            <label class="control-label" for="mediumImageUrl">書籍の画像（中）</label>
-            <div class="controls">
-                <input type="text" id="mediumImageUrl" class="input-xlarge" name="medium_image_url" maxlength="100" />
-            </div>
-        </div>
-        <div class="control-group">
-            <label class="control-label" for="smallImageUrl">書籍の画像（小）</label>
-            <div class="controls">
-                <input type="text" id="smallImageUrl" class="input-xlarge" name="small_image_url" maxlength="100" />
-            </div>
-        </div>
-        <div class="control-group">
-            <label class="control-label" for="bookIsbn">ISBN</label>
-            <div class="controls">
-                <input type="text" id="bookIsbn" class="input-xlarge" name="book_isbn" maxlength="50" />
-            </div>
-        </div>
-        <div class="control-group">
-            <label class="control-label" for="publishedDate">出版年月日</label>
-            <div class="controls">
-                <input type="date" id="publishedDate" class="input-xlarge" name="published_date" maxlength="10" pattern="^[0-9]{2}[/][0-9]{2}[/][0-9]{2}$" />
-            </div>
-        </div>
-
-        <div class="control-group">
-            <div class="controls">
-              <button type="submit" id="makeBookButton" class="btn">作成</button>
-            </div>
-        </div>
+    <h2>本棚に追加する書籍を検索する</h2>
+    <form id="searchBookForm" class="form-horizontal">
+        <input type="text" class="input-xlarge search-query" id="searchBookKeyword" placeholder="本のタイトル、作家名、キーワードなど" required maxlength="50" />
+        <button type="submit" class="btn" id="searchBookButton">検索</button>
     </form>
-    </div>
+    <script type="text/template" id="bookInfoTemplate">
+        <div class="bookInfo">
+            <h3 class="book_title"><%= title %></h3>
+            <img src="<%= medium_image %>" class="book_image img-polaroid" />
+            <p class="book_author"><%= author %></p>
+            <p class="published_date"><%= publication_date %></p>
+            <button class="btn registerButton" type="button">この本を追加する</button>
+        </div>
+    </script>
+    <div id="searchResultBookList"></div>
 }

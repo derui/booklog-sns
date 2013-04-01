@@ -23,38 +23,69 @@ requirejs.config({
 requirejs(['lib/backbone', 'model', 'view', 'common', 'lib/zepto', 'lib/moment'], function (Backbone, Model, View) {
     'use strict';
 
-    var shelfId = _.queryString2json()['shelf_id'];
+    var SearchBookFormView = View.BaseView.extend({
+        events: {'submit': 'searchBookForAmazon'},
+        searchBookForAmazon: function () {
+            $('#searchBookButton').attr('disabled', 'disabled');
+            $('#searchResultBookList').empty();
+            $.getJSON('/api/amazon_search/' + encodeURIComponent($('#searchBookKeyword').val()),
+                function (data) {
+                    var books = data.result.items;
+                    for (var i = 0, book; book = books[i]; ++i) {
+                        var bookView = new searchResultBookView({model: new Model.Book(book)});
+                        bookView.render();
+                    }
 
-    var RegisterBookFormView = View.BaseView.extend({
-        events: {'submit': 'save'},
-        initialize: function () {
-            _.bindAll(this, 'save');
-        }, save: function () {
-            var arr = this.$el.serializeArray();
-            var data = _(arr).reduce(function (acc, field) {
-                var value = field.value;
+                    $('#searchBookButton').removeAttr('disabled');
 
-                if (value) {
-                    acc[field.name] = value;
-                }
+                    var RegisterButtonView = View.BaseView.extend({
+                        el: '.registerButton',
+                        events: {
+                            'click': 'registerBook'
+                        },
+                        registerBook: function (e) {
+                            var $targetBookInfo = $(e.target).closest('.bookInfo');
+                            var bookInfo = JSON.parse($targetBookInfo.data('bookInfoJson'));
+                            var data = {
+                                'shelf_id': shelfId,
+                                'book_name': bookInfo.title,
+                                'book_author': bookInfo.author,
+                                'large_image_url': bookInfo.large_image,
+                                'medium_image_url': bookInfo.medium_image,
+                                'small_image_url': bookInfo.small_image,
+                                'book_isbn': bookInfo.isbn,
+                                'published_date': bookInfo.publication_date
+                                    ? moment(bookInfo.publication_dat).format('YYYY/MM/DD')
+                                    : ''
+                            };
 
-                return acc;
-            }, {});
+                            this.model.save(data, {success: function (model, response, options) {
+                                location.href = '/book/detail/' + response.result[0].id;
+                            }});
 
-            data['shelf_id'] = shelfId;
+                            return false;
+                        }
+                    });
 
-            if (data['published_date']) {
-                data['published_date'] = moment(data['published_date']).format('YYYY/MM/DD');
-            }
-
-            this.model.save(data, {success: function (model, response, options) {
-                location.href = '/book/detail/' + response.result[0].id;
-            }});
+                    var registerButtonView = new RegisterButtonView({model: new Model.Book()});
+                });
             return false;
         }
     });
 
-    var registerBookFormView = new RegisterBookFormView({el: $('#registerBookForm'), model: new Model.Book()});
+    var searchBookFormView = new SearchBookFormView({el: $('#searchBookForm')});
+    var shelfId = _.queryString2json()['shelf_id'];
+
+    var searchResultBookView = View.BaseView.extend({
+        el: '#searchResultBookList',
+        render: function () {
+            var bookModelJson = this.model.toJSON();
+            var bookInfo = _.template($("#bookInfoTemplate").html(), bookModelJson);
+            var $bookInfo = $(bookInfo);
+            $bookInfo.data('bookInfoJson', JSON.stringify(bookModelJson));
+            this.$el.append($bookInfo);
+        }
+    });
 
     $(function () {
         var $bookshelfAnchorLink = $('#bookshelfAnchorLink');

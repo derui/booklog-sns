@@ -49,6 +49,10 @@ h2 {
     font-size: 1.8em;
 }
 
+h3 {
+    font-size: 1.5em;
+}
+
 h1, h2, h3 {
     line-height: 1.5;
 }
