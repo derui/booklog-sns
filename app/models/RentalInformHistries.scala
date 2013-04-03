@@ -11,7 +11,7 @@ import scala.language.postfixOps
  * レンタル情報についての履歴を管理するテーブル。レンタル情報と制約以外は同一の
  * インターフェースを保持する。
  */
-object RentalInformHistories extends Table[RentalInform]("rental_info_history") {
+object RentalInformHistories extends Table[RentalInform]("rental_info_history") with Logging {
 
   type RentalInfoWithName = (RentalInform, String, String)
   
@@ -36,6 +36,8 @@ object RentalInformHistories extends Table[RentalInform]("rental_info_history") 
       if r.createdUser === c.userId && r.updatedUser === u.userId && r.rentalId === rentalId
     } yield (r, c.userDisplayName, u.userDisplayName)
 
+    log(query)
+
     query.list
   }
 
@@ -48,6 +50,8 @@ object RentalInformHistories extends Table[RentalInform]("rental_info_history") 
       if r.createdUser === c.userId && r.updatedUser === u.userId && r.rentalBookId === bookId
     } yield (r, c.userDisplayName, u.userDisplayName)
 
+    log(query)
+
     query.list
   }
 
@@ -59,6 +63,8 @@ object RentalInformHistories extends Table[RentalInform]("rental_info_history") 
       c <- UserInforms
       if r.createdUser === c.userId && r.updatedUser === u.userId && r.rentalUserId === userId
     } yield (r, c.userDisplayName, u.userDisplayName)
+
+    log(query)
 
     query.list
   }

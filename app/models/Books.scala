@@ -17,7 +17,7 @@ case class Book(bookId: Long, shelfId: Long, name: String,
                 updated: Timestamp, updatedUser: Long)
 
 // それぞれの本に対する操作を提供する
-object Books extends Table[Book]("book") {
+object Books extends Table[Book]("book") with Logging {
 
   type BookWithName = (Book, String, String)
 
@@ -67,6 +67,9 @@ object Books extends Table[Book]("book") {
       u <- UserInforms
       if b.bookId === bookId && b.createdUser === c.userId && b.updatedUser === u.userId
     } yield (b, c.userDisplayName, u.userDisplayName)
+
+    log(query)
+
     query.firstOption
   }
 
@@ -81,6 +84,8 @@ object Books extends Table[Book]("book") {
       b.shelfId === shelfId
     } yield (b, c.userDisplayName, u.userDisplayName)
 
+    log(query)
+
     (start, limits) match {
       case (Some(s), None) => query.drop(s).list
       case (None, Some(l)) => query.take(l).list
@@ -91,10 +96,12 @@ object Books extends Table[Book]("book") {
 
   // 指定されたbookIdのBookを削除する
   def delete(id : Long)(implicit session: Session): Int = {
-     (for {
+    val q = (for {
        b <- Books
        if b.bookId === id
-     } yield (b)).delete
+     } yield (b))
+    log(q)
+    q.delete
   }
 
   def toJson(book: Book): JsValue = {

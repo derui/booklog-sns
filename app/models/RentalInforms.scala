@@ -15,7 +15,7 @@ case class RentalInform(rentalId: Long, rentalUserId: Long,
 /**
  * 本棚データベースに対する操作をまとめたオブジェクト
  */
-object RentalInforms extends Table[RentalInform]("rental_info") {
+object RentalInforms extends Table[RentalInform]("rental_info") with Logging {
 
   type RentalInfoWithName = (RentalInform, String, String)
 
@@ -43,6 +43,8 @@ object RentalInforms extends Table[RentalInform]("rental_info") {
       if r.createdUser === c.userId && r.updatedUser === u.userId && r.rentalId === rentalId
     } yield (r, c.userDisplayName, u.userDisplayName)
 
+    log(query)
+
     query.firstOption
   }
 
@@ -55,6 +57,8 @@ object RentalInforms extends Table[RentalInform]("rental_info") {
       if r.createdUser === c.userId && r.updatedUser === u.userId && r.rentalBookId === bookId
     } yield (r, c.userDisplayName, u.userDisplayName)
 
+    log(query)
+
     query.firstOption
   }
 
@@ -66,6 +70,8 @@ object RentalInforms extends Table[RentalInform]("rental_info") {
       c <- UserInforms
       if r.createdUser === c.userId && r.updatedUser === u.userId
     } yield (r, c.userDisplayName, u.userDisplayName)
+
+    log(query)
 
     (start, limits) match {
       case (Some(s), None) => query.drop(s).list
@@ -81,6 +87,8 @@ object RentalInforms extends Table[RentalInform]("rental_info") {
       r <- RentalInforms
       if r.rentalId === rentalId
     } yield (r)
+
+    log(query)
 
     val rental = query.first
     RentalInformHistories.insert(rental)

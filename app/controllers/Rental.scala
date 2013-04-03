@@ -2,6 +2,7 @@ package controllers
 
 import java.sql.Timestamp
 import models._
+import play.api.Logger
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.json.JsValue
@@ -10,6 +11,7 @@ import play.api.libs.json.Json.toJsFieldJsValueWrapper
 import play.api.mvc._
 import util._
 import play.api.libs.json._
+import play.api.Play.current
 import scala.Some
 import models.DBWrap.UsePerDB
 import java.util.Calendar
@@ -22,7 +24,6 @@ import scala.slick.driver.MySQLDriver.simple.{Session => DBSession}
   */
 trait Rental extends Controller with JsonResponse with Composeable with UsePerDB {
   this: Security =>
-
 
   // 指定されたレンタル情報を取得する
   def getRentalDetails(id: Long) = Authenticated {

@@ -13,7 +13,7 @@ case class BookShelf(id: Long, name: String, description: String, created: Times
 /**
  * 本棚データベースに対する操作をまとめたオブジェクト
  */
-object BookShelves extends Table[BookShelf]("book_shelf") {
+object BookShelves extends Table[BookShelf]("book_shelf") with Logging {
 
   type BookShelfWithName = (BookShelf, String, String)
 
@@ -43,6 +43,9 @@ object BookShelves extends Table[BookShelf]("book_shelf") {
       c <- UserInforms
       if b.createdUser === c.userId && b.updatedUser === u.userId && b.id === shelfId
     } yield (b, c.userDisplayName, u.userDisplayName)
+
+    log(query)
+
     query.firstOption
   }
 
@@ -55,6 +58,8 @@ object BookShelves extends Table[BookShelf]("book_shelf") {
       if bs.createdUser === c.userId && bs.updatedUser === u.userId
     } yield (bs, c.userDisplayName, u.userDisplayName)
 
+    log(query)
+
     (start, limits) match {
       case (Some(s), None) => query.drop(s).list
       case (None, Some(l)) => query.take(l).list
@@ -64,8 +69,12 @@ object BookShelves extends Table[BookShelf]("book_shelf") {
   }
 
   // 対象の本棚を削除する。
-  def delete(shelfId :Long)(implicit session:Session): Int =
-    (for {b <- BookShelves if b.id === shelfId} yield b).delete
+  def delete(shelfId :Long)(implicit session:Session): Int = {
+    val q = (for {b <- BookShelves if b.id === shelfId} yield b)
+    log(q)
+    q.delete
+  }
+
   
   // 対象をjsonに変換する
   def toJson(target: BookShelf): JsValue = {
