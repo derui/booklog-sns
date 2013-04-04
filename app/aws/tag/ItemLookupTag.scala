@@ -9,6 +9,9 @@ object ItemLookupTag {
 
   // ルートに存在するタグ
   def itemSearchResponse(doc:NodeSeq): NodeSeq = doc \ "ItemSearchResponse"
+  def itemLookupResponse(doc:NodeSeq): NodeSeq = doc \ "ItemLookupResponse"
+
+  def isValid(doc:NodeSeq) : NodeSeq = doc \ "IsValid"
 
   // ItemSearchResponse直下に存在するタグ
   def items(doc:NodeSeq): NodeSeq = doc \\ "Item"

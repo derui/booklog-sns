@@ -1,41 +1,35 @@
-<!DOCTYPE html>
-<html lang="ja">
-  <head>
-    <meta charset="utf-8">
-    <title>Social BookShelf</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="@routes.Assets.at("stylesheets/base.css")" rel="stylesheet">
-    <link href="@routes.Assets.at("stylesheets/main.css")" rel="stylesheet">
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
-    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.3/angular.min.js"></script>
-    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.2/jquery-ui.min.js"></script>
-    <script src="@routes.Assets.at("javascripts/gplus/app.js")"></script>
-    <script src="@routes.Assets.at("javascripts/gplus/services.js")"></script>
-    <script src="@routes.Assets.at("javascripts/gplus/controllers.js")"></script>
-    <script type='text/javascript'>
-      function startApp() {
-      angular.bootstrap(document, ['photoHunt']);
+@styles = {
+  <link href="@routes.Assets.at("stylesheets/index.css")" rel="stylesheet">
+}
+
+@script = {
+  <script src="@routes.Assets.at("javascripts/index.js")"></script>
+  <script src="@routes.Assets.at("javascripts/lib/zepto.js")"></script>
+  <script type="text/javascript">
+    $(function ($) {
+      var video = $("video").get(0);
+      if (navigator.webkitGetUserMedia) {
+        navigator.webkitGetUserMedia({video: true}, successCallback, function(error) {
+            window.alert("カメラが使えません");
+        });
+        function successCallback(stream) {
+          $('#barcodeImage').val(webkitURL.createObjectURL(stream));
+          $('#form').submit();
+        }
       }
-    </script>
-  </head>
-  <body ng-controller="PhotoHuntCtrl" ng-cloak>
-
-    <span id="signin" ng-show="immediateFailed">
-      <span id="myGsignin"></span>
-</span>
-      <script type="text/javascript">
-  window.___gcfg = {
-    parsetags: 'explicit'
-  };
-  (function() {
-    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
-    po.src = 'https://apis.google.com/js/auth:plusone.js?onload=startApp';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
-  })();
-  $(function() {
-    $("#sort").buttonset();
-  });
+    });
   </script>
+}
 
-</body>
-</html>
+@layout("Social BookShelf")(styles)(script) {
+<div class="jumbotron">
+    <h1>本棚をシェアしよう。</h1>
+
+    <p class="lead">オフィスで、仲間内で。本の貸し借りを管理するアプリです。<br/>あなたの欲しい本は、誰かがすでに持っているかも。</p>
+    <a class="btn btn-large btn-success" href="book_shelf/register">本棚をつくる</a>
+    <form id="form" method="POST" action="api/book_shelf/amazon_barcode" enctype="multipart/form-data">
+      <video autoplay />
+      <input type="file" id="barcodeImage" style="display:none" />
+    </form>
+</div>
+}

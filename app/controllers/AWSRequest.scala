@@ -1,9 +1,8 @@
 package controllers
 
+import aws.{AWSRequest =>_, _}
 import aws.{AWSRequest => Request}
-import aws.ParamGen
-import aws.ParamKey
-import aws.ItemSearch
+import controllers.barcode.EANBarcode
 import util._
 import models._
 import play.api.data.Form
@@ -32,6 +31,7 @@ trait AWSRequest extends Controller with JsonResponse with Composeable {
     Request(ParamGen.format(param), secretKey, accessKey, associateTag, amazonURL)
   }
 
+  // キーワードに一致する書籍を取得する
   def searchBy(keyword:String) = Authenticated {
     Action { implicit request =>
       val form = Form(
@@ -53,6 +53,29 @@ trait AWSRequest extends Controller with JsonResponse with Composeable {
             case (items, count) => okJsonRaw(items, count)
           }
         })
+    }
+  }
+
+  def searchByBarcode = Authenticated {
+    Action {implicit request =>
+      request.body.asRaw match {
+        case None => error("バーコード画像が取得できませんでした")
+        case Some(r) =>
+          EANBarcode.decode(r.asFile) match {
+            case Left(e) => error(e)
+            case Right(barcode) => {
+              val ope = ParamGen.operation(_:List[ParamKey], "ItemLookup")
+              val version = ParamGen.version(_:List[ParamKey])
+              val res = ParamGen.resGroup(_:List[ParamKey])
+              val id = ParamGen.ean(_:List[ParamKey], barcode)
+              val param = (ope << version << res << id)(commonParam)
+              val req = makeRequest(param)
+              ItemLookup.documentToJson(ItemLookup.send(req)) match {
+                case _ => error("")
+              }
+            }
+          }
+      }
     }
   }
 }

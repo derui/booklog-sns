@@ -33,6 +33,7 @@ GET     /api/rental_history/     application.Rental.getRentalHistory
 
 # Get book infomations from Amazon Advertise API
 GET     /api/amazon_search/*keyword       application.AWSRequest.searchBy(keyword:String)
+POST     /api/amazon_barcode              application.AWSRequest.searchByBarcode
 
 # Detect current environment on running Play.
 GET     /api/detect_env         application.Application.detectCurrentEnvironment
