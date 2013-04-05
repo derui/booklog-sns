@@ -71,7 +71,7 @@ object BookShelves extends Table[BookShelf]("book_shelf") with Logging {
   // 対象の本棚を削除する。
   def delete(shelfId :Long)(implicit session:Session): Int = {
     val q = (for {b <- BookShelves if b.id === shelfId} yield b)
-    log(q)
+    log(q.deleteStatement)
     q.delete
   }
 

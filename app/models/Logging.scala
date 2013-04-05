@@ -7,4 +7,8 @@ trait Logging {
   def log[G,T](q:Query[G,T]) {
     Logger.info("execute SQL : %s" format q.selectStatement)
   }
+
+  def log(log:String) {
+    Logger.info("execute SQL : %s" format log)
+  }
 }

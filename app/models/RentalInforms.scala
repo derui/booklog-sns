@@ -91,6 +91,8 @@ object RentalInforms extends Table[RentalInform]("rental_info") with Logging {
     log(query)
 
     val rental = query.first
+
+    log(RentalInformHistories.insertStatement)
     RentalInformHistories.insert(rental)
     query.delete
   }

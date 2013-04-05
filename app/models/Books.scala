@@ -100,7 +100,7 @@ object Books extends Table[Book]("book") with Logging {
        b <- Books
        if b.bookId === id
      } yield (b))
-    log(q)
+    log(q.deleteStatement)
     q.delete
   }
 

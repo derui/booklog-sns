@@ -1,5 +1,6 @@
 package controllers
 
+import play.Logger
 import util._
 import models._
 import play.api.data.Form
@@ -135,6 +136,8 @@ trait Application extends Controller with JsonResponse with Composeable with Use
                 val now = new Timestamp(Calendar.getInstance().getTimeInMillis)
                 val result = BookShelves.ins.insert(
                   p._1, p._2, now, getAuthUserId, now, getAuthUserId)
+                Logger.info(BookShelves.ins.insertStatementFor(
+                  p._1, p._2, now, getAuthUserId, now, getAuthUserId).toString())
                 okJsonOneOf(Json.obj("id" -> result))
             }
           })
@@ -165,7 +168,12 @@ trait Application extends Controller with JsonResponse with Composeable with Use
               implicit ds =>
                 val now = new Timestamp(Calendar.getInstance().getTimeInMillis)
                 val result = Books.ins.insert(p._1, p._2, p._3, p._4,
-                  p._5.map(s => new Date(s.getTime)), p._6, p._7, p._8, now, getAuthUserId, now, getAuthUserId)
+                  p._5.map(s => new Date(s.getTime)), p._6, p._7, p._8,
+                  now, getAuthUserId, now, getAuthUserId)
+                Logger.info(Books.ins.insertStatementFor(Integer.valueOf(p._1).longValue, p._2, p._3, p._4,
+                  p._5.map(s => new Date(s.getTime)), p._6, p._7, p._8,
+                  now, getAuthUserId, now, getAuthUserId).toString
+                )
 
                 okJsonOneOf(Json.obj("id" -> result))
             }
@@ -300,6 +308,7 @@ trait Application extends Controller with JsonResponse with Composeable with Use
                                  if u.userId === res.userId
                     } yield (u.userDisplayName)
                     q.update(p)
+                    Logger.info(q.updateStatement)
                     okJson(List())
                   }
                 }

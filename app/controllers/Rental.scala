@@ -97,6 +97,8 @@ trait Rental extends Controller with JsonResponse with Composeable with UsePerDB
             val now = new Timestamp(Calendar.getInstance().getTimeInMillis)
             val id = RentalInforms.ins.insert(getAuthUserId,
               p, true, now, getAuthUserId, now, getAuthUserId)
+            Logger.info(RentalInforms.ins.insertStatementFor(getAuthUserId,
+              p.longValue, true, now, getAuthUserId, now, getAuthUserId).toString)
             okJsonOneOf(Json.obj("rental_id" -> id))
           }
         })
