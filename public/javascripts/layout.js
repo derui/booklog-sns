@@ -6,19 +6,11 @@ requirejs.config({
         },
         "lib/underscore": {
             exports: "_"
-        },
-        "lib/pure": {
-            deps: ["lib/zepto"],
-            exports: "pure"
-        },
-        "lib/backbone": {
-            deps: ["lib/zepto", "lib/underscore"],
-            exports: "Backbone"
         }
     }
 });
 
-requirejs(['lib/backbone', 'view', 'lib/pure', 'lib/zepto', 'common'], function (Backbone, View) {
+requirejs(['view', 'common', 'lib/zepto'], function (View) {
     'use strict';
 
     _.loginUserInfo(
@@ -126,11 +118,66 @@ requirejs(['lib/backbone', 'view', 'lib/pure', 'lib/zepto', 'common'], function 
         });
     }
 
+    var LoginUserDisplayNameView = View.BaseView.extend({
+        events: {'blur': 'updateUserName'},
+        updateUserName: function () {
+            $('#editButton').removeClass('disabled');
+            var $loginUserDisplayName = this.$el;
+            var loginUserDisplayName = $.trim($loginUserDisplayName.val());
+            var prevLoginUserName = $loginUserDisplayName.attr('data-loginUserName');
+
+            if (loginUserDisplayName && loginUserDisplayName !== prevLoginUserName) {
+                var escapedLoginUserDisplayName = _.escape(loginUserDisplayName);
+                $loginUserDisplayName.replaceWith('<span id="loginUserDisplayName" data-loginUserName="' +
+                    escapedLoginUserDisplayName +
+                    '">' +
+                    escapedLoginUserDisplayName +
+                    '</span>');
+                $.ajax({
+                    type: 'PUT',
+                    url: '/api/login_user_info',
+                    data: {"user_display_name": loginUserDisplayName}
+                });
+            } else {
+                var escapedPrevLoginUserName = _.escape(prevLoginUserName);
+                $loginUserDisplayName.replaceWith('<span id="loginUserDisplayName" data-loginUserName="' +
+                    escapedPrevLoginUserName +
+                    '">' +
+                    escapedPrevLoginUserName +
+                    '</span>');
+            }
+        }
+    });
+
     function showLoginUserInfo(loginUserInfo) {
+        var displayName = _.escape(loginUserInfo.user_display_name);
         $('#signinArea').prepend('<span id="loginUserInfoArea">' +
             '<img src="' + loginUserInfo.google_public_profile_photo_url + '" id="profilePhoto" />' +
-            '<span>' + loginUserInfo.google_display_name + '</span>' +
+            '<span id="loginUserDisplayName" data-loginUserName="' + displayName + '">' + displayName + '</span>' +
+            '&nbsp;' +
+            '<a href="#" id="editButton" class="btn btn-mini"><i class="icon-search icon-pencil"></i></a>' +
             '</span>');
+
+        var EditButtonView = View.BaseView.extend({
+            el: '#editButton',
+            events: {'click': 'switchEditable'},
+            switchEditable: function () {
+                this.$el.addClass('disabled');
+                var $loginUserDisplayName = $('#loginUserDisplayName');
+                var loginUserDisplayName = _.escape($loginUserDisplayName.text());
+                $loginUserDisplayName.replaceWith('<input type="text" id="loginUserDisplayName" class="input-small" value="' +
+                    loginUserDisplayName +
+                    '" data-loginUserName="' +
+                    loginUserDisplayName + '" />');
+                $('#loginUserDisplayName').focus();
+                var loginUserDisplayNameView = new LoginUserDisplayNameView({el: '#loginUserDisplayName'});
+
+                return false;
+            }
+        });
+
+        var editButtonView = new EditButtonView();
+
         $('#logoutButton').removeClass('disabled');
     }
 });
