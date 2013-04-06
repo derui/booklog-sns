@@ -57,24 +57,24 @@ trait AWSRequest extends Controller with JsonResponse with Composeable {
   }
 
   def searchByBarcode = Authenticated {
-    Action {implicit request =>
-      request.body.asRaw match {
-        case None => error("バーコード画像が取得できませんでした")
-        case Some(r) =>
-          EANBarcode.decode(r.asFile) match {
-            case Left(e) => error(e)
-            case Right(barcode) => {
-              val ope = ParamGen.operation(_:List[ParamKey], "ItemLookup")
-              val version = ParamGen.version(_:List[ParamKey])
-              val res = ParamGen.resGroup(_:List[ParamKey])
-              val id = ParamGen.ean(_:List[ParamKey], barcode)
-              val param = (ope << version << res << id)(commonParam)
-              val req = makeRequest(param)
-              ItemLookup.documentToJson(ItemLookup.send(req)) match {
-                case _ => error("")
-              }
+    Action(parse.multipartFormData) {implicit request =>
+      request.body.file("capture").map {r =>
+        EANBarcode.decode(r.ref.file) match {
+          case Left(e) => error(e)
+          case Right(barcode) => {
+            val ope = ParamGen.operation(_:List[ParamKey], "ItemLookup")
+            val version = ParamGen.version(_:List[ParamKey])
+            val res = ParamGen.resGroup(_:List[ParamKey])
+            val id = ParamGen.ean(_:List[ParamKey], barcode)
+            val param = (ope << version << res << id)(commonParam)
+            val req = makeRequest(param)
+            ItemLookup.documentToJson(ItemLookup.send(req)) match {
+              case _ => error("")
             }
           }
+        }
+      }.getOrElse {
+        error("バーコード画像が取得できませんでした")
       }
     }
   }
