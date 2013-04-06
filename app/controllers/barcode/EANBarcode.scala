@@ -30,7 +30,7 @@ object EANBarcode {
     }.orElse(Some(Left("画像が読み込めません"))).get
   }
 
-  // PNGファイルを読み込む。読み込めなかった場合には
+  // PNGファイルを読み込む。読み込めなかった場合にはNoneを返す
   private def readImage(image:File) : Option[BufferedImage] = {
     try {
       Option(ImageIO.read(image))
@@ -44,8 +44,8 @@ object EANBarcode {
   // imageからRGBのPixel配列を取得する
   private def imageToPixelArray(image:BufferedImage): Array[Int] = {
     val imaged = for {
-      x <- Range(0, image.getWidth - 1)
-      y <- Range(0, image.getHeight - 1)
+      y <- Range(0, image.getHeight)
+      x <- Range(0, image.getWidth)
     } yield image.getRGB(x, y)
     imaged.toArray
   }
@@ -64,7 +64,7 @@ object EANBarcode {
     } catch {
       case e: Exception =>
         Logger.info("barcode decoding failure")
-        Logger.info(e.getStackTrace().toString())
+        e.printStackTrace
         Left("バーコード解析に失敗しました")
     }
   }
