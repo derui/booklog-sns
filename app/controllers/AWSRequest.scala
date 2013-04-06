@@ -69,7 +69,8 @@ trait AWSRequest extends Controller with JsonResponse with Composeable {
             val param = (ope << version << res << id)(commonParam)
             val req = makeRequest(param)
             ItemLookup.documentToJson(ItemLookup.send(req)) match {
-              case _ => error("")
+              case Some(js) => okJsonOneOf(js)
+              case None => error("バーコードの商品を検索できませんでした")
             }
           }
         }
