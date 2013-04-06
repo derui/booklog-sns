@@ -93,7 +93,7 @@ requirejs(['lib/zepto', 'lib/canvas-to-blob'], function (Backbone, Model, View) 
                     }
                 });
             },
-            'multipart/form-data'
+            'image/png'
         );
     }
 
