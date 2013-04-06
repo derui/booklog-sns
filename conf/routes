@@ -8,6 +8,8 @@ GET     /book_shelf/register     application.Application.registerBookShelf
 GET     /book_shelf/detail/*id   application.Application.showBookShelf(id: Long)
 GET     /book/register           application.Application.registerBook
 GET     /book/detail/*id         application.Application.showBook(id: Long)
+GET     /test                    application.Application.test
+
 
 # API endpoints
 GET     /api/shelf               application.Application.getAllShelf

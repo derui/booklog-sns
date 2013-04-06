@@ -1,35 +1,26 @@
 @styles = {
-  <link href="@routes.Assets.at("stylesheets/index.css")" rel="stylesheet">
 }
 
 @script = {
-  <script src="@routes.Assets.at("javascripts/index.js")"></script>
-  <script src="@routes.Assets.at("javascripts/lib/zepto.js")"></script>
-  <script type="text/javascript">
-    $(function ($) {
-      var video = $("video").get(0);
-      if (navigator.webkitGetUserMedia) {
-        navigator.webkitGetUserMedia({video: true}, successCallback, function(error) {
-            window.alert("カメラが使えません");
-        });
-        function successCallback(stream) {
-          $('#barcodeImage').val(webkitURL.createObjectURL(stream));
-          $('#form').submit();
-        }
-      }
-    });
-  </script>
+  <script src="@routes.Assets.at("javascripts/test.js")"></script>
 }
 
-@layout("Social BookShelf")(styles)(script) {
-<div class="jumbotron">
-    <h1>本棚をシェアしよう。</h1>
-
-    <p class="lead">オフィスで、仲間内で。本の貸し借りを管理するアプリです。<br/>あなたの欲しい本は、誰かがすでに持っているかも。</p>
-    <a class="btn btn-large btn-success" href="book_shelf/register">本棚をつくる</a>
-    <form id="form" method="POST" action="api/book_shelf/amazon_barcode" enctype="multipart/form-data">
-      <video autoplay />
-      <input type="file" id="barcodeImage" style="display:none" />
-    </form>
-</div>
+@layout("テストページ - Social BookShelf")(styles)(script) {
+    <h2>カメラからバーコードを読み取る</h2>
+    <section id="splash">
+        <p id="errorMessage"></p>
+    </section>
+    <h3>スマートデバイス向け</h3>
+    <input type="file" id="selectPhoto" accept="image/*;capture=camera" />
+    <h3>PC向け</h3>
+    <section id="app" hidden>
+        <p>
+            <button type="button" id="snapshotbutton" class="btn"><i class="icon-camera"></i> 写真を撮る</button>
+            <button type="button" id="searchBookFromBarcode" class="btn"><i class="icon-barcode"></i> 読み取る</button>
+        </p>
+        <p>
+            <video id="monitor" autoplay width="320" height="240"></video>
+            <canvas id="photo"></canvas>
+        </p>
+    </section>
 }
