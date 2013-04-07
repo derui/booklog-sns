@@ -17,7 +17,7 @@ requirejs.config({
     }
 });
 
-requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto', 'lib/moment'], function (Backbone, Model, View) {
+requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'lib/zepto', 'lib/moment'], function (Backbone, Model, View) {
     'use strict';
 
     // レンタル情報一覧のビュー

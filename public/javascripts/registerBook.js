@@ -20,7 +20,7 @@ requirejs.config({
     }
 });
 
-requirejs(['lib/backbone', 'model', 'view', 'common', 'lib/zepto', 'lib/moment', 'lib/canvas-to-blob'], function (Backbone, Model, View) {
+requirejs(['lib/backbone', 'model', 'view', 'lib/zepto', 'lib/moment', 'lib/canvas-to-blob'], function (Backbone, Model, View) {
     'use strict';
 
     var shelfId = _.queryString2json()['shelf_id'];
@@ -72,7 +72,10 @@ requirejs(['lib/backbone', 'model', 'view', 'common', 'lib/zepto', 'lib/moment',
                 var image = new Image();
                 image.onload = function () {
                     $('#searchByBarcodeForSmartDevice').removeClass('disabled');
-                    drawImage2Canvas($('#previewPhotoForSmartDevice')[0], image, image.width, image.height);
+                    var previewPhotoForSmartDevice = $('#previewPhotoForSmartDevice')[0];
+                    previewPhotoForSmartDevice.width = image.width;
+                    previewPhotoForSmartDevice.height = image.height;
+                    drawImage2Canvas(previewPhotoForSmartDevice, image, image.width, image.height);
                 };
                 // 画像のURLをソースに設定
                 image.src = evt.target.result;
@@ -91,7 +94,9 @@ requirejs(['lib/backbone', 'model', 'view', 'common', 'lib/zepto', 'lib/moment',
         el: '#searchByBarcodeForSmartDevice',
         events: {'click': 'searchBookByBarcodeForSmartDevice'},
         searchBookByBarcodeForSmartDevice: function () {
-            searchBookByBarcode($('#previewPhotoForSmartDevice')[0]);
+            var $searchButton = this.$el;
+            $searchButton.addClass('disabled');
+            searchBookByBarcode($('#previewPhotoForSmartDevice')[0], $searchButton);
 
             return false;
         }
@@ -144,7 +149,9 @@ requirejs(['lib/backbone', 'model', 'view', 'common', 'lib/zepto', 'lib/moment',
         el: '#searchByBarcodeForPC',
         events: {'click': 'searchBookByBarcodeForPC'},
         searchBookByBarcodeForPC: function () {
-            searchBookByBarcode($('#previewPhotoForPC')[0]);
+            var $searchButton = this.$el;
+            $searchButton.addClass('disabled');
+            searchBookByBarcode($('#previewPhotoForPC')[0], $searchButton);
 
             return false;
         }
@@ -153,14 +160,14 @@ requirejs(['lib/backbone', 'model', 'view', 'common', 'lib/zepto', 'lib/moment',
     new SearchByBarcodeForPCButtonView();
 
     // 指定されたcanvasに描画された画像を元に、バーコード検索を行う
-    function searchBookByBarcode(canvas) {
+    function searchBookByBarcode(canvas, $searchButton) {
         canvas.toBlob(
             function (newBlob) {
                 var formdata = new FormData();
                 formdata.append("capture", newBlob);
                 $.ajax({
                     url: '/api/amazon_barcode',
-                    data: formdata,     // 
+                    data: formdata,
                     cache: false,
                     contentType: false, // デフォルト：application/x-www-form-urlencoded; charset=UTF-8
                     processData: false, // デフォルト：application/x-www-form-urlencoded
@@ -169,8 +176,11 @@ requirejs(['lib/backbone', 'model', 'view', 'common', 'lib/zepto', 'lib/moment',
                     success: function (response) {
                         renderSearchBookResult(response.result);
                     },
-                    error : function(){
+                    error: function () {
                         _.showErrorMessage('バーコードの読み取りに失敗しました');
+                    },
+                    complete: function () {
+                        $searchButton.removeClass('disabled');
                     }
                 });
             },

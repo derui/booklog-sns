@@ -17,7 +17,7 @@ requirejs.config({
     }
 });
 
-requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'common', 'lib/zepto'], function (Backbone, Model, View) {
+requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'lib/zepto'], function (Backbone, Model, View) {
     'use strict';
 
     var RegisterBookShelfFormView = View.BaseView.extend({
