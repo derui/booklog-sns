@@ -1,4 +1,5 @@
 @styles = {
+<link href="@routes.Assets.at("stylesheets/registerBook.css")" rel="stylesheet">
 }
 
 @script = {
@@ -11,18 +12,59 @@
         <li class="active">書籍登録</li>
     </ul>
     <h2>本棚に追加する書籍を検索する</h2>
-    <form id="searchBookForm" class="form-horizontal">
-        <input type="text" class="input-xlarge search-query" id="searchBookKeyword" placeholder="本のタイトル、作家名、キーワードなど" required maxlength="50" />
-        <button type="submit" class="btn" id="searchBookButton">検索</button>
-    </form>
-    <script type="text/template" id="bookInfoTemplate">
-        <div class="bookInfo">
-            <h3 class="book_title"><%= title %></h3>
-            <img src="<%= medium_image %>" class="book_image img-polaroid" />
-            <p class="book_author"><%= author %></p>
-            <p class="published_date"><%= publication_date %></p>
-            <button class="btn registerButton" type="button">この本を追加する</button>
+    <div class="row-fluid">
+        <div class="span6">
+            <h3>キーワード検索</h3>
+            <form id="searchBookForm" class="form-inline form-search">
+                <div class="input-append">
+                    <input type="text" class="input-large search-query" id="searchBookKeyword" placeholder="タイトル、著者名、キーワード" required autofocus maxlength="50" />
+                    <button type="submit" class="btn" id="searchBookButton"><i class="icon-search"></i> 検索</button>
+                </div>
+            </form>
+            <h3>バーコード検索</h3>
+            <form id="searchBookByBarcodeForm">
+                <legend>カメラで撮影（スマートデバイス）</legend>
+                <div class="controls">
+                    <input type="file" id="selectPhoto" accept="image/*;capture=camera" />
+                </div>
+                <h4>プレビュー</h4>
+                <div class="controls">
+                    <button type="button" id="searchByBarcodeForSmartDevice" class="btn disabled"><i class="icon-search"></i> バーコード検索</button>
+                </div>
+                <div class="controls">
+                    <canvas id="previewPhotoForSmartDevice" class="previewPhoto" width="275" height="206"></canvas>
+                </div>
+                <legend>カメラで撮影（PC）</legend>
+                <div class="control-group">
+                    <div class="controls">
+                        <button type="button" id="launchCamera" class="btn"><i class="icon-camera"></i> カメラを起動する</button>
+                        <button type="button" id="snapshotbutton" class="btn disabled"><i class="icon-certificate"></i> 写真を撮る</button>
+                    </div>
+                    <div class="controls">
+                        <video id="monitor" autoplay></video>
+                    </div>
+                </div>
+                <h4>プレビュー</h4>
+                <div class="controls">
+                    <button type="button" id="searchByBarcodeForPC" class="btn disabled"><i class="icon-search"></i> バーコード検索</button>
+                </div>
+                <div class="controls">
+                    <canvas id="previewPhotoForPC" class="previewPhoto" width="275" height="206"></canvas>
+                </div>
+            </form>
         </div>
-    </script>
-    <div id="searchResultBookList"></div>
+        <div class="span6">
+            <h3>検索結果</h3>
+            <script type="text/template" id="bookInfoTemplate">
+                <div class="bookInfo">
+                    <h3 class="book_title"><%= title %></h3>
+                    <img src="<%= medium_image %>" class="book_image img-polaroid" />
+                    <p class="book_author"><%= author %></p>
+                    <p class="published_date"><%= publication_date %></p>
+                    <button class="btn registerButton" type="button">この本を追加する</button>
+                </div>
+            </script>
+            <div id="searchResultBookList"></div>
+        </div>
+    </div>
 }

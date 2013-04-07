@@ -1,0 +1,14 @@
+@charset "utf-8";
+
+#selectPhoto {
+    line-height: 1;
+}
+
+#monitor, .previewPhoto {
+    margin-top: 0.5em;
+}
+
+#monitor {
+    width: 275px;
+    height: 206px;
+}

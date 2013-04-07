@@ -65,3 +65,7 @@ h1, h2, h3 {
 #loginUserDisplayName:focus {
     background-color: #fcf8e3;
 }
+
+.alert {
+    display: none;
+}

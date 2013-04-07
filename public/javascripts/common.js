@@ -88,6 +88,15 @@ requirejs(['lib/underscore', 'lib/zepto', 'lib/pure', 'lib/moment'], function ()
         },
         parseDateForJST: function (targetDate) {
             return moment(targetDate).add('hours', 9);
+        },
+        showErrorMessage: function (errorMessage) {
+            $('.alert-error').text(errorMessage).show();
+        },
+        showSuccessMessage: function (successMessage) {
+            $('.alert-success').text(successMessage).show();
+        },
+        hideMessages: function () {
+            $('.alert').hide().empty();
         }
     });
 });
