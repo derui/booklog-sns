@@ -41,8 +41,7 @@ object ItemLookup extends Request with Composeable {
 
   // XMLを返却用に変換する
   def documentToJson(doc:Document) : Option[JsObject] = {
-    val res = I.itemLookupResponse(doc)
-    if (!I.isValid(res).text.toBoolean) {
+    if (!I.isValid(doc).text.toBoolean) {
       None
     } else {
       val items = itemsToJson(I.items(doc))
