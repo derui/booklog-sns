@@ -32,7 +32,7 @@
                     <button type="button" id="searchByBarcodeForSmartDevice" class="btn disabled"><i class="icon-search"></i> バーコード検索</button>
                 </div>
                 <div class="controls">
-                    <canvas id="previewPhotoForSmartDevice" class="previewPhoto"></canvas>
+                    <canvas id="previewPhotoForSmartDevice" class="previewPhoto" width="200" height="200"></canvas>
                 </div>
                 <legend>カメラで撮影（PC）</legend>
                 <div class="control-group">
@@ -53,7 +53,7 @@
                 </div>
             </form>
         </div>
-        <div class="span6">
+        <div class="span6" id="searchResultArea">
             <h3>検索結果</h3>
             <script type="text/template" id="bookInfoTemplate">
                 <div class="bookInfo">

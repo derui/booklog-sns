@@ -73,9 +73,9 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/zepto', 'lib/moment', 'lib/canv
                 image.onload = function () {
                     $('#searchByBarcodeForSmartDevice').removeClass('disabled');
                     var previewPhotoForSmartDevice = $('#previewPhotoForSmartDevice')[0];
-                    previewPhotoForSmartDevice.width = image.width;
-                    previewPhotoForSmartDevice.height = image.height;
-                    drawImage2Canvas(previewPhotoForSmartDevice, image, image.width, image.height);
+                    var sizeInfo = calcImageSize(image);
+
+                    drawImage2Canvas(previewPhotoForSmartDevice, image, sizeInfo.width, sizeInfo.height);
                 };
                 // 画像のURLをソースに設定
                 image.src = evt.target.result;
@@ -161,6 +161,9 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/zepto', 'lib/moment', 'lib/canv
 
     // 指定されたcanvasに描画された画像を元に、バーコード検索を行う
     function searchBookByBarcode(canvas, $searchButton) {
+        // エラーメッセージがあれば消去する
+        _.hideMessages();
+        // バーコード検索APIに渡すため、canvasに描画された画像をBlobに変換する
         canvas.toBlob(
             function (newBlob) {
                 var formdata = new FormData();
@@ -188,6 +191,28 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/zepto', 'lib/moment', 'lib/canv
         );
     }
 
+    // canvasのサイズにあわせて画像を縮小した時のwidth、heightを計算して返す
+    function calcImageSize(image) {
+        var width = image.width;
+        var height = image.height;
+        var longSideSize = (width >= height) ? width : height;
+        var targetWidth = $('#previewPhotoForSmartDevice').width();
+        var adjustmentWidth, adjustmentHeight;
+
+        if (longSideSize < targetWidth) {
+            adjustmentWidth = width;
+            adjustmentHeight = height;
+        } else {
+            adjustmentWidth = parseFloat(targetWidth) / longSideSize * width;
+            adjustmentHeight = parseFloat(targetWidth) / longSideSize * height;
+        }
+
+        return {
+            width: parseInt(adjustmentWidth),
+            height: parseInt(adjustmentHeight)
+        };
+    }
+
     // カメラから取得したストリームをvideoタグに設定する
     function gotStream(stream) {
         $('#monitor')
@@ -212,10 +237,16 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/zepto', 'lib/moment', 'lib/canv
 
     // 検索結果の本一覧を描画する
     function renderSearchBookResult(books) {
+        // 検索結果一覧をクリアする
+        $('#searchResultBookList').empty();
+
         for (var i = 0, book; book = books[i]; ++i) {
             var bookView = new SearchResultBookView({model: new Model.Book(book)});
             bookView.render();
         }
+
+        // 検索結果一覧にスクロールする
+        _.scrollTo('#searchResultArea');
 
         var RegisterButtonView = View.BaseView.extend({
             el: '.registerButton',

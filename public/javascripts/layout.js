@@ -4,13 +4,16 @@ requirejs.config({
         "lib/zepto": {
             exports: "Zepto"
         },
+        "lib/zepto.scroll": {
+            deps : ['lib/zepto']
+        },
         "lib/underscore": {
             exports: "_"
         }
     }
 });
 
-requirejs(['view', 'lib/zepto'], function (View) {
+requirejs(['view', 'lib/zepto', 'lib/zepto.scroll'], function (View) {
     'use strict';
 
     // PUREをZepto.jsで使えるようにするおまじない
@@ -102,13 +105,18 @@ requirejs(['view', 'lib/zepto'], function (View) {
             return moment(targetDate).add('hours', 9);
         },
         showErrorMessage: function (errorMessage) {
-            $('.alert-error').text(errorMessage).show();
+            $('.common-alert.alert-error').text(errorMessage).show();
+            _.scrollTo('html, body');
         },
         showSuccessMessage: function (successMessage) {
-            $('.alert-success').text(successMessage).show();
+            $('.common-alert.alert-success').text(successMessage).show();
+            _.scrollTo('html, body');
         },
         hideMessages: function () {
-            $('.alert').hide().empty();
+            $('.common-alert').hide().empty();
+        },
+        scrollTo: function (selector) {
+            $.scrollTo($(selector).offset().top);
         }
     });
 
