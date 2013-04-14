@@ -84,7 +84,9 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'lib/zepto'], function (
     var bookListView = new BookListView({
         collection: bookList
     });
-    bookList.fetch({reset: true, data: $.param({'shelf': location.pathname.split('/').pop(), start: 0, rows: 5})});
+      // TODO ページング出来るようになったらこっちを使う
+//    bookList.fetch({reset: true, data: $.param({'shelf': location.pathname.split('/').pop(), start: 0, rows: 5})});
+    bookList.fetch({reset: true, data: $.param({'shelf': location.pathname.split('/').pop()})});
 
     $(function () {
         $('#registerBookButton').on('click', function () {
