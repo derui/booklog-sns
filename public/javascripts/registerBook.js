@@ -265,7 +265,7 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/zepto', 'lib/moment', 'lib/canv
                     'small_image_url': bookInfo.small_image,
                     'book_isbn': bookInfo.isbn,
                     'published_date': bookInfo.publication_date
-                        ? moment(bookInfo.publication_dat).format('YYYY/MM/DD')
+                        ? moment(bookInfo.publication_date).format('YYYY/MM/DD')
                         : ''
                 };
 
