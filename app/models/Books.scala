@@ -6,7 +6,7 @@ import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import scala.slick.driver.MySQLDriver.simple._
 import scala.language.postfixOps
-import models.DBWrap._
+import models._
 
 // Bookテーブルの情報を表すcase class
 case class Book(bookId: Long, shelfId: Long, name: String,

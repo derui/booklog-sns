@@ -13,7 +13,7 @@ import java.sql.Date
 import java.util.Calendar
 import scala.slick.driver.MySQLDriver.simple.{Session => _, _}
 import scala.slick.driver.MySQLDriver.simple.{Session => DBSession}
-import models.DBWrap.UsePerDB
+import models.DBWrap
 import play.api.Play
 import play.api.Play.current
 

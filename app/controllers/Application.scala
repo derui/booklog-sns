@@ -12,11 +12,11 @@ import java.sql.Date
 import java.util.Calendar
 import scala.slick.driver.MySQLDriver.simple.{Session => _, _}
 import scala.slick.driver.MySQLDriver.simple.{Session => DBSession}
-import models.DBWrap.UsePerDB
+import models._
 import play.api.Play
 import play.api.Play.current
 
-trait Application extends Controller with JsonResponse with Composeable with UsePerDB {
+trait Application extends Controller with JsonResponse with Composeable with DBWrap  {
   this: Security =>
 
   def index = Action {

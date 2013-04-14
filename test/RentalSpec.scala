@@ -1,5 +1,6 @@
 package test
 
+import db.wrapper.specs2.AutoRollback
 import java.sql.Date
 import java.sql.Timestamp
 import java.util.Calendar
@@ -11,7 +12,7 @@ import play.api.test.Helpers._
 import play.api.libs.json._
 import scala.slick.driver.MySQLDriver.simple.{Session => _, _}
 import scala.slick.driver.MySQLDriver.simple.{Session => DBSession}
-import models.DBWrap.UsePerDB
+import models.DBWrap
 
 class RentalSpec extends Specification {
 
@@ -19,31 +20,16 @@ class RentalSpec extends Specification {
   val now = new Timestamp(time)
   val nowDate = new Date(time)
 
-  trait OneData extends Scope with After with UsePerDB {
-    db.withSession {
-      implicit session: DBSession =>
-        (for {s <- Books} yield s).delete
-        (for {s <- UserInforms} yield s).delete
-        (for {s <- RentalInforms} yield s).delete
-
-        val book = Books.ins.insert(0L, "", None, None, None, None, None, None, now, 0L, now, 0L)
+  trait OneData extends AutoRollback {
+    override def fixture(implicit session:DBSession) = {
+      val book = Books.ins.insert(0L, "", None, None, None, None, None, None, now, 0L, now, 0L)
         (for {b <- Books if b.bookId === book} yield (b.bookId)).update(0L)
 
-        val user = UserInforms.ins.insert("", "", "", "", "", "", None, None, None, now, 0L, now, 0L)
+      val user = UserInforms.ins.insert("", "", "", "", "", "", None, None, None, now, 0L, now, 0L)
         (for {
           u <- UserInforms
           if u.userId === user
         } yield (u.userId)).update(0L)
-    }
-
-    override def after {
-      db.withSession {
-        implicit session: DBSession =>
-          (for {s <- Books} yield s).delete
-          (for {s <- UserInforms} yield s).delete
-          (for {s <- RentalInforms} yield s).delete
-          (for {s <- RentalInformHistories} yield s).delete
-      }
     }
   }
 
