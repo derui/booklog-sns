@@ -74,7 +74,6 @@ object BookShelves extends Table[BookShelf]("book_shelf") with Logging {
     log(q.deleteStatement)
     q.delete
   }
-
   
   // 対象をjsonに変換する
   def toJson(target: BookShelf): JsValue = {
