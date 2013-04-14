@@ -5,7 +5,10 @@ requirejs.config({
             exports: "Zepto"
         },
         "lib/zepto.scroll": {
-            deps : ['lib/zepto']
+            deps: ['lib/zepto']
+        },
+        "lib/chardinjs": {
+            deps: ['lib/zepto']
         },
         "lib/underscore": {
             exports: "_"
@@ -13,7 +16,7 @@ requirejs.config({
     }
 });
 
-requirejs(['view', 'lib/zepto', 'lib/zepto.scroll'], function (View) {
+requirejs(['view', 'lib/zepto', 'lib/underscore', 'lib/zepto.scroll', 'lib/chardinjs'], function (View) {
     'use strict';
 
     // PUREをZepto.jsで使えるようにするおまじない
@@ -35,12 +38,21 @@ requirejs(['view', 'lib/zepto', 'lib/zepto.scroll'], function (View) {
         });
     })(Zepto);
 
-    // Ajax共通処理：Ajax通信前処理
-    $(document).on('ajaxBeforeSend', function (e, xhr) {
-        // CSRF対策
-        xhr.setRequestHeader('X-From', location.href);
-    });
-
+    $(document)
+        // Ajax共通処理：Ajax通信前処理
+        .on('ajaxBeforeSend', function (e, xhr) {
+            // CSRF対策
+            xhr.setRequestHeader('X-From', location.href);
+        })
+        .on('ajaxError', function (e, xhr, ajaxOption) {
+            switch (xhr.status) {
+                // 認証エラー
+                case 401:
+                    $('body').chardinJs('start');
+                    break;
+            }
+        })
+    ;
     _.mixin({
         replaceAll: function (target, substr, newSubStr) {
             if (!target) {
@@ -130,39 +142,30 @@ requirejs(['view', 'lib/zepto', 'lib/zepto.scroll'], function (View) {
             loginGooglePlus();
         });
 
-    // ログアウトボタンのビュー
-    // TODO ログアウト処理再検討のため、コメントアウト
-//    var LogoutButtonView = View.BaseView.extend({
-//        el: '#logoutButton',
-//        events: {
-//            "click": "logout"
-//        },
-//        logout: function () {
-//            var $logoutButton = this.$el;
-//            if ($logoutButton.hasClass('disabled')) {
-//                return;
-//            }
-//
-//            $.ajax({
-//                type: 'POST',
-//                url: '/api/logout',
-//                success: function () {
-//                    $('#loginUserInfoArea').remove();
-//                    $logoutButton.addClass('disabled');
-//                    var $signinButton = $('#___signin_0');
-//
-//                    if ($signinButton.length) {
-//                        $signinButton.css('display', 'inline-block').show();
-//                    } else {
-//                        loginGooglePlus();
-//                    }
-//
-//                }
-//            });
-//        }
-//    });
-//
-//    var logoutButtonView = new LogoutButtonView();
+// ログアウトボタンのビュー
+    var LogoutButtonView = View.BaseView.extend({
+        el: '#logoutButton',
+        events: {
+            "click": "logout"
+        },
+        logout: function () {
+            var $logoutButton = this.$el;
+            if ($logoutButton.hasClass('disabled')) {
+                return;
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: '/api/logout',
+                success: function () {
+                    // ログアウトの状態で再度アクセスする
+                    location.href = location.href;
+                }
+            });
+        }
+    });
+
+    var logoutButtonView = new LogoutButtonView();
 
     function loginGooglePlus() {
         // Google+でログイン後に呼ばれるコールバック関数を定義する
@@ -178,9 +181,8 @@ requirejs(['view', 'lib/zepto', 'lib/zepto.scroll'], function (View) {
                     contentType: "application/json",
                     data: JSON.stringify(authResult),
                     success: function (response) {
-                        var loginUserInfo = response.result[0];
-                        $('#___signin_0').hide();
-                        showLoginUserInfo(loginUserInfo);
+                        // ログインした状態で再度アクセスする
+                        location.href = location.href;
                     }
                 });
             } else {
@@ -287,4 +289,5 @@ requirejs(['view', 'lib/zepto', 'lib/zepto.scroll'], function (View) {
 
         $('#logoutButton').removeClass('disabled');
     }
-});
+})
+;

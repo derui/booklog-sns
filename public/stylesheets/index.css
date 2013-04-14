@@ -11,6 +11,34 @@
     line-height: 1;
 }
 
+/* Large desktop */
+@media (min-width: 1200px) {
+    .jumbotron h1 {
+        font-size: 65px;
+    }
+}
+
+/* Portrait tablet to landscape and desktop */
+@media (min-width: 768px) and (max-width: 979px) {
+    .jumbotron h1 {
+        font-size: 63px;
+    }
+}
+
+/* Landscape phone to portrait tablet */
+@media (max-width: 767px) {
+    .jumbotron h1 {
+        font-size: 60px;
+    }
+}
+
+/* Landscape phones and down */
+@media (max-width: 480px) {
+    .jumbotron h1 {
+        font-size: 40px;
+    }
+}
+
 .jumbotron .btn {
     font-size: 21px;
     padding: 14px 24px;
