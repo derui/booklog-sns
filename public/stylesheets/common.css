@@ -66,6 +66,6 @@ h1, h2, h3 {
     background-color: #fcf8e3;
 }
 
-.alert {
+.common-alert {
     display: none;
 }

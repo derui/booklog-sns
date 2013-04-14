@@ -96,7 +96,7 @@ requirejs(['lib/underscore', 'lib/zepto', 'lib/pure', 'lib/moment'], function ()
             $('.alert-success').text(successMessage).show();
         },
         hideMessages: function () {
-            $('.alert').hide().empty();
+            $('.common-alert').hide().empty();
         }
     });
 });
