@@ -65,6 +65,9 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'lib/zepto'], function (
                         },
                         '.book_image@src': function (arg) {
                             return arg.bookInfoArea.item.medium_image_url;
+                        },
+                        '.book_author': function (arg) {
+                            return arg.bookInfoArea.item.book_author;
                         }
                     }
                 }

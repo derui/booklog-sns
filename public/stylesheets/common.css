@@ -15,6 +15,34 @@ body {
     font-size: 2em;
 }
 
+/* Large desktop */
+@media (min-width: 1200px) {
+    .container-narrow h1 {
+        font-size: 2em;
+    }
+}
+
+/* Portrait tablet to landscape and desktop */
+@media (min-width: 768px) and (max-width: 979px) {
+    .container-narrow h1 {
+        font-size: 2em;
+    }
+}
+
+/* Landscape phone to portrait tablet */
+@media (max-width: 767px) {
+    .container-narrow h1 {
+        font-size: 2em;
+    }
+}
+
+/* Landscape phones and down */
+@media (max-width: 480px) {
+    .container-narrow h1 {
+        font-size: 23px;
+    }
+}
+
 .container-narrow h1 img {
     vertical-align: text-top;
 }

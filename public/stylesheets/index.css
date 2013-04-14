@@ -15,6 +15,7 @@
 @media (min-width: 1200px) {
     .jumbotron h1 {
         font-size: 65px;
+        line-height: 1;
     }
 }
 
@@ -22,20 +23,26 @@
 @media (min-width: 768px) and (max-width: 979px) {
     .jumbotron h1 {
         font-size: 63px;
+        line-height: 1;
     }
 }
 
 /* Landscape phone to portrait tablet */
 @media (max-width: 767px) {
     .jumbotron h1 {
-        font-size: 60px;
+        font-size: 44px;
+        line-height: 1;
     }
 }
 
 /* Landscape phones and down */
 @media (max-width: 480px) {
     .jumbotron h1 {
-        font-size: 40px;
+        font-size: 34px;
+        line-height: 1;
+    }
+    .jumbotron p.lead {
+        font-size: 19px;
     }
 }
 
