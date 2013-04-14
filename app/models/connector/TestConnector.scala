@@ -29,8 +29,8 @@ trait TestConnector extends Connector {
 
     override def withTransaction[T](f:Session => T): T = {
       val ses = createSession
+      ses.conn.setAutoCommit(false)
       val r = f(ses)
-      ses.rollback
       r
     }
     override def withTransaction[T](f: => T): T = f

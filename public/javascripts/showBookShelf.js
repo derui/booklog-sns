@@ -28,10 +28,8 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'lib/zepto'], function (
         },
         render: function () {
             var bookShelf = this.model.attributes.result[0];
-            var book = bookShelf;
             this.$el.render({
-                "bookShelf": bookShelf,
-                "book": book
+                "bookShelf": bookShelf
             }, {
                 '.shelf_name': function (arg) {
                     return arg.context.bookShelf.shelf_name;
@@ -41,6 +39,9 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'lib/zepto'], function (
                 }
             });
 
+            if (bookShelf.book_count > 5) {
+                // TODO 「さらに読み込む」ボタン表示
+            }
             return this;
         }
     });
@@ -52,9 +53,9 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'lib/zepto'], function (
             this.collection.on('reset', this.render, this);
         },
         render: function () {
-            var models = this.collection.models;
+            var bookInfo = this.collection.models[0].attributes;
             this.$el.render({
-                "books": models[0].attributes.result
+                "books": bookInfo.result
             }, {
                 '.bookInfoArea': {
                     'bookInfoArea<-books': {
@@ -83,6 +84,8 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'lib/zepto'], function (
     var bookListView = new BookListView({
         collection: bookList
     });
+      // TODO ページング出来るようになったらこっちを使う
+//    bookList.fetch({reset: true, data: $.param({'shelf': location.pathname.split('/').pop(), start: 0, rows: 5})});
     bookList.fetch({reset: true, data: $.param({'shelf': location.pathname.split('/').pop()})});
 
     $(function () {

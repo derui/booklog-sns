@@ -65,6 +65,8 @@ class BookShelvesSpec extends Specification {
           val s = shelf.get._1
           s.name must beEqualTo("book shelf")
           s.description must beEqualTo("shelf description")
+          shelf.get._2 must be_==("name")
+          shelf.get._3 must be_==("name")
           val jsoned = BookShelves.toJson(s)
           (jsoned \ "created_date").as[String] must be_==("%tF %<tT" format s.created)
           (jsoned \ "updated_date").as[String] must be_==("%tF %<tT" format s.updated)

@@ -6,6 +6,8 @@ import java.sql.Timestamp
 import java.sql.Date
 import java.util.Calendar
 import org.specs2.mutable._
+import org.specs2.specification._
+import org.specs2.matcher._
 import org.specs2.specification.Scope
 import play.api.test._
 import play.api.test.Helpers._
@@ -20,10 +22,8 @@ class ApplicationSpec extends Specification {
   val now = new Timestamp(Calendar.getInstance.getTimeInMillis)
 
   // 基本的なデータの追加・削除をするためのtrait
-  trait OneData extends AutoRollback
-  {
+  trait OneData extends AutoRollback {
     override def fixture(implicit session: DBSession) = {
-      
       val shelfId = BookShelves.ins.insert("book shelf", "description", now, 0L, now, 0L)
       val book = Books.ins.insert(0L, "book name", Some("book author"), Some("book isbn"),
         None, None, None, None, now, 0L, now, 0L)
@@ -167,5 +167,47 @@ class ApplicationSpec extends Specification {
       val node = Json.parse(contentAsString(env.get))
       (node \ "environment").as[String] must be_==("develop")
     }
+
+    "modify updated date of the bookshelf that is added a book" in new WithApplication {
+      new OneData {
+        override def fixture(implicit session: DBSession) = {
+          super.fixture(session)
+          val cal = Calendar.getInstance
+          cal.add(Calendar.DAY_OF_YEAR, -2)
+          val now = new Timestamp(cal.getTimeInMillis())
+          (for {s <- BookShelves if s.id === 0L} yield (s.createdDate)).update(now)
+        }
+
+        val book_id = addBook(0L)
+        val book = route(FakeRequest(GET, "/api/book/" + book_id))
+
+        book must beSome
+        val node = Json.parse(contentAsString(book.get))
+        val formatter = new SimpleDateFormat("yyyy/MM/dd")
+        val bookRegistered = ((node \ "result")(0) \ "created_date").as[Date]
+
+        val shelf = route(FakeRequest(GET, "/api/shelf/" + 0L))
+        val shelf_node = Json.parse(contentAsString(shelf.get))
+        val shelfUpdated = ((shelf_node \ "result")(0) \ "updated_date").as[Date]
+        val shelfRegistered = ((shelf_node \ "result")(0) \ "created_date").as[Date]
+
+        bookRegistered.getTime must be_==(shelfUpdated.getTime)
+        shelfUpdated.getTime must beGreaterThan(shelfRegistered.getTime)
+      }
+    }
+  }
+
+  def addBook(shelfId: Long)(implicit application:FakeApplication) = {
+    val book_req: Map[String, Seq[String]] = Map("shelf_id" -> Seq(shelfId.toString),
+      "book_name" -> Seq("book name"),
+      "published_date" -> Seq("2012/02/01"),
+      "large_image_url" -> Seq("large image url"))
+    val book_result = route(FakeRequest(POST, "/api/book").withHeaders(
+      CONTENT_TYPE -> "application/x-www-form-urlencode"), book_req)
+
+    book_result must beSome
+    status(book_result.get) must beEqualTo(OK)
+
+    ((Json.parse(contentAsString(book_result.get)) \ "result")(0) \ "id").as[Long]
   }
 }
