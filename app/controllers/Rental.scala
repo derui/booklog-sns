@@ -13,7 +13,7 @@ import util._
 import play.api.libs.json._
 import play.api.Play.current
 import scala.Some
-import models.DBWrap.UsePerDB
+import models.DBWrap
 import java.util.Calendar
 import scala.slick.driver.MySQLDriver.simple.{Session => _, _}
 import scala.slick.driver.MySQLDriver.simple.{Session => DBSession}
@@ -22,7 +22,7 @@ import scala.slick.driver.MySQLDriver.simple.{Session => DBSession}
   * レンタル状況の登録、変更、取得APIへのアクセスを受ける。
   * ここで受けたものは、基本的にModelかLogicに丸投げする。
   */
-trait Rental extends Controller with JsonResponse with Composeable with UsePerDB {
+trait Rental extends Controller with JsonResponse with Composeable with DBWrap {
   this: Security =>
 
   // 指定されたレンタル情報を取得する

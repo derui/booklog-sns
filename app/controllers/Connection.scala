@@ -18,7 +18,7 @@ import models.{UserInforms, UserInform}
 import com.google.api.services.plus.Plus
 import play.api.mvc.Session
 import com.google.api.client.http.GenericUrl
-import models.DBWrap.UsePerDB
+import models.DBWrap
 import scala.language.postfixOps
 import java.util.Calendar
 import com.google.api.services.plus.model.Person
@@ -52,7 +52,7 @@ sealed abstract class ConnectResult {
 /**
  * Google+ Sign-in の機能を利用した認証機能を提供するオブジェクト
  */
-object Connection extends UsePerDB with Composeable {
+object Connection extends DBWrap with Composeable {
 
   // 認証情報をセッションに登録する際に利用されるキー
   private val SESSION_KEY = "me"

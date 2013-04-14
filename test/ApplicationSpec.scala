@@ -1,5 +1,6 @@
 package test
 
+import db.wrapper.specs2.AutoRollback
 import java.text.SimpleDateFormat
 import java.sql.Timestamp
 import java.sql.Date
@@ -13,35 +14,23 @@ import play.api.libs.json._
 import scala.slick.driver.MySQLDriver.simple.{Session => _, _}
 import scala.slick.driver.MySQLDriver.simple.{Session => DBSession}
 import db.wrapper.specs2.AutoRollback
-import models.DBWrap.UsePerDB
+import models.DBWrap
 
 class ApplicationSpec extends Specification {
   val now = new Timestamp(Calendar.getInstance.getTimeInMillis)
 
   // 基本的なデータの追加・削除をするためのtrait
-  trait OneData extends Scope with After with UsePerDB {
-    db.withTransaction {
-      implicit session : DBSession =>
-        (for {s <- BookShelves} yield s).delete
-        (for {s <- Books} yield s).delete
-        (for {s <- UserInforms} yield s).delete
-
-        val shelfId = BookShelves.ins.insert("book shelf", "description", now, 0L, now, 0L)
-        val book = Books.ins.insert(0L, "book name", Some("book author"), Some("book isbn"),
-          None, None, None, None, now, 0L, now, 0L)
-        val user = UserInforms.ins.insert("", "", "", "", "", "", None, None, None, now, 0L, now, 0L)
+  trait OneData extends AutoRollback
+  {
+    override def fixture(implicit session: DBSession) = {
+      
+      val shelfId = BookShelves.ins.insert("book shelf", "description", now, 0L, now, 0L)
+      val book = Books.ins.insert(0L, "book name", Some("book author"), Some("book isbn"),
+        None, None, None, None, now, 0L, now, 0L)
+      val user = UserInforms.ins.insert("", "", "", "", "", "", None, None, None, now, 0L, now, 0L)
         (for {s <- BookShelves if s.id === shelfId} yield (s.id)).update(0L)
         (for {s <- Books if s.bookId === book} yield (s.bookId)).update(0L)
         (for {s <- UserInforms if s.userId === user} yield (s.userId)).update(0L)
-    }
-
-    override def after {
-      db.withTransaction {
-        implicit session :DBSession =>
-          (for {s <- BookShelves} yield s).delete
-          (for {s <- Books} yield s).delete
-          (for {s <- UserInforms} yield s).delete
-      }
     }
   }
 
