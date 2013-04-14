@@ -22,3 +22,6 @@ server.pid
 *.iml
 *.eml
 .idea
+
+conf/secrets.conf
+conf/aws.conf
