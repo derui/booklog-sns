@@ -10,6 +10,8 @@ before_script:
 script:
   - mv conf/application.conf conf/ci.application.conf
   - mv conf/ci.conf conf/application.conf
+  - touch conf/aws.conf
+  - touch conf/secret.conf
   - sbt -DapplyEvolutions.default=true test
 before_install:
   - sudo apt-get update -qq
