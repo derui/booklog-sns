@@ -21,19 +21,20 @@
 
 <div class="container-narrow">
 
-    <div class="masthead">
+    <div class="masthead" data-intro="<p>Social BookShelfを利用するためには、Googleアカウントでログインする必要があります。</p><p>Google+ボタンをクリックして、任意のGoogleアカウントでログインしてください。</p><p>ユーザ名（あとで変更可能）とユーザアイコンが連携されます。</p>" data-position="bottom">
         <ul class="nav nav-pills pull-right">
-            <div id="signinArea" class="pull-right">
+            <div id="signinArea" class="pull-right" >
               <span
                 class="g-signin"
                 data-callback="signinCallback"
+                data-approvalprompt="force"
                 data-cookiepolicy="single_host_origin"
                 data-requestvisibleactions="http://schemas.google.com/AddActivity"
                 data-scope="https://www.googleapis.com/auth/plus.login"
                 data-height="short"
                 data-theme="dark">
               </span>
-              <!-- <button class="btn btn-small disabled" id="logoutButton" type="button">log out</button> -->
+              <button class="btn btn-small disabled" id="logoutButton" type="button">log out</button>
             </div>
             <!-- <form class="navbar-search pull-right">
                 <input type="search" class="search-query" placeholder="本のタイトルを検索する">
