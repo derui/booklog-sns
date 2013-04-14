@@ -5,7 +5,7 @@ import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import scala.slick.driver.MySQLDriver.simple._
 import scala.language.postfixOps
-import models.DBWrap._
+import models._
 
 case class BookShelf(id: Long, name: String, description: String, created: Timestamp,
                  createdUser: Long, updated: Timestamp, updatedUser: Long)
