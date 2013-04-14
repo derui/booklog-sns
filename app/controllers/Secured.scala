@@ -2,6 +2,7 @@ package controllers
 
 import java.math.BigInteger
 import java.net.URI
+import play.api.Logger
 import play.api.http.HeaderNames
 import play.api.mvc.Request
 import play.api.mvc._
@@ -10,7 +11,7 @@ import play.api.mvc.SimpleResult
 import controllers.Connection._
 
 // 認証処理を挟みたい場合に、こBのtraitをActionにwithしてやる。
-trait Secured extends Security {
+trait Secured extends Security with RequestLogging {
   private var userId = 0L
 
   override def Authenticated[A](action : Action[A]) : Action[A] = Action(action.parser) { request =>
@@ -24,7 +25,10 @@ trait Secured extends Security {
         }
         case Right(id) => {
           userId = id
-          action(request)
+          Logger.info("start : %d : %s with [%s]" format (request.id, request.path, request.queryString.toString))
+          val ret = action(request)
+          Logger.info("end   : %d : %s with [%s]" format (request.id, request.path, request.queryString.toString))
+          ret
         }
       }
     } else {

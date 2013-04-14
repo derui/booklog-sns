@@ -1,9 +1,8 @@
 package controllers
 
+import aws.{AWSRequest =>_, _}
 import aws.{AWSRequest => Request}
-import aws.ParamGen
-import aws.ParamKey
-import aws.ItemSearch
+import controllers.barcode.EANBarcode
 import util._
 import models._
 import play.api.data.Form
@@ -14,7 +13,7 @@ import java.sql.Date
 import java.util.Calendar
 import scala.slick.driver.MySQLDriver.simple.{Session => _, _}
 import scala.slick.driver.MySQLDriver.simple.{Session => DBSession}
-import models.DBWrap.UsePerDB
+import models.DBWrap
 import play.api.Play
 import play.api.Play.current
 
@@ -29,9 +28,10 @@ trait AWSRequest extends Controller with JsonResponse with Composeable {
   val commonParam = ParamGen.common(List(), accessKey, associateTag)
 
   private def makeRequest(param:List[ParamKey]) : Request = {
-    Request(ParamGen.format(param), accessKey, secretKey, associateTag, amazonURL)
+    Request(ParamGen.format(param), secretKey, accessKey, associateTag, amazonURL)
   }
 
+  // キーワードに一致する書籍を取得する
   def searchBy(keyword:String) = Authenticated {
     Action { implicit request =>
       val form = Form(
@@ -53,6 +53,30 @@ trait AWSRequest extends Controller with JsonResponse with Composeable {
             case (items, count) => okJsonRaw(items, count)
           }
         })
+    }
+  }
+
+  def searchByBarcode = Authenticated {
+    Action(parse.multipartFormData) {implicit request =>
+      request.body.file("capture").map {r =>
+        EANBarcode.decode(r.ref.file) match {
+          case Left(e) => error(e)
+          case Right(barcode) => {
+            val ope = ParamGen.operation(_:List[ParamKey], "ItemLookup")
+            val version = ParamGen.version(_:List[ParamKey])
+            val res = ParamGen.resGroup(_:List[ParamKey])
+            val id = ParamGen.ean(_:List[ParamKey], barcode)
+            val param = (ope << version << res << id)(commonParam)
+            val req = makeRequest(param)
+            ItemLookup.documentToJson(ItemLookup.send(req)) match {
+              case Some(js) => okJsonOneOf(js)
+              case None => error("バーコードの商品を検索できませんでした")
+            }
+          }
+        }
+      }.getOrElse {
+        error("バーコード画像が取得できませんでした")
+      }
     }
   }
 }

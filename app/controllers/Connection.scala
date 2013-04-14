@@ -1,6 +1,7 @@
 package controllers
 
 import _root_.util.Composeable
+import play.Logger
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
@@ -17,7 +18,7 @@ import models.{UserInforms, UserInform}
 import com.google.api.services.plus.Plus
 import play.api.mvc.Session
 import com.google.api.client.http.GenericUrl
-import models.DBWrap.UsePerDB
+import models.DBWrap
 import scala.language.postfixOps
 import java.util.Calendar
 import com.google.api.services.plus.model.Person
@@ -51,7 +52,7 @@ sealed abstract class ConnectResult {
 /**
  * Google+ Sign-in の機能を利用した認証機能を提供するオブジェクト
  */
-object Connection extends UsePerDB with Composeable {
+object Connection extends DBWrap with Composeable {
 
   // 認証情報をセッションに登録する際に利用されるキー
   private val SESSION_KEY = "me"
@@ -150,9 +151,11 @@ object Connection extends UsePerDB with Composeable {
                 nowDate,
                 0L
               )
+              Logger.info(UserInforms.ins.insertStatement)
 
               val query = for {u <- UserInforms if u.userId === id} yield (u)
               query.map(r => r.createdUser ~ r.updatedUser).update((id, id))
+              Logger.info(query.updateStatement)
               Right(query.first)
           }
       }
@@ -180,7 +183,10 @@ object Connection extends UsePerDB with Composeable {
                 expireIn.orElse(user.userGoogleExpiresIn)
                 )) match {
               case 0 => Left(ConnectResult.UserUpdateError(user.userId))
-              case _ => Right(q.first)
+              case _ => {
+                Logger.info(q.updateStatement)
+                Right(q.first)
+              }
             }
         }
     }

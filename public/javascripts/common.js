@@ -1,4 +1,4 @@
-requirejs(['lib/underscore', 'lib/zepto', 'lib/pure'], function () {
+requirejs(['lib/underscore', 'lib/zepto', 'lib/pure', 'lib/moment'], function () {
     'use strict';
 
     // PUREをZepto.jsで使えるようにするおまじない
@@ -21,7 +21,7 @@ requirejs(['lib/underscore', 'lib/zepto', 'lib/pure'], function () {
     })(Zepto);
 
     // Ajax共通処理：Ajax通信前処理
-    $(document).on('ajaxBeforeSend', function (e, xhr, options) {
+    $(document).on('ajaxBeforeSend', function (e, xhr) {
         // CSRF対策
         xhr.setRequestHeader('X-From', location.href);
     });
@@ -47,6 +47,56 @@ requirejs(['lib/underscore', 'lib/zepto', 'lib/pure'], function () {
             }
 
             return json;
+        },
+        getPrimaryKeyFromUrl: function (paramPathname) {
+            var pathname = paramPathname || location.pathname;
+
+            return pathname.split('/').pop();
+        },
+        environment: function (success, error) {
+            $.ajax({
+                url: '/api/detect_env',
+                success: function (data) {
+                    if (_.isFunction(success)) {
+                        success(data.environment);
+                    }
+                },
+                error: function () {
+                    if (_.isFunction(error)) {
+                        error();
+                    }
+                }
+            });
+        },
+        loginUserInfo: function (success, error) {
+            $.ajax({
+                url: '/api/login_user_info',
+                success: function (data) {
+                    if (_.isFunction(success)) {
+                        success(data.result[0]);
+                    }
+                },
+                error: function () {
+                    if (_.isFunction(error)) {
+                        error();
+                    }
+                }
+            });
+        },
+        convertLineBreak2BR: function (targetText) {
+            return _(targetText).replaceAll('\n', '<br />');
+        },
+        parseDateForJST: function (targetDate) {
+            return moment(targetDate).add('hours', 9);
+        },
+        showErrorMessage: function (errorMessage) {
+            $('.alert-error').text(errorMessage).show();
+        },
+        showSuccessMessage: function (successMessage) {
+            $('.alert-success').text(successMessage).show();
+        },
+        hideMessages: function () {
+            $('.common-alert').hide().empty();
         }
     });
 });

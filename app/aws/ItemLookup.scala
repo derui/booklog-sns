@@ -25,7 +25,7 @@ import util.Composeable
 import aws.tag.{ItemLookupTag => I}
 import util.JsonUtil
 
-object ItemSearch extends Request with Composeable {
+object ItemLookup extends Request with Composeable {
 
   private val signatureAddress = "ecs.amazonaws.jp\n/onca/xml\n"
 
@@ -40,13 +40,13 @@ object ItemSearch extends Request with Composeable {
   }
 
   // XMLを返却用に変換する
-  def documentToJson(doc:Document) : (JsObject, Int) = {
-    val res = I.itemSearchResponse(doc)
-    val items = itemsToJson(I.items(doc))
-    (Json.obj("total_result" -> I.totalResults(doc).text.toInt,
-      "total_page" -> I.totalPage(doc).text.toInt,
-      "items" -> JsonUtil.listToArray(items)),
-      items.length)
+  def documentToJson(doc:Document) : Option[JsObject] = {
+    if (!I.isValid(doc).text.toBoolean) {
+      None
+    } else {
+      val items = itemsToJson(I.items(doc))
+      Some(items.head)
+    }
   }
 
   // ItemタグそれぞれについてJsonに変換して返す。

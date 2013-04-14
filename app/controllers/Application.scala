@@ -1,5 +1,6 @@
 package controllers
 
+import play.Logger
 import util._
 import models._
 import play.api.data.Form
@@ -11,11 +12,11 @@ import java.sql.Date
 import java.util.Calendar
 import scala.slick.driver.MySQLDriver.simple.{Session => _, _}
 import scala.slick.driver.MySQLDriver.simple.{Session => DBSession}
-import models.DBWrap.UsePerDB
+import models._
 import play.api.Play
 import play.api.Play.current
 
-trait Application extends Controller with JsonResponse with Composeable with UsePerDB {
+trait Application extends Controller with JsonResponse with Composeable with DBWrap  {
   this: Security =>
 
   def index = Action {
@@ -36,6 +37,10 @@ trait Application extends Controller with JsonResponse with Composeable with Use
 
   def showBook(id: Long) = Action {
     Ok(views.html.showBook())
+  }
+
+  def test = Action {
+    Ok(views.html.test())
   }
 
   // JavaScript側から、oauth2で認証されたトークンを受け取って、二段階目の認証を行う。
@@ -65,7 +70,7 @@ trait Application extends Controller with JsonResponse with Composeable with Use
                   // すでに登録されているユーザーか、今回登録されたユーザー情報を返す。
                   // 認証が完了したユーザーについては、セッションに認証データを登録しておく
 
-                  Ok((userInfoToToken _ >> responseToJson _)(userInfo)).withSession {
+                  okJsonOneOf(UserInforms.toJson(userInfo)).withSession {
                     Connection.addAuthToSession(session, userInfo)
                   }
               }
@@ -117,17 +122,6 @@ trait Application extends Controller with JsonResponse with Composeable with Use
     }
   }
 
-  // 渡されたUserInfoを返却用のjsonに変換する。
-  private def userInfoToToken(userInfo: UserInform): List[JsValue] = {
-    val json = UserInforms.toJson(userInfo)
-    List(Json.obj("id" -> (json \ "user_id").as[Long],
-      "googleUserId" -> (json \ "google_user_id").as[String],
-      "googleDisplayName" -> (json \ "google_display_name").as[String],
-      "googlePublicProfileUrl" -> (json \ "google_public_profile_url").as[String],
-      "googlePublicProfilePhotoUrl" -> (json \ "google_public_profile_photo_url").as[String],
-      "googleExpiresAt" -> (json \ "google_expires_at").as[Long]))
-  }
-
   case class Shelf(name: String)
 
   def makeShelf = Authenticated {
@@ -146,6 +140,8 @@ trait Application extends Controller with JsonResponse with Composeable with Use
                 val now = new Timestamp(Calendar.getInstance().getTimeInMillis)
                 val result = BookShelves.ins.insert(
                   p._1, p._2, now, getAuthUserId, now, getAuthUserId)
+                Logger.info(BookShelves.ins.insertStatementFor(
+                  p._1, p._2, now, getAuthUserId, now, getAuthUserId).toString())
                 okJsonOneOf(Json.obj("id" -> result))
             }
           })
@@ -176,7 +172,12 @@ trait Application extends Controller with JsonResponse with Composeable with Use
               implicit ds =>
                 val now = new Timestamp(Calendar.getInstance().getTimeInMillis)
                 val result = Books.ins.insert(p._1, p._2, p._3, p._4,
-                  p._5.map(s => new Date(s.getTime)), p._6, p._7, p._8, now, getAuthUserId, now, getAuthUserId)
+                  p._5.map(s => new Date(s.getTime)), p._6, p._7, p._8,
+                  now, getAuthUserId, now, getAuthUserId)
+                Logger.info(Books.ins.insertStatementFor(Integer.valueOf(p._1).longValue, p._2, p._3, p._4,
+                  p._5.map(s => new Date(s.getTime)), p._6, p._7, p._8,
+                  now, getAuthUserId, now, getAuthUserId).toString
+                )
 
                 okJsonOneOf(Json.obj("id" -> result))
             }
@@ -311,6 +312,7 @@ trait Application extends Controller with JsonResponse with Composeable with Use
                                  if u.userId === res.userId
                     } yield (u.userDisplayName)
                     q.update(p)
+                    Logger.info(q.updateStatement)
                     okJson(List())
                   }
                 }
@@ -341,4 +343,5 @@ trait Application extends Controller with JsonResponse with Composeable with Use
       Ok(Json.obj("environment" -> "develop"))
     }
   }
+
 }

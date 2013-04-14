@@ -1,0 +1,22 @@
+language: scala
+scala:
+  - 2.10.0
+services:
+  - mysql
+jdk:
+  - openjdk7
+before_script:
+  - mysql -e 'create database bookshelf;'
+script:
+  - mv conf/application.conf conf/ci.application.conf
+  - mv conf/ci.conf conf/application.conf
+  - sbt -DapplyEvolutions.default=true test
+before_install:
+  - sudo apt-get update -qq
+# develop branch only
+branches:
+  expect:
+    - master
+
+notification:
+  email: false

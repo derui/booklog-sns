@@ -1,41 +1,26 @@
-<!DOCTYPE html>
-<html lang="ja">
-  <head>
-    <meta charset="utf-8">
-    <title>Social BookShelf</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="@routes.Assets.at("stylesheets/base.css")" rel="stylesheet">
-    <link href="@routes.Assets.at("stylesheets/main.css")" rel="stylesheet">
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
-    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.3/angular.min.js"></script>
-    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.2/jquery-ui.min.js"></script>
-    <script src="@routes.Assets.at("javascripts/gplus/app.js")"></script>
-    <script src="@routes.Assets.at("javascripts/gplus/services.js")"></script>
-    <script src="@routes.Assets.at("javascripts/gplus/controllers.js")"></script>
-    <script type='text/javascript'>
-      function startApp() {
-      angular.bootstrap(document, ['photoHunt']);
-      }
-    </script>
-  </head>
-  <body ng-controller="PhotoHuntCtrl" ng-cloak>
+@styles = {
+}
 
-    <span id="signin" ng-show="immediateFailed">
-      <span id="myGsignin"></span>
-</span>
-      <script type="text/javascript">
-  window.___gcfg = {
-    parsetags: 'explicit'
-  };
-  (function() {
-    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
-    po.src = 'https://apis.google.com/js/auth:plusone.js?onload=startApp';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
-  })();
-  $(function() {
-    $("#sort").buttonset();
-  });
-  </script>
+@script = {
+  <script src="@routes.Assets.at("javascripts/test.js")"></script>
+}
 
-</body>
-</html>
+@layout("テストページ - Social BookShelf")(styles)(script) {
+    <h2>カメラからバーコードを読み取る</h2>
+    <section id="splash">
+        <p id="errorMessage"></p>
+    </section>
+    <h3>スマートデバイス向け</h3>
+    <input type="file" id="selectPhoto" accept="image/*;capture=camera" />
+    <h3>PC向け</h3>
+    <section id="app" hidden>
+        <p>
+            <button type="button" id="snapshotbutton" class="btn"><i class="icon-camera"></i> 写真を撮る</button>
+            <button type="button" id="searchBookFromBarcode" class="btn"><i class="icon-barcode"></i> 読み取る</button>
+        </p>
+        <p>
+            <video id="monitor" autoplay width="320" height="240"></video>
+            <canvas id="photo"></canvas>
+        </p>
+    </section>
+}

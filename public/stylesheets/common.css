@@ -49,10 +49,23 @@ h2 {
     font-size: 1.8em;
 }
 
+h3 {
+    font-size: 1.5em;
+}
+
 h1, h2, h3 {
     line-height: 1.5;
 }
 
-input[type=date] {
-    display: -webkit-inline-flex;
+#loginUserDisplayName {
+    display: inline-block;
+    height: 25px;
+}
+
+#loginUserDisplayName:focus {
+    background-color: #fcf8e3;
+}
+
+.common-alert {
+    display: none;
 }

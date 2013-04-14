@@ -7,7 +7,7 @@ case class Param(key : String, value : String)
 object ReqParam {
   // キーをソートする。
   def sortByKey(list:List[Param]): List[Param] =
-    list.sortWith((x, y) => x.key.compareToIgnoreCase(y.key) < 0)
+    list.sortWith((x, y) => x.key.compareTo(y.key) < 0)
 
   // 渡されたParamをURLエンコードして=で繋いだ形で返す。
   def encode(param:Param): String = {
@@ -22,7 +22,8 @@ object ReqParam {
     x match {
       case Nil => List()
       case h :: Nil => List(h)
-      case h :: snd :: rest => h :: sep :: snd :: intersperse(rest, sep)
+      case h :: snd :: Nil => h :: sep :: snd :: Nil
+      case h :: snd :: rest => h :: sep :: snd :: sep :: intersperse(rest, sep)
     }
     intersperse(params.map(x => encode(x)), "&").foldLeft(new StringBuilder()){
       (base, x) => base.append(x)

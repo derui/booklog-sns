@@ -5,7 +5,7 @@ import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import scala.slick.driver.MySQLDriver.simple._
 import scala.language.postfixOps
-import models.DBWrap._
+import models._
 
 // UserInfoテーブルの情報を表すcase class
 case class UserInform(userId: Long,
@@ -21,7 +21,7 @@ case class UserInform(userId: Long,
                       created: Timestamp, createdUser: Long, updated: Timestamp, updatedUser: Long)
 
 // それぞれの本に対する操作を提供する
-object UserInforms extends Table[UserInform]("user_info") {
+object UserInforms extends Table[UserInform]("user_info") with Logging {
 
   // 各カラム
   def userId = column[Long]("user_id", O.PrimaryKey, O AutoInc)
@@ -73,6 +73,7 @@ object UserInforms extends Table[UserInform]("user_info") {
       u <- UserInforms
       if u.userId === id
     } yield u
+    log(query)
     query.firstOption
   }
 

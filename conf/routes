@@ -8,6 +8,8 @@ GET     /book_shelf/register     application.Application.registerBookShelf
 GET     /book_shelf/detail/*id   application.Application.showBookShelf(id: Long)
 GET     /book/register           application.Application.registerBook
 GET     /book/detail/*id         application.Application.showBook(id: Long)
+GET     /test                    application.Application.test
+
 
 # API endpoints
 GET     /api/shelf               application.Application.getAllShelf
@@ -28,10 +30,12 @@ GET     /api/rental              application.Rental.getRentalInformAll
 GET     /api/rental/             application.Rental.getRentalInfoByBookId
 GET     /api/rental/*id          application.Rental.getRentalDetails(id: Long)
 POST    /api/rental              application.Rental.doRental
-PUT     /api/rental/*id          application.Rental.returnRentalBook(id:Long)
+DELETE     /api/rental/*id          application.Rental.returnRentalBook(id:Long)
+GET     /api/rental_history/     application.Rental.getRentalHistory
 
 # Get book infomations from Amazon Advertise API
 GET     /api/amazon_search/*keyword       application.AWSRequest.searchBy(keyword:String)
+POST     /api/amazon_barcode              application.AWSRequest.searchByBarcode
 
 # Detect current environment on running Play.
 GET     /api/detect_env         application.Application.detectCurrentEnvironment

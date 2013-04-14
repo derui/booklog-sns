@@ -27,22 +27,24 @@
               <span
                 class="g-signin"
                 data-callback="signinCallback"
-                data-clientid="881447546058.apps.googleusercontent.com"
                 data-cookiepolicy="single_host_origin"
                 data-requestvisibleactions="http://schemas.google.com/AddActivity"
                 data-scope="https://www.googleapis.com/auth/plus.login"
                 data-height="short"
                 data-theme="dark">
               </span>
-                <button class="btn btn-small disabled" id="logoutButton" type="button">log out</button>
+              <!-- <button class="btn btn-small disabled" id="logoutButton" type="button">log out</button> -->
             </div>
-            <form class="navbar-search pull-right">
+            <!-- <form class="navbar-search pull-right">
                 <input type="search" class="search-query" placeholder="本のタイトルを検索する">
             </form>
+            -->
         </ul>
         <h1 class="muted"><a href="/">Social BookShelf <img src="@routes.Assets.at("images/book-12-32.png")" /></a></h1>
     </div>
     <hr>
+    <div class="common-alert alert alert-error"></div>
+    <div class="common-alert alert alert-success"></div>
     @content
     <script src="@routes.Assets.at("javascripts/lib/require.js")"></script>
     <script src="@routes.Assets.at("javascripts/layout.js")"></script>
