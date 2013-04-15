@@ -20,6 +20,20 @@ requirejs.config({
 requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'lib/zepto'], function (Backbone, Model, View) {
     'use strict';
 
+    var shelfId = _.getPrimaryKeyFromUrl();
+
+    var RegisterBookButtonView = View.BaseView.extend({
+        el: '#registerBookButton',
+        events: {'click': 'move2RegisterBookPage'},
+        move2RegisterBookPage: function () {
+            location.href = '/book/register?shelf_id=' + shelfId;
+
+            return false;
+        }
+    });
+
+    var registerBookButtonView = new RegisterBookButtonView();
+
     // 本棚詳細のビュー
     var BookShelfView = View.BaseView.extend({
         el: '.bookShelfInfo',
@@ -61,7 +75,7 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'lib/zepto'], function (
                     'bookInfoArea<-books': {
                         '.book_title': function (arg) {
                             return '<a href="/book/detail/' + arg.bookInfoArea.item.book_id + '">' +
-                            arg.bookInfoArea.item.book_name + '</a>';
+                                arg.bookInfoArea.item.book_name + '</a>';
                         },
                         '.book_image@src': function (arg) {
                             return arg.bookInfoArea.item.medium_image_url;
@@ -77,7 +91,7 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'lib/zepto'], function (
         }
     });
 
-    var bookShelf = new Model.BookShelf({'id': location.pathname.split('/').pop()});
+    var bookShelf = new Model.BookShelf({'id': shelfId});
     var bookShelfView = new BookShelfView({
         model: bookShelf
     });
@@ -87,13 +101,8 @@ requirejs(['lib/backbone', 'model', 'view', 'lib/pure', 'lib/zepto'], function (
     var bookListView = new BookListView({
         collection: bookList
     });
-      // TODO ページング出来るようになったらこっちを使う
-//    bookList.fetch({reset: true, data: $.param({'shelf': location.pathname.split('/').pop(), start: 0, rows: 5})});
-    bookList.fetch({reset: true, data: $.param({'shelf': location.pathname.split('/').pop()})});
 
-    $(function () {
-        $('#registerBookButton').on('click', function () {
-            location.href = '/book/register?shelf_id=' + location.pathname.split('/').pop();
-        });
-    });
+    // TODO ページング出来るようになったらこっちを使う
+//    bookList.fetch({reset: true, data: $.param({'shelf': shelfId, start: 0, rows: 5})});
+    bookList.fetch({reset: true, data: $.param({'shelf': shelfId})});
 });
